@@ -16,7 +16,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .notice{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.4}.notice.error{color:#ffb4a9}
 .refresh{position:absolute;right:12px;top:12px;z-index:450;background:#0b1727ee;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-weight:650}
 .aircraft-icon{background:transparent;border:0;color:#51d5f2;text-shadow:0 1px 5px #001;font-size:22px;line-height:24px;display:flex;align-items:center;justify-content:center}.aircraft-icon span{display:block;transform-origin:50% 50%;}
-.leaflet-control-attribution{font-size:9px!important}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0b1727!important;color:#f4f8ff!important;border:1px solid #42c8e8;box-shadow:0 8px 28px #000b!important}.leaflet-popup-content{margin:12px 14px!important;color:#f4f8ff!important;font-size:13px;line-height:1.45}.leaflet-popup-close-button{color:#fff!important;font-size:22px!important}.leaflet-control-attribution{font-size:9px!important}
 @media(max-width:600px){.panel{top:auto;bottom:22px;width:calc(100vw - 24px)}.refresh{top:12px}.status{max-width:110px;text-align:right}}
 </style></head>
 <body>
@@ -39,6 +39,7 @@ const map=L.map('map',{worldCopyJump:true}).setView([45.7,9.7],5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap contributors'}).addTo(map);
 let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
 const flightHistory=new Map();
+let pinnedAircraftKey=null;
 const $=id=>document.getElementById(id);
 function planeIcon(track){const angle=Number.isFinite(Number(track))?Number(track):0;const svg='<svg viewBox="0 0 32 32" width="27" height="27" style="display:block;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:drop-shadow(0 1px 2px #001)"><path d="M16 1 L19 12 L30 20 L30 23 L18 19 L18 29 L23 32 L23 34 L16 31 L9 34 L9 32 L14 29 L14 19 L2 23 L2 20 L13 12 Z" fill="#51d5f2" stroke="#052235" stroke-width="1"/></svg>';return L.divIcon({className:'aircraft-icon',html:svg,iconSize:[30,30],iconAnchor:[15,15]})}
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
@@ -77,6 +78,7 @@ async function loadPlanes(){
   const res=await fetch(url,{headers:{Accept:'application/json'}});
   if(!res.ok)throw new Error('Servizio aerei: HTTP '+res.status);
   const data=await res.json(),aircraft=(data.aircraft||[]).filter(a=>Number.isFinite(a.lat)&&Number.isFinite(a.lon));
+  let reopenKey=null;planeLayer.eachLayer(marker=>{if(marker.isPopupOpen()&&marker.options.aircraftKey)reopenKey=marker.options.aircraftKey});
   planeLayer.clearLayers();
   const now=Date.now();
   aircraft.forEach(a=>{
@@ -88,9 +90,12 @@ async function loadPlanes(){
     history=history.filter(p=>now-p.time<20*60*1000).slice(-40);
     flightHistory.set(key,history);
    }
-   const marker=L.marker([a.lat,a.lon],{icon:planeIcon(a.track)});
-   marker.bindPopup(aircraftPopup(a),{maxWidth:320});
+   const marker=L.marker([a.lat,a.lon],{icon:planeIcon(a.track),aircraftKey:key});
+   marker.bindPopup(aircraftPopup(a),{maxWidth:320,closeButton:true,autoPan:true});
    marker.addTo(planeLayer);
+   marker.on('popupopen',()=>{pinnedAircraftKey=key});
+   marker.on('popupclose',()=>{if(pinnedAircraftKey===key)pinnedAircraftKey=null});
+   if(reopenKey&&key===reopenKey){marker.openPopup();pinnedAircraftKey=key;}
   });
   for(const [key,history] of flightHistory){if(!history.length||now-history[history.length-1].time>20*60*1000)flightHistory.delete(key)}
   trailLayer.clearLayers();
