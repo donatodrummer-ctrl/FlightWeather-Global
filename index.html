@@ -23,7 +23,10 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <header><div class="brand">✈ <span>FlightWeather</span> Global</div><div class="status" id="topStatus">Mappa in inizializzazione…</div></header>
 <main><div id="map"></div>
 <section class="panel" aria-label="Controlli mappa">
-<h1>Cerca volo o aeroporto</h1>\n<div class="searchbox"><input id="searchInput" type="search" placeholder="Volo, registrazione, ICAO o aeroporto"><button id="searchBtn">Cerca</button></div>\n<div class="searchresults" id="searchResults"></div>\n<h1>Livelli mappa</h1>
+<h1>Cerca volo o aeroporto</h1>
+<div class="searchbox"><input id="searchInput" type="search" placeholder="Volo, registrazione, ICAO o aeroporto"><button id="searchBtn">Cerca</button></div>
+<div class="searchresults" id="searchResults"></div>
+<h1>Livelli mappa</h1>
 <div class="toggles">
 <label class="toggle"><input id="planesToggle" type="checkbox" checked> Traffico aereo live</label>
 <label class="toggle"><input id="weatherToggle" type="checkbox"> Radar precipitazioni</label>
@@ -38,7 +41,8 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 const map=L.map('map',{worldCopyJump:true}).setView([45.7,9.7],5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap contributors'}).addTo(map);
 let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
-const flightHistory=new Map();\nlet aircraftCache=[];
+const flightHistory=new Map();
+let aircraftCache=[];
 let pinnedAircraftKey=null;
 const $=id=>document.getElementById(id);
 function planeIcon(track){const angle=Number.isFinite(Number(track))?Number(track):0;const svg='<svg viewBox="0 0 32 32" width="27" height="27" style="display:block;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:drop-shadow(0 1px 2px #001)"><path d="M16 1 L19 12 L30 20 L30 23 L18 19 L18 29 L23 32 L23 34 L16 31 L9 34 L9 32 L14 29 L14 19 L2 23 L2 20 L13 12 Z" fill="#51d5f2" stroke="#052235" stroke-width="1"/></svg>';return L.divIcon({className:'aircraft-icon',html:svg,iconSize:[30,30],iconAnchor:[15,15]})}
@@ -77,7 +81,8 @@ async function loadPlanes(){
   const url='/api/aircraft?lat='+c.lat.toFixed(4)+'&lon='+c.lng.toFixed(4)+'&dist='+radius;
   const res=await fetch(url,{headers:{Accept:'application/json'}});
   if(!res.ok)throw new Error('Servizio aerei: HTTP '+res.status);
-  const data=await res.json(),aircraft=(data.aircraft||[]).filter(a=>Number.isFinite(a.lat)&&Number.isFinite(a.lon));\n  aircraftCache=aircraft;
+  const data=await res.json(),aircraft=(data.aircraft||[]).filter(a=>Number.isFinite(a.lat)&&Number.isFinite(a.lon));
+  aircraftCache=aircraft;
   let reopenKey=null;planeLayer.eachLayer(marker=>{if(marker.isPopupOpen()&&marker.options.aircraftKey)reopenKey=marker.options.aircraftKey});
   planeLayer.clearLayers();
   const now=Date.now();
