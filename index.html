@@ -132,7 +132,7 @@ async function loadPlanes(){
    if(key){
     let history=flightHistory.get(key)||[];
     const last=history[history.length-1];
-    if(!last||Math.abs(last.lat-a.lat)+Math.abs(last.lon-a.lon)>0.00001)history.push({lat:a.lat,lon:a.lon,time:now});
+    if(!last||Math.abs(last.lat-Number(a.lat))+Math.abs(last.lon-Number(a.lon))>0.000001)history.push({lat:Number(a.lat),lon:Number(a.lon),time:now});
     history=history.filter(p=>now-p.time<20*60*1000).slice(-40);
     flightHistory.set(key,history);
    }
@@ -145,7 +145,7 @@ async function loadPlanes(){
   });
   for(const [key,history] of flightHistory){if(!history.length||now-history[history.length-1].time>20*60*1000)flightHistory.delete(key)}
   trailLayer.clearLayers();
-  flightHistory.forEach(history=>{if(history.length>1){L.polyline(history.map(p=>[p.lat,p.lon]),{color:'#42c8e8',weight:3,opacity:.92,dashArray:'8 5',lineCap:'round',lineJoin:'round'}).addTo(trailLayer)}});
+  flightHistory.forEach(history=>{if(history.length>1){const points=history.map(p=>[p.lat,p.lon]);L.polyline(points,{color:'#062033',weight:8,opacity:.95,lineCap:'round',lineJoin:'round'}).addTo(trailLayer);L.polyline(points,{color:'#42e8ff',weight:4,opacity:1,dashArray:'9 5',lineCap:'round',lineJoin:'round'}).addTo(trailLayer)}});trailLayer.bringToFront();
   $('planeCount').textContent=aircraft.length.toLocaleString('it-IT');
   $('topStatus').textContent='Traffico aggiornato · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   setNotice(aircraft.length?'Ricevuti '+aircraft.length+' aeromobili entro circa '+Math.round(radius*1.852)+' km dal centro della mappa.':'Nessun aeromobile rilevato in quest’area. Prova a spostare o ingrandire la mappa.');
