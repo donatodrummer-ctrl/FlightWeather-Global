@@ -99,18 +99,13 @@ function aircraftPopup(a){
  const airlineHeader=airline?'<div style="display:flex;align-items:center;gap:9px;padding:7px 0 9px;margin-bottom:5px;border-bottom:1px solid #34465b"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(airline[2])+'&sz=128" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:7px;background:#fff;padding:3px" onerror="this.style.display=\'none\'"><div><div style="font-weight:750;font-size:14px">'+escapeHtml(airline[1])+'</div><div style="font-size:10px;color:#9fb1c6">Compagnia identificata dal nominativo</div></div></div>':'';
  const rows=[
   row('Modello / tipo',a.t||a.desc||'n/d'),
-  row('Costruttore / descrizione',a.desc||'n/d'),
   row('Registrazione',a.r||'n/d'),
-  row('Identificativo ICAO',a.hex||'n/d'),
   row('Quota barometrica',niceAlt(a.alt_baro)),
   row('Quota geometrica',niceAlt(a.alt_geom)),
   row('Velocità al suolo',niceSpeed(a.gs)),
   row('Velocità verticale',niceVertical(a.baro_rate??a.geom_rate)),
-  row('Rotta al suolo',Number.isFinite(Number(a.track))?Math.round(a.track)+'°':'n/d'),
   row('Prua magnetica',niceNumber(a.mag_heading,0,'°')),
   row('Codice transponder',a.squawk||'n/d'),
-  row('Categoria aeromobile',a.category||'n/d'),
-  row('Segnale ricevuto',niceNumber(a.rssi,1,' dBFS')),
   row('Ultimo rilevamento',Number.isFinite(Number(a.seen))?Math.round(a.seen)+' s fa':'n/d')
  ];
  return '<div style="min-width:225px;max-width:290px;color:#eaf2fb"><div style="font-size:16px;font-weight:800;margin-bottom:3px">'+escapeHtml(title)+'</div>'+airlineHeader+'<div style="font-size:10px;color:#42c8e8;margin-bottom:8px">DATI AEROMOBILE · ADS-B</div>'+rows.join('')+(!airline?'<div style="font-size:10px;color:#9fb1c6;margin-top:8px">Compagnia non identificabile dal nominativo disponibile.</div>':'')+'</div>';
