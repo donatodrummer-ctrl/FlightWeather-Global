@@ -79,10 +79,20 @@ function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Num
 function niceSpeed(v){const n=Number(v);return Number.isFinite(n)?Math.round(n*1.852).toLocaleString('it-IT')+' km/h':'n/d'}
 function niceVertical(v){const n=Number(v);return Number.isFinite(n)?(n>0?'+':'')+Math.round(n*0.3048).toLocaleString('it-IT')+' m/min':'n/d'}
 function niceNumber(v,digits=1,suffix=''){const n=Number(v);return Number.isFinite(n)?n.toFixed(digits)+suffix:'n/d'}
+const airlinePrefixes=[
+ ['RYR','Ryanair','ryanair.com'],['EIN','Aer Lingus','aerlingus.com'],['DLH','Lufthansa','lufthansa.com'],['EWG','Eurowings','eurowings.com'],['EJU','easyJet Europe','easyjet.com'],['EZY','easyJet','easyjet.com'],['ITY','ITA Airways','ita-airways.com'],['AZA','ITA Airways','ita-airways.com'],['WZZ','Wizz Air','wizzair.com'],['WMT','Wizz Air Malta','wizzair.com'],['AFR','Air France','airfrance.com'],['KLM','KLM','klm.com'],['BAW','British Airways','britishairways.com'],['UAE','Emirates','emirates.com'],['QTR','Qatar Airways','qatarairways.com'],['THY','Turkish Airlines','turkishairlines.com'],['SWR','Swiss','swiss.com'],['AUA','Austrian Airlines','austrian.com'],['VLG','Vueling','vueling.com'],['TAP','TAP Air Portugal','flytap.com'],['SAS','SAS','flysas.com'],['FIN','Finnair','finnair.com'],['LOT','LOT Polish Airlines','lot.com'],['AEE','Aegean Airlines','aegeanair.com'],['IBE','Iberia','iberia.com'],['TUI','TUI fly','tuifly.com'],['CFG','Condor','condor.com'],['TAR','Tunisair','tunisair.com'],['ETH','Ethiopian Airlines','ethiopianairlines.com'],['DAL','Delta Air Lines','delta.com'],['UAL','United Airlines','united.com'],['AAL','American Airlines','aa.com'],['ACA','Air Canada','aircanada.com'],['SIA','Singapore Airlines','singaporeair.com'],['CPA','Cathay Pacific','cathaypacific.com'],['JAL','Japan Airlines','jal.com'],['ANA','ANA','ana.co.jp']
+];
+function airlineForFlight(flight){
+ const callsign=String(flight||'').trim().toUpperCase().replace(/\\s+/g,'');
+ if(!callsign)return null;
+ return airlinePrefixes.find(([prefix])=>callsign.startsWith(prefix))||null;
+}
 function aircraftPopup(a){
  const row=(label,value)=>'<div style="display:flex;justify-content:space-between;gap:14px;padding:4px 0;border-bottom:1px solid #34465b"><span style="color:#9fb1c6">'+label+'</span><b style="text-align:right">'+escapeHtml(value??'n/d')+'</b></div>';
  const flight=String(a.flight||'').trim();
  const title=flight||a.hex||'Aeromobile';
+ const airline=airlineForFlight(flight);
+ const airlineHeader=airline?'<div style="display:flex;align-items:center;gap:9px;padding:7px 0 9px;margin-bottom:5px;border-bottom:1px solid #34465b"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(airline[2])+'&sz=128" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:7px;background:#fff;padding:3px" onerror="this.style.display=\'none\'"><div><div style="font-weight:750;font-size:14px">'+escapeHtml(airline[1])+'</div><div style="font-size:10px;color:#9fb1c6">Compagnia identificata dal nominativo</div></div></div>':'';
  const rows=[
   row('Modello / tipo',a.t||a.desc||'n/d'),
   row('Costruttore / descrizione',a.desc||'n/d'),
@@ -99,7 +109,7 @@ function aircraftPopup(a){
   row('Segnale ricevuto',niceNumber(a.rssi,1,' dBFS')),
   row('Ultimo rilevamento',Number.isFinite(Number(a.seen))?Math.round(a.seen)+' s fa':'n/d')
  ];
- return '<div style="min-width:225px;max-width:290px;color:#eaf2fb"><div style="font-size:16px;font-weight:800;margin-bottom:3px">'+escapeHtml(title)+'</div><div style="font-size:10px;color:#42c8e8;margin-bottom:8px">DATI AEROMOBILE · ADS-B</div>'+rows.join('')+'<div style="font-size:10px;color:#9fb1c6;margin-top:8px">Compagnia e destinazione non sono fornite dal normale flusso di posizione ADS-B.</div></div>';
+ return '<div style="min-width:225px;max-width:290px;color:#eaf2fb"><div style="font-size:16px;font-weight:800;margin-bottom:3px">'+escapeHtml(title)+'</div>'+airlineHeader+'<div style="font-size:10px;color:#42c8e8;margin-bottom:8px">DATI AEROMOBILE · ADS-B</div>'+rows.join('')+(!airline?'<div style="font-size:10px;color:#9fb1c6;margin-top:8px">Compagnia non identificabile dal nominativo disponibile.</div>':'')+'</div>';
 }
 async function loadPlanes(){
  if(!$('planesToggle').checked){planeLayer.clearLayers();$('planeCount').textContent='0';return}
