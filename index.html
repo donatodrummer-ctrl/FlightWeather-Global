@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#07111f"><title>FlightWeather Global</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{color-scheme:dark;--bg:#07111f;--panel:#101e30;--line:#26384d;--text:#eaf2fb;--muted:#9fb1c6;--cyan:#42c8e8;--green:#4ade80}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px system-ui,-apple-system,Segoe UI,sans-serif}
+header{height:58px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;background:#0b1727;border-bottom:1px solid var(--line);position:relative;z-index:500}
+.brand{font-weight:800;letter-spacing:.2px;font-size:16px}.brand span{color:var(--cyan)}.status{font-size:11px;color:var(--muted)}
+main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;background:#0b1727}
+.panel{position:absolute;z-index:450;top:12px;left:12px;width:min(280px,calc(100vw - 24px));background:#0b1727ee;border:1px solid var(--line);border-radius:13px;padding:12px;box-shadow:0 8px 30px #0006;backdrop-filter:blur(10px)}
+.panel h1{font-size:14px;margin:0 0 9px}.toggles{display:grid;gap:9px}.toggle{display:flex;align-items:center;gap:8px;color:#d9e5f2;font-size:13px}.toggle input{accent-color:var(--cyan);width:16px;height:16px}
+.stats{display:flex;gap:14px;border-top:1px solid var(--line);margin-top:11px;padding-top:10px;color:var(--muted);font-size:12px}.stats b{color:var(--text);font-size:15px;display:block}
+.notice{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.4}.notice.error{color:#ffb4a9}
+.refresh{position:absolute;right:12px;top:12px;z-index:450;background:#0b1727ee;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-weight:650}
+.aircraft-icon{background:transparent;border:0;color:#51d5f2;text-shadow:0 1px 5px #001;font-size:22px;line-height:24px}
+.leaflet-control-attribution{font-size:9px!important}
+@media(max-width:600px){.panel{top:auto;bottom:22px;width:calc(100vw - 24px)}.refresh{top:12px}.status{max-width:110px;text-align:right}}
+</style></head>
+<body>
+<header><div class="brand">✈ <span>FlightWeather</span> Global</div><div class="status" id="topStatus">Mappa in inizializzazione…</div></header>
+<main><div id="map"></div>
+<section class="panel" aria-label="Controlli mappa">
+<h1>Livelli mappa</h1>
+<div class="toggles">
+<label class="toggle"><input id="planesToggle" type="checkbox" checked> Traffico aereo live</label>
+<label class="toggle"><input id="weatherToggle" type="checkbox"> Radar precipitazioni</label>
+</div>
+<div class="stats"><div><b id="planeCount">—</b>Aerei visibili</div><div><b id="radarTime">—</b>Ultimo radar</div></div>
+<div class="notice" id="notice">Apri la mappa su una zona e attiva il traffico aereo. Gli aerei vengono caricati nell'area attorno al centro della vista.</div>
+</section>
+<button class="refresh" id="refreshBtn">↻ Aggiorna</button>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const map=L.map('map',{worldCopyJump:true}).setView([45.7,9.7],5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap contributors'}).addTo(map);
+let planeLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
+const $=id=>document.getElementById(id);
+const planeIcon=L.divIcon({className:'aircraft-icon',html:'✈',iconSize:[24,24],iconAnchor:[12,12]});
+function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
+function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n).toLocaleString('it-IT')+' ft':'Quota n/d'}
+function niceSpeed(v){const n=Number(v);return Number.isFinite(n)?Math.round(n)+' kt':'n/d'}
+async function loadPlanes(){
+ if(!$('planesToggle').checked){planeLayer.clearLayers();$('planeCount').textContent='0';return}
+ const c=map.getCenter(),radius=Math.min(250,Math.max(30,Math.round(map.getBounds().getNorthEast().distanceTo(map.getBounds().getSouthWest())/1852/2)));
+ $('topStatus').textContent='Aggiornamento traffico…';
+ try{
+  const url='/api/aircraft?lat='+c.lat.toFixed(4)+'&lon='+c.lng.toFixed(4)+'&dist='+radius;
+  const res=await fetch(url,{headers:{Accept:'application/json'}});
+  if(!res.ok)throw new Error('Servizio aerei: HTTP '+res.status);
+  const data=await res.json(),aircraft=(data.aircraft||[]).filter(a=>Number.isFinite(a.lat)&&Number.isFinite(a.lon));
+  planeLayer.clearLayers();
+  aircraft.forEach(a=>{
+   const marker=L.marker([a.lat,a.lon],{icon:planeIcon,rotationAngle:Number(a.track)||0});
+   const name=(a.flight||a.hex||'Aeromobile').trim();
+   marker.bindPopup('<b>'+escapeHtml(name)+'</b><br>Tipo: '+escapeHtml(a.t||'n/d')+'<br>Quota: '+niceAlt(a.alt_baro)+'<br>Velocità: '+niceSpeed(a.gs)+'<br>Rotta: '+(Number.isFinite(Number(a.track))?Math.round(a.track)+'°':'n/d')+'<br>Registrazione: '+escapeHtml(a.r||'n/d'));
+   marker.addTo(planeLayer);
+  });
+  $('planeCount').textContent=aircraft.length.toLocaleString('it-IT');
+  $('topStatus').textContent='Traffico aggiornato · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  setNotice(aircraft.length?'Ricevuti '+aircraft.length+' aeromobili entro circa '+radius+' NM dal centro della mappa.':'Nessun aeromobile rilevato in quest’area. Prova a spostare o ingrandire la mappa.');
+ }catch(e){$('topStatus').textContent='Traffico non disponibile';setNotice(e.message+' — Se il problema continua, riprova tra poco.',true)}
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function loadRadar(){
+ try{
+  const res=await fetch('https://api.rainviewer.com/public/weather-maps.json');
+  if(!res.ok)throw new Error('Radar HTTP '+res.status);
+  const data=await res.json();radarFrames=data.radar?.past||[];
+  if(!radarFrames.length)throw new Error('Nessun fotogramma radar disponibile');
+  const frame=radarFrames[radarFrames.length-1];
+  if(radarLayer)map.removeLayer(radarLayer);
+  radarLayer=L.tileLayer(data.host+frame.path+'/256/{z}/{x}/{y}/2/1_1.png',{opacity:.62,maxZoom:7,attribution:'Radar: <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>'});
+  if($('weatherToggle').checked)radarLayer.addTo(map);
+  $('radarTime').textContent=new Date(frame.time*1000).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+ }catch(e){$('radarTime').textContent='N/D';setNotice('Radar meteo non disponibile: '+e.message,true)}
+}
+$('planesToggle').addEventListener('change',loadPlanes);
+$('weatherToggle').addEventListener('change',e=>{if(!radarLayer){loadRadar();return}if(e.target.checked)radarLayer.addTo(map);else map.removeLayer(radarLayer)});
+$('refreshBtn').addEventListener('click',()=>{loadPlanes();if($('weatherToggle').checked)loadRadar()});
+let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(loadPlanes,700)});
+loadRadar();loadPlanes();
+setInterval(()=>{if($('planesToggle').checked)loadPlanes()},30000);
+setInterval(()=>{if($('weatherToggle').checked)loadRadar()},600000);
+</script></body></html>
