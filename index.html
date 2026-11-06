@@ -17,7 +17,8 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .refresh{position:absolute;right:12px;top:12px;z-index:450;background:#0b1727ee;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-weight:650}
 .aircraft-icon{background:transparent;border:0;color:#51d5f2;text-shadow:0 1px 5px #001;font-size:22px;line-height:24px;display:flex;align-items:center;justify-content:center}.aircraft-icon span{display:block;transform-origin:50% 50%;}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0b1727!important;color:#f4f8ff!important;border:1px solid #42c8e8;box-shadow:0 8px 28px #000b!important}.leaflet-popup-content{margin:12px 14px!important;color:#f4f8ff!important;font-size:13px;line-height:1.45}.leaflet-popup-close-button{color:#fff!important;font-size:22px!important}.leaflet-control-attribution{font-size:9px!important}
-.panel.compact{top:auto!important;bottom:8px!important;left:8px!important;width:min(210px,calc(100vw - 16px))!important;padding:7px 10px!important;transition:all .22s ease}.panel.compact h1,.panel.compact .searchbox,.panel.compact .searchresults,.panel.compact .toggles,.panel.compact .notice{display:none!important}.panel.compact .stats{border:0;margin:0;padding:0;gap:18px}.panel.compact .stats b{font-size:13px;display:inline;margin-right:4px}.panel.compact .stats div{font-size:10px;white-space:nowrap}\n@media(max-width:600px){.panel{top:auto;bottom:22px;width:calc(100vw - 24px)}.refresh{top:12px}.status{max-width:110px;text-align:right}}
+.panel.compact{top:auto!important;bottom:8px!important;left:8px!important;width:min(210px,calc(100vw - 16px))!important;padding:7px 10px!important;transition:all .22s ease}.panel.compact h1,.panel.compact .searchbox,.panel.compact .searchresults,.panel.compact .toggles,.panel.compact .notice{display:none!important}.panel.compact .stats{border:0;margin:0;padding:0;gap:18px}.panel.compact .stats b{font-size:13px;display:inline;margin-right:4px}.panel.compact .stats div{font-size:10px;white-space:nowrap}
+@media(max-width:600px){.panel{top:auto;bottom:22px;width:calc(100vw - 24px)}.refresh{top:12px}.status{max-width:110px;text-align:right}}
 </style></head>
 <body>
 <header><div class="brand">✈ <span>FlightWeather</span> Global</div><div class="status" id="topStatus">Mappa in inizializzazione…</div></header>
@@ -72,7 +73,8 @@ function planeIcon(a){
  const svg='<svg viewBox="0 0 32 34" width="29" height="31" style="display:block;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:drop-shadow(0 1px 2px #001)"><g fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.15" stroke-linejoin="round">'+shape+'</g></svg>';
  return L.divIcon({className:'aircraft-icon',html:svg,iconSize:[32,34],iconAnchor:[16,17]})
 }
-function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}\nfunction setPanelCompact(compact){document.querySelector('.panel').classList.toggle('compact',compact)}
+function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
+function setPanelCompact(compact){document.querySelector('.panel').classList.toggle('compact',compact)}
 function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n*0.3048).toLocaleString('it-IT')+' m':'n/d'}
 function niceSpeed(v){const n=Number(v);return Number.isFinite(n)?Math.round(n*1.852).toLocaleString('it-IT')+' km/h':'n/d'}
 function niceVertical(v){const n=Number(v);return Number.isFinite(n)?(n>0?'+':'')+Math.round(n*0.3048).toLocaleString('it-IT')+' m/min':'n/d'}
@@ -124,7 +126,8 @@ async function loadPlanes(){
    const marker=L.marker([a.lat,a.lon],{icon:planeIcon(a),aircraftKey:key});
    marker.bindPopup(aircraftPopup(a),{maxWidth:320,closeButton:true,autoPan:true});
    marker.addTo(planeLayer);
-   marker.on('popupopen',()=>{pinnedAircraftKey=key;setPanelCompact(true)});\n   marker.on('popupclose',()=>{if(pinnedAircraftKey===key){pinnedAircraftKey=null;setPanelCompact(false)}});
+   marker.on('popupopen',()=>{pinnedAircraftKey=key;setPanelCompact(true)});
+   marker.on('popupclose',()=>{if(pinnedAircraftKey===key){pinnedAircraftKey=null;setPanelCompact(false)}});
    if(reopenKey&&key===reopenKey){marker.openPopup();pinnedAircraftKey=key;}
   });
   for(const [key,history] of flightHistory){if(!history.length||now-history[history.length-1].time>20*60*1000)flightHistory.delete(key)}
