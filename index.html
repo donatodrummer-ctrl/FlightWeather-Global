@@ -15,7 +15,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .stats{display:flex;gap:14px;border-top:1px solid var(--line);margin-top:11px;padding-top:10px;color:var(--muted);font-size:12px}.stats b{color:var(--text);font-size:15px;display:block}
 .notice{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.4}.notice.error{color:#ffb4a9}
 .refresh{position:absolute;right:12px;top:12px;z-index:450;background:#0b1727ee;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-weight:650}
-.aircraft-icon{background:transparent;border:0;color:#51d5f2;text-shadow:0 1px 5px #001;font-size:22px;line-height:24px}
+.aircraft-icon{background:transparent;border:0;color:#51d5f2;text-shadow:0 1px 5px #001;font-size:22px;line-height:24px;display:flex;align-items:center;justify-content:center}.aircraft-icon span{display:block;transform-origin:50% 50%;}
 .leaflet-control-attribution{font-size:9px!important}
 @media(max-width:600px){.panel{top:auto;bottom:22px;width:calc(100vw - 24px)}.refresh{top:12px}.status{max-width:110px;text-align:right}}
 </style></head>
@@ -37,9 +37,10 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <script>
 const map=L.map('map',{worldCopyJump:true}).setView([45.7,9.7],5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap contributors'}).addTo(map);
-let planeLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
+let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
+const flightHistory=new Map();
 const $=id=>document.getElementById(id);
-const planeIcon=L.divIcon({className:'aircraft-icon',html:'✈',iconSize:[24,24],iconAnchor:[12,12]});
+function planeIcon(track){const angle=Number.isFinite(Number(track))?Number(track):0;return L.divIcon({className:'aircraft-icon',html:'<span style="transform:rotate('+angle+'deg)">✈</span>',iconSize:[26,26],iconAnchor:[13,13]})}
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
 function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n).toLocaleString('it-IT')+' ft':'Quota n/d'}
 function niceSpeed(v){const n=Number(v);return Number.isFinite(n)?Math.round(n)+' kt':'n/d'}
@@ -53,12 +54,24 @@ async function loadPlanes(){
   if(!res.ok)throw new Error('Servizio aerei: HTTP '+res.status);
   const data=await res.json(),aircraft=(data.aircraft||[]).filter(a=>Number.isFinite(a.lat)&&Number.isFinite(a.lon));
   planeLayer.clearLayers();
+  const now=Date.now();
   aircraft.forEach(a=>{
-   const marker=L.marker([a.lat,a.lon],{icon:planeIcon,rotationAngle:Number(a.track)||0});
+   const key=String(a.hex||a.flight||'').trim();
+   if(key){
+    let history=flightHistory.get(key)||[];
+    const last=history[history.length-1];
+    if(!last||Math.abs(last.lat-a.lat)+Math.abs(last.lon-a.lon)>0.00015)history.push({lat:a.lat,lon:a.lon,time:now});
+    history=history.filter(p=>now-p.time<20*60*1000).slice(-20);
+    flightHistory.set(key,history);
+   }
+   const marker=L.marker([a.lat,a.lon],{icon:planeIcon(a.track)});
    const name=(a.flight||a.hex||'Aeromobile').trim();
    marker.bindPopup('<b>'+escapeHtml(name)+'</b><br>Tipo: '+escapeHtml(a.t||'n/d')+'<br>Quota: '+niceAlt(a.alt_baro)+'<br>Velocità: '+niceSpeed(a.gs)+'<br>Rotta: '+(Number.isFinite(Number(a.track))?Math.round(a.track)+'°':'n/d')+'<br>Registrazione: '+escapeHtml(a.r||'n/d'));
    marker.addTo(planeLayer);
   });
+  for(const [key,history] of flightHistory){if(!history.length||now-history[history.length-1].time>20*60*1000)flightHistory.delete(key)}
+  trailLayer.clearLayers();
+  flightHistory.forEach(history=>{if(history.length>1)L.polyline(history.map(p=>[p.lat,p.lon]),{color:'#42c8e8',weight:2,opacity:.68,dashArray:'5 6'}).addTo(trailLayer)});
   $('planeCount').textContent=aircraft.length.toLocaleString('it-IT');
   $('topStatus').textContent='Traffico aggiornato · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   setNotice(aircraft.length?'Ricevuti '+aircraft.length+' aeromobili entro circa '+radius+' NM dal centro della mappa.':'Nessun aeromobile rilevato in quest’area. Prova a spostare o ingrandire la mappa.');
