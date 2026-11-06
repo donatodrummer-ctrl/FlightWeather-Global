@@ -42,8 +42,32 @@ const flightHistory=new Map();
 const $=id=>document.getElementById(id);
 function planeIcon(track){const angle=Number.isFinite(Number(track))?Number(track):0;const svg='<svg viewBox="0 0 32 32" width="27" height="27" style="display:block;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:drop-shadow(0 1px 2px #001)"><path d="M16 1 L19 12 L30 20 L30 23 L18 19 L18 29 L23 32 L23 34 L16 31 L9 34 L9 32 L14 29 L14 19 L2 23 L2 20 L13 12 Z" fill="#51d5f2" stroke="#052235" stroke-width="1"/></svg>';return L.divIcon({className:'aircraft-icon',html:svg,iconSize:[30,30],iconAnchor:[15,15]})}
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
-function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n).toLocaleString('it-IT')+' ft':'Quota n/d'}
+function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n).toLocaleString('it-IT')+' ft':'n/d'}
 function niceSpeed(v){const n=Number(v);return Number.isFinite(n)?Math.round(n)+' kt':'n/d'}
+function niceVertical(v){const n=Number(v);return Number.isFinite(n)?(n>0?'+':'')+Math.round(n).toLocaleString('it-IT')+' ft/min':'n/d'}
+function niceNumber(v,digits=1,suffix=''){const n=Number(v);return Number.isFinite(n)?n.toFixed(digits)+suffix:'n/d'}
+function aircraftPopup(a){
+ const row=(label,value)=>'<div style="display:flex;justify-content:space-between;gap:14px;padding:4px 0;border-bottom:1px solid #34465b"><span style="color:#9fb1c6">'+label+'</span><b style="text-align:right">'+escapeHtml(value??'n/d')+'</b></div>';
+ const flight=String(a.flight||'').trim();
+ const title=flight||a.hex||'Aeromobile';
+ const rows=[
+  row('Modello / tipo',a.t||a.desc||'n/d'),
+  row('Costruttore / descrizione',a.desc||'n/d'),
+  row('Registrazione',a.r||'n/d'),
+  row('Identificativo ICAO',a.hex||'n/d'),
+  row('Quota barometrica',niceAlt(a.alt_baro)),
+  row('Quota geometrica',niceAlt(a.alt_geom)),
+  row('Velocità al suolo',niceSpeed(a.gs)),
+  row('Velocità verticale',niceVertical(a.baro_rate??a.geom_rate)),
+  row('Rotta al suolo',Number.isFinite(Number(a.track))?Math.round(a.track)+'°':'n/d'),
+  row('Prua magnetica',niceNumber(a.mag_heading,0,'°')),
+  row('Codice transponder',a.squawk||'n/d'),
+  row('Categoria aeromobile',a.category||'n/d'),
+  row('Segnale ricevuto',niceNumber(a.rssi,1,' dBFS')),
+  row('Ultimo rilevamento',Number.isFinite(Number(a.seen))?Math.round(a.seen)+' s fa':'n/d')
+ ];
+ return '<div style="min-width:225px;max-width:290px;color:#eaf2fb"><div style="font-size:16px;font-weight:800;margin-bottom:3px">'+escapeHtml(title)+'</div><div style="font-size:10px;color:#42c8e8;margin-bottom:8px">DATI AEROMOBILE · ADS-B</div>'+rows.join('')+'<div style="font-size:10px;color:#9fb1c6;margin-top:8px">Compagnia e destinazione non sono fornite dal normale flusso di posizione ADS-B.</div></div>';
+}
 async function loadPlanes(){
  if(!$('planesToggle').checked){planeLayer.clearLayers();$('planeCount').textContent='0';return}
  const c=map.getCenter(),radius=Math.min(250,Math.max(30,Math.round(map.getBounds().getNorthEast().distanceTo(map.getBounds().getSouthWest())/1852/2)));
@@ -65,8 +89,7 @@ async function loadPlanes(){
     flightHistory.set(key,history);
    }
    const marker=L.marker([a.lat,a.lon],{icon:planeIcon(a.track)});
-   const name=(a.flight||a.hex||'Aeromobile').trim();
-   marker.bindPopup('<b>'+escapeHtml(name)+'</b><br>Tipo: '+escapeHtml(a.t||'n/d')+'<br>Quota: '+niceAlt(a.alt_baro)+'<br>Velocità: '+niceSpeed(a.gs)+'<br>Rotta: '+(Number.isFinite(Number(a.track))?Math.round(a.track)+'°':'n/d')+'<br>Registrazione: '+escapeHtml(a.r||'n/d'));
+   marker.bindPopup(aircraftPopup(a),{maxWidth:320});
    marker.addTo(planeLayer);
   });
   for(const [key,history] of flightHistory){if(!history.length||now-history[history.length-1].time>20*60*1000)flightHistory.delete(key)}
