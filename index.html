@@ -11,7 +11,7 @@ header{height:58px;padding:0 14px;display:flex;align-items:center;justify-conten
 .brand{font-weight:800;letter-spacing:.2px;font-size:16px}.brand span{color:var(--cyan)}.status{font-size:11px;color:var(--muted)}
 main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;background:#0b1727}
 .panel{position:absolute;z-index:450;top:12px;left:12px;width:min(280px,calc(100vw - 24px));background:#0b1727ee;border:1px solid var(--line);border-radius:13px;padding:12px;box-shadow:0 8px 30px #0006;backdrop-filter:blur(10px)}
-.panel h1{font-size:14px;margin:0 0 9px}.toggles{display:grid;gap:9px}.toggle{display:flex;align-items:center;gap:8px;color:#d9e5f2;font-size:13px}.toggle input{accent-color:var(--cyan);width:16px;height:16px}
+.panel h1{font-size:14px;margin:0 0 9px}.searchbox{display:flex;gap:6px;margin-bottom:10px}.searchbox input{min-width:0;flex:1;background:#07111f;border:1px solid #40566f;border-radius:8px;padding:9px;color:#fff;font-size:13px}.searchbox button{background:#12354a;border:1px solid #42c8e8;border-radius:8px;color:#fff;padding:0 11px;font-weight:700}.searchresults{display:none;max-height:145px;overflow:auto;margin:-3px 0 10px;border:1px solid #344b63;border-radius:8px;background:#07111f}.searchresults button{display:block;width:100%;text-align:left;padding:8px 10px;border:0;border-bottom:1px solid #26384d;background:transparent;color:#f4f8ff;font-size:12px}.searchresults button:last-child{border-bottom:0}.searchhint{font-size:11px;color:#b7c8d9;padding:8px 10px}.toggles{display:grid;gap:9px}.toggle{display:flex;align-items:center;gap:8px;color:#d9e5f2;font-size:13px}.toggle input{accent-color:var(--cyan);width:16px;height:16px}
 .stats{display:flex;gap:14px;border-top:1px solid var(--line);margin-top:11px;padding-top:10px;color:var(--muted);font-size:12px}.stats b{color:var(--text);font-size:15px;display:block}
 .notice{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.4}.notice.error{color:#ffb4a9}
 .refresh{position:absolute;right:12px;top:12px;z-index:450;background:#0b1727ee;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-weight:650}
@@ -23,7 +23,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <header><div class="brand">✈ <span>FlightWeather</span> Global</div><div class="status" id="topStatus">Mappa in inizializzazione…</div></header>
 <main><div id="map"></div>
 <section class="panel" aria-label="Controlli mappa">
-<h1>Livelli mappa</h1>
+<h1>Cerca volo o aeroporto</h1>\n<div class="searchbox"><input id="searchInput" type="search" placeholder="Volo, registrazione, ICAO o aeroporto"><button id="searchBtn">Cerca</button></div>\n<div class="searchresults" id="searchResults"></div>\n<h1>Livelli mappa</h1>
 <div class="toggles">
 <label class="toggle"><input id="planesToggle" type="checkbox" checked> Traffico aereo live</label>
 <label class="toggle"><input id="weatherToggle" type="checkbox"> Radar precipitazioni</label>
@@ -38,14 +38,14 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 const map=L.map('map',{worldCopyJump:true}).setView([45.7,9.7],5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap contributors'}).addTo(map);
 let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
-const flightHistory=new Map();
+const flightHistory=new Map();\nlet aircraftCache=[];
 let pinnedAircraftKey=null;
 const $=id=>document.getElementById(id);
 function planeIcon(track){const angle=Number.isFinite(Number(track))?Number(track):0;const svg='<svg viewBox="0 0 32 32" width="27" height="27" style="display:block;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:drop-shadow(0 1px 2px #001)"><path d="M16 1 L19 12 L30 20 L30 23 L18 19 L18 29 L23 32 L23 34 L16 31 L9 34 L9 32 L14 29 L14 19 L2 23 L2 20 L13 12 Z" fill="#51d5f2" stroke="#052235" stroke-width="1"/></svg>';return L.divIcon({className:'aircraft-icon',html:svg,iconSize:[30,30],iconAnchor:[15,15]})}
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
-function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n).toLocaleString('it-IT')+' ft':'n/d'}
-function niceSpeed(v){const n=Number(v);return Number.isFinite(n)?Math.round(n)+' kt':'n/d'}
-function niceVertical(v){const n=Number(v);return Number.isFinite(n)?(n>0?'+':'')+Math.round(n).toLocaleString('it-IT')+' ft/min':'n/d'}
+function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n*0.3048).toLocaleString('it-IT')+' m':'n/d'}
+function niceSpeed(v){const n=Number(v);return Number.isFinite(n)?Math.round(n*1.852).toLocaleString('it-IT')+' km/h':'n/d'}
+function niceVertical(v){const n=Number(v);return Number.isFinite(n)?(n>0?'+':'')+Math.round(n*0.3048).toLocaleString('it-IT')+' m/min':'n/d'}
 function niceNumber(v,digits=1,suffix=''){const n=Number(v);return Number.isFinite(n)?n.toFixed(digits)+suffix:'n/d'}
 function aircraftPopup(a){
  const row=(label,value)=>'<div style="display:flex;justify-content:space-between;gap:14px;padding:4px 0;border-bottom:1px solid #34465b"><span style="color:#9fb1c6">'+label+'</span><b style="text-align:right">'+escapeHtml(value??'n/d')+'</b></div>';
@@ -77,7 +77,7 @@ async function loadPlanes(){
   const url='/api/aircraft?lat='+c.lat.toFixed(4)+'&lon='+c.lng.toFixed(4)+'&dist='+radius;
   const res=await fetch(url,{headers:{Accept:'application/json'}});
   if(!res.ok)throw new Error('Servizio aerei: HTTP '+res.status);
-  const data=await res.json(),aircraft=(data.aircraft||[]).filter(a=>Number.isFinite(a.lat)&&Number.isFinite(a.lon));
+  const data=await res.json(),aircraft=(data.aircraft||[]).filter(a=>Number.isFinite(a.lat)&&Number.isFinite(a.lon));\n  aircraftCache=aircraft;
   let reopenKey=null;planeLayer.eachLayer(marker=>{if(marker.isPopupOpen()&&marker.options.aircraftKey)reopenKey=marker.options.aircraftKey});
   planeLayer.clearLayers();
   const now=Date.now();
@@ -102,9 +102,31 @@ async function loadPlanes(){
   flightHistory.forEach(history=>{if(history.length>1)L.polyline(history.map(p=>[p.lat,p.lon]),{color:'#42c8e8',weight:2,opacity:.68,dashArray:'5 6'}).addTo(trailLayer)});
   $('planeCount').textContent=aircraft.length.toLocaleString('it-IT');
   $('topStatus').textContent='Traffico aggiornato · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  setNotice(aircraft.length?'Ricevuti '+aircraft.length+' aeromobili entro circa '+radius+' NM dal centro della mappa.':'Nessun aeromobile rilevato in quest’area. Prova a spostare o ingrandire la mappa.');
+  setNotice(aircraft.length?'Ricevuti '+aircraft.length+' aeromobili entro circa '+Math.round(radius*1.852)+' km dal centro della mappa.':'Nessun aeromobile rilevato in quest’area. Prova a spostare o ingrandire la mappa.');
  }catch(e){$('topStatus').textContent='Traffico non disponibile';setNotice(e.message+' — Se il problema continua, riprova tra poco.',true)}
 }
+async function searchMap(){
+ const q=$('searchInput').value.trim(),box=$('searchResults');
+ if(!q)return;
+ box.style.display='block';box.innerHTML='<div class="searchhint">Ricerca in corso…</div>';
+ const matches=aircraftCache.filter(a=>[a.flight,a.hex,a.r,a.t].some(v=>String(v||'').toLowerCase().includes(q.toLowerCase())));
+ if(matches.length){
+  box.innerHTML='';
+  matches.slice(0,8).forEach(a=>{const b=document.createElement('button');b.textContent=(a.flight||a.hex||'Volo')+' · '+(a.r||a.t||'Aeromobile');b.onclick=()=>{map.setView([a.lat,a.lon],9);const m=planeLayer.getLayers().find(x=>x.options.aircraftKey===String(a.hex||a.flight||'').trim());if(m)m.openPopup();box.style.display='none'};box.appendChild(b)});
+  return;
+ }
+ try{
+  const query=/\\b(airport|aeroporto|aerodromo)\\b/i.test(q)?q:q+' airport';
+  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q='+encodeURIComponent(query);
+  const res=await fetch(url,{headers:{'Accept':'application/json'}});
+  if(!res.ok)throw new Error('Ricerca non disponibile');
+  const results=await res.json();box.innerHTML='';
+  if(!results.length){box.innerHTML='<div class="searchhint">Nessun risultato. Per i voli, cerca un identificativo presente nell’area caricata.</div>';return}
+  results.forEach(place=>{const b=document.createElement('button');b.textContent=place.display_name;b.onclick=()=>{map.setView([Number(place.lat),Number(place.lon)],11);box.style.display='none';setNotice('Mappa centrata su '+place.display_name)};box.appendChild(b)});
+ }catch(e){box.innerHTML='<div class="searchhint">Errore nella ricerca. Riprova.</div>'}
+}
+$('searchBtn').addEventListener('click',searchMap);
+$('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')searchMap()});
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 async function loadRadar(){
  try{
