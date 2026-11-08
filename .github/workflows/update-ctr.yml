@@ -32,7 +32,7 @@ jobs:
           PY
       - name: Pubblica archivio aggiornato
         run: |
-          if git diff --quiet -- data/ctr-it.geojson; then
+          if [ -z "$(git status --porcelain -- data/ctr-it.geojson)" ]; then
             echo "Dati CTR già aggiornati"
             exit 0
           fi
