@@ -47,7 +47,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const map=L.map('map',{worldCopyJump:true}).setView([45.7,9.7],5);
-map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='650';map.getPane('trailsPane').style.pointerEvents='none';
+map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
 let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
 const flightHistory=new Map();
@@ -113,6 +113,9 @@ function planeIcon(a,selected=false){
  return L.divIcon({className:'aircraft-icon',html,iconSize:[54,34],iconAnchor:[16,17]})
 }
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
+function updateSelectedMarkerPopups(){
+ aircraftCache.forEach(a=>{const key=String(a.hex||a.flight||('pos-'+a.lat+'-'+a.lon)).trim();const marker=aircraftMarkers.get(key);if(marker&&marker.getPopup())marker.setPopupContent(aircraftPopup(a))});
+}
 function updateAircraftIcons(){
  aircraftCache.forEach(a=>{const key=String(a.hex||a.flight||('pos-'+a.lat+'-'+a.lon)).trim();const marker=aircraftMarkers.get(key);if(marker)marker.setIcon(planeIcon(a,key===pinnedAircraftKey))});
 }
@@ -160,7 +163,10 @@ function aircraftPopup(a){
  const title=flight||'Aeromobile';
  const airline=airlineForFlight(flight);
  const airlineHeader=airline?'<div style="display:flex;align-items:center;gap:9px;padding:7px 0 9px;margin-bottom:5px;border-bottom:1px solid #34465b"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(airline[2])+'&sz=128" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:7px;background:#fff;padding:3px" onerror="this.style.display=\'none\'"><div><div style="font-weight:750;font-size:14px">'+escapeHtml(airline[1])+'</div><div style="font-size:10px;color:#9fb1c6">Compagnia identificata dal nominativo</div></div></div>':'';
+ const route=a.route;
+ const routeLabel=route?(String(route.from_iata||route.from||'').toUpperCase()+' → '+String(route.to_iata||route.to||'').toUpperCase()):'Non disponibile';
  const rows=[
+  row('Tratta',routeLabel),
   row('Modello / tipo',a.t||a.desc||'n/d'),
   row('Quota',niceAlt(a.alt_baro??a.alt_geom)),
   row('Velocità',niceSpeed(a.gs)),
@@ -177,7 +183,7 @@ async function loadPlanes(){
  $('topStatus').textContent='Aggiornamento traffico…';
  try{
   if(!flyItalyKey)throw new Error('Inserisci prima la chiave API FlyItalyADSB nel campo qui sopra.');
-  const url='https://api.flyitalyadsb.com/v2/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius;
+  const url='https://api.flyitalyadsb.com/v2/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius+'?with=route';
   const res=await fetch(url,{headers:{Accept:'application/json','X-Api-Key':flyItalyKey},credentials:'omit',mode:'cors'});
   if(!res.ok)throw new Error('FlyItalyADSB HTTP '+res.status);
   const data=await res.json();
@@ -215,11 +221,13 @@ async function loadPlanes(){
      }else aircraftMotions.delete(key);
     }
     marker.setIcon(planeIcon(a,key===pinnedAircraftKey));
+     if(marker.getPopup())marker.setPopupContent(aircraftPopup(a));
      if(pinnedAircraftKey===key)showSelectedAircraft(a);
    }else{
     marker=L.marker([a.lat,a.lon],{icon:planeIcon(a,key===pinnedAircraftKey),aircraftKey:key,bubblingMouseEvents:false});
     marker.addTo(planeLayer);
-    marker.on('click',()=>{pinnedAircraftKey=key;updateAircraftIcons();showSelectedAircraft(a);drawSelectedTrail()});
+    marker.bindPopup(aircraftPopup(a),{closeButton:true,autoPan:false});
+    marker.on('click',()=>{pinnedAircraftKey=key;updateSelectedMarkerPopups();updateAircraftIcons();showSelectedAircraft(a);drawSelectedTrail();marker.setPopupContent(aircraftPopup(a)).openPopup()});
     aircraftMarkers.set(key,marker);
    }
   });
