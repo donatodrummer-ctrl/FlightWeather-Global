@@ -122,10 +122,8 @@ async function loadPlanes(){
  const c=map.getCenter(),radius=Math.min(250,Math.max(30,Math.round(map.getBounds().getNorthEast().distanceTo(map.getBounds().getSouthWest())/1852/2)));
  $('topStatus').textContent='Aggiornamento traffico…';
  try{
-  const endpoints=[
-   'https://opendata.adsb.fi/api/v3/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius,
-   'https://api.adsb.lol/v2/point/'+c.lat.toFixed(4)+'/'+c.lng.toFixed(4)+'/'+radius
-  ];
+  const directUrl='https://api.adsb.lol/v2/point/'+c.lat.toFixed(4)+'/'+c.lng.toFixed(4)+'/'+radius;
+  const endpoints=['https://proxy.cors.dev/'+directUrl];
   let aircraft=[],lastError=null,source='';
   for(const url of endpoints){
    try{
@@ -134,11 +132,11 @@ async function loadPlanes(){
     const data=await res.json();
     const list=data.ac||data.aircraft||[];
     const parsed=list.map(a=>({...a,seen:a.seen??a.seen_pos})).filter(a=>Number.isFinite(Number(a.lat))&&Number.isFinite(Number(a.lon)));
-    if(parsed.length){aircraft=parsed;source=url.includes('adsb.fi')?'adsb.fi':'adsb.lol';break;}
-    lastError=new Error('Nessun dato ricevuto dal servizio');
+    if(parsed.length){aircraft=parsed;source='adsb.lol';break;}
+    lastError=new Error('Nessun aeromobile restituito dal servizio');
    }catch(err){lastError=err;}
   }
-  if(!aircraft.length&&lastError)throw new Error('Fonti ADS-B non disponibili: '+lastError.message);
+  if(!aircraft.length&&lastError)throw new Error('Servizio ADS-B tramite proxy non disponibile: '+lastError.message);
 
   aircraftCache=aircraft;
   let reopenKey=null;planeLayer.eachLayer(marker=>{if(marker.isPopupOpen()&&marker.options.aircraftKey)reopenKey=marker.options.aircraftKey});
