@@ -832,6 +832,11 @@ async function setAirportLayerEnabled(kind,enabled){
  }catch(error){setNotice('Dati aeroporti non disponibili: '+error.message,true);$('topStatus').textContent='Dati aeroporti non disponibili'}
  finally{button.disabled=false}
 }
+// Avvio pulito: aeroporti e campi di volo sempre disattivati all'apertura.
+airportsEnabled=false;airfieldsEnabled=false;
+map.removeLayer(airportLayer);map.removeLayer(airfieldLayer);
+$('airportBtn').classList.remove('active');$('airportBtn').setAttribute('aria-pressed','false');$('airportBtn').textContent='● AEROPORTI OFF';
+$('airfieldBtn').classList.remove('active');$('airfieldBtn').setAttribute('aria-pressed','false');$('airfieldBtn').textContent='● CAMPI OFF';
 $('airportBtn').addEventListener('click',()=>setAirportLayerEnabled('airport',!airportsEnabled));
 $('airfieldBtn').addEventListener('click',()=>setAirportLayerEnabled('airfield',!airfieldsEnabled));
 
