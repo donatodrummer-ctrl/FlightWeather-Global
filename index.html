@@ -30,6 +30,11 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .night-button{position:absolute;right:12px;top:166px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #4de0c1;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}
 .night-button.active{background:#073d43;border-color:#8affea;color:#bafff3;box-shadow:0 0 12px #20e6c455}
 .ctr-button{position:absolute;right:12px;top:228px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ff6872;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}.ctr-button.active{background:#4a1720;border-color:#ff9aa1;color:#ffdadd}
+.airport-button,.airfield-button{position:absolute;right:12px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:10px;font-weight:750;box-shadow:0 2px 8px #0008}
+.airport-button{top:260px;border:1px solid #ff4b55}.airport-button.active{background:#55151c;color:#ffdadd}
+.airfield-button{top:290px;border:1px solid #ffd43b}.airfield-button.active{background:#55440b;color:#fff0a6}
+.airport-legend{display:none;position:absolute;left:12px;bottom:12px;z-index:460;padding:7px 9px;border:1px solid #536579;border-radius:7px;background:#101923ed;color:#eef4fb;font-size:10px;line-height:1.7;box-shadow:0 4px 14px #0009;pointer-events:none}
+.airport-legend.visible{display:block}.airport-legend>div{display:flex;align-items:center;gap:7px}.airport-dot,.airfield-dot{width:9px;height:9px;border-radius:50%;display:inline-block;border:1px solid #fff}.airport-dot{background:#ff3b45}.airfield-dot{background:#ffd43b}
 main.night-mode #map .leaflet-tile-pane{filter:brightness(.42) saturate(.62) hue-rotate(155deg) contrast(1.12)}
 main.night-mode .aircraft-icon{filter:drop-shadow(0 0 1px #62ffe0);text-shadow:0 0 2px #62ffe0,0 1px 4px #000}
 main.night-mode .leaflet-popup-content-wrapper,main.night-mode .leaflet-popup-tip{background:#031b25!important;border-color:#35d9bd!important;box-shadow:0 0 14px #12c8a655!important}
@@ -64,6 +69,9 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 <button class="traffic-button active" id="trafficBtn" type="button" aria-pressed="true">✈ TRAFFICO ON</button>
 <button class="night-button" id="nightBtn" type="button" aria-pressed="false">◐ NOTTE OFF</button>
  <button class="ctr-button" id="ctrBtn" type="button" aria-pressed="false">CTR OFF</button>
+ <button class="airport-button" id="airportBtn" type="button" aria-pressed="false">● AEROPORTI OFF</button>
+ <button class="airfield-button" id="airfieldBtn" type="button" aria-pressed="false">● CAMPI OFF</button>
+ <div id="airportLegend" class="airport-legend" aria-live="polite"><div><span class="airport-dot"></span>Aeroporti</div><div><span class="airfield-dot"></span>Campi di volo</div></div>
 <div id="altitudeLegend" class="altitude-legend" aria-label="Legenda colori quota">
  <div class="legend-title">Quota scia</div>
  <div class="legend-row"><span class="swatch" style="background:#42d6ff"></span>Sotto 3.000 m</div>
@@ -80,6 +88,7 @@ map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.ge
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,className:'basemap-dim',attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
 map.createPane('lightningPane');map.getPane('lightningPane').style.zIndex='420';map.getPane('lightningPane').style.pointerEvents='none';
 let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[],lightningLayer=null,ctrLayer=null,ctrDataLoaded=false,ctrLoading=false;
+let airportData=null,airportLayer=L.layerGroup(),airfieldLayer=L.layerGroup(),airportsEnabled=false,airfieldsEnabled=false,airportLoadPromise=null;
 const flightHistory=new Map();
 let aircraftCache=[];
 let pinnedAircraftKey=null;
@@ -568,6 +577,70 @@ async function setCtrEnabled(enabled){
 }
 $('ctrBtn').addEventListener('click',()=>setCtrEnabled(!$('ctrBtn').classList.contains('active')));
 
+async function loadAirportData(){
+ if(airportData)return airportData;
+ if(!airportLoadPromise){
+  airportLoadPromise=(async()=>{
+   const response=await fetch('./data/airports.geojson?'+Date.now(),{cache:'no-store',headers:{'Accept':'application/geo+json, application/json'}});
+   if(!response.ok)throw new Error('Archivio aeroporti non pronto (HTTP '+response.status+')');
+   const data=await response.json();
+   if(!data||!Array.isArray(data.features))throw new Error('Archivio aeroporti non valido');
+   airportData=data.features;return airportData;
+  })().catch(error=>{airportLoadPromise=null;throw error});
+ }
+ return airportLoadPromise;
+}
+function airportPopup(p,type){
+ const name=escapeHtml(p.name||'Senza nome');
+ const place=[p.municipality,p.iso_country].filter(Boolean).map(escapeHtml).join(', ');
+ const codes=[p.icao_code?'ICAO '+escapeHtml(p.icao_code):'',p.iata_code?'IATA '+escapeHtml(p.iata_code):''].filter(Boolean).join(' · ');
+ return '<b>'+name+'</b><br>'+type+(place?'<br>'+place:'')+(codes?'<br><small>'+codes+'</small>':'')+'<br><small>Fonte: OurAirports · dati informativi</small>';
+}
+function refreshAirportLayers(){
+ const zoom=map.getZoom(),bounds=map.getBounds();
+ airportLayer.clearLayers();airfieldLayer.clearLayers();
+ if(zoom<5){$('airportLegend').classList.toggle('visible',airportsEnabled||airfieldsEnabled);return}
+ if(!airportData)return;
+ const maxPoints=1800;let airportCount=0,airfieldCount=0;
+ for(const feature of airportData){
+  const c=feature.geometry&&feature.geometry.coordinates;
+  if(!c||c.length<2)continue;
+  const lon=Number(c[0]),lat=Number(c[1]);
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)||!bounds.contains([lat,lon]))continue;
+  const p=feature.properties||{};
+  if(p.type==='small_airport'){
+   if(!airfieldsEnabled||airfieldCount>=maxPoints)continue;
+   L.circleMarker([lat,lon],{radius:3.7,color:'#fff0a6',weight:1,opacity:.95,fillColor:'#ffd43b',fillOpacity:.95}).bindPopup(airportPopup(p,'Campo di volo')).addTo(airfieldLayer);
+   airfieldCount++;
+  }else{
+   if(!airportsEnabled||airportCount>=maxPoints)continue;
+   L.circleMarker([lat,lon],{radius:4.2,color:'#ffdadd',weight:1,opacity:1,fillColor:'#ff3b45',fillOpacity:.98}).bindPopup(airportPopup(p,'Aeroporto')).addTo(airportLayer);
+   airportCount++;
+  }
+ }
+ if(airportsEnabled&&!map.hasLayer(airportLayer))airportLayer.addTo(map);
+ if(!airportsEnabled&&map.hasLayer(airportLayer))map.removeLayer(airportLayer);
+ if(airfieldsEnabled&&!map.hasLayer(airfieldLayer))airfieldLayer.addTo(map);
+ if(!airfieldsEnabled&&map.hasLayer(airfieldLayer))map.removeLayer(airfieldLayer);
+ $('airportLegend').classList.toggle('visible',airportsEnabled||airfieldsEnabled);
+}
+async function setAirportLayerEnabled(kind,enabled){
+ const button=$(kind==='airport'?'airportBtn':'airfieldBtn');button.disabled=true;
+ try{
+  if(enabled)await loadAirportData();
+  if(kind==='airport')airportsEnabled=enabled;else airfieldsEnabled=enabled;
+  refreshAirportLayers();button.classList.toggle('active',enabled);
+  button.setAttribute('aria-pressed',String(enabled));
+  button.textContent=(kind==='airport'?'● AEROPORTI ':'● CAMPI ')+(enabled?'ON':'OFF');
+  if(enabled&&map.getZoom()<5)setNotice('Aumenta lo zoom (livello 5 o superiore) per visualizzare aeroporti e campi di volo.');
+  else setNotice(enabled?'Punti aeroportuali caricati nell’area visibile.':'Livello mappa aggiornato.');
+ }catch(error){setNotice('Dati aeroporti non disponibili: '+error.message,true);$('topStatus').textContent='Dati aeroporti non disponibili'}
+ finally{button.disabled=false}
+}
+$('airportBtn').addEventListener('click',()=>setAirportLayerEnabled('airport',!airportsEnabled));
+$('airfieldBtn').addEventListener('click',()=>setAirportLayerEnabled('airfield',!airfieldsEnabled));
+
+
 function setRadarEnabled(enabled){$('weatherToggle').checked=enabled;$('radarBtn').classList.toggle('active',enabled);$('radarBtn').textContent=enabled?'◉ RADAR ON':'◉ RADAR OFF';$('radarBtn').setAttribute('aria-pressed',String(enabled));if(!radarLayer){if(enabled)loadRadar();return}if(enabled)radarLayer.addTo(map);else map.removeLayer(radarLayer)}
 $('radarBtn').addEventListener('click',()=>setRadarEnabled(!$('weatherToggle').checked));
 $('refreshBtn').addEventListener('click',()=>{loadPlanes();if($('weatherToggle').checked)loadRadar();if($('lightningToggle').checked)loadLightning()});
@@ -614,7 +687,7 @@ locateButton.addEventListener('click',event=>{
 });
 
 map.on('click',()=>{pinnedAircraftKey=null;followSelectedAircraft=false;updateFollowButton();updateAircraftIcons();showSelectedAircraft(null);drawSelectedTrail();setPanelCompact(true)});
-let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes()},700)});
+let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes();refreshAirportLayers()},700)});
 loadRadar();loadPlanes();
 // Il controllo e il caricamento del traffico sono impostati ogni 3 secondi.
 setInterval(()=>{if(trafficEnabled)loadPlanes()},3000);
