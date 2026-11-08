@@ -1,0 +1,43 @@
+name: Aggiorna dati CTR italiani
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '20 4 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refresh-ctr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Scarica CTR OpenAIP Italia
+        run: |
+          mkdir -p data
+          curl --fail --location --silent --show-error \
+            'https://storage.googleapis.com/29f98e10-a489-4c82-ae5e-489dbcd4912f/it_asp.geojson' \
+            -o data/ctr-it.geojson
+          python - <<'PY'
+          import json
+          with open('data/ctr-it.geojson', encoding='utf-8') as f:
+              data = json.load(f)
+          assert data.get('type') == 'FeatureCollection'
+          assert isinstance(data.get('features'), list) and data['features']
+          ctr = [x for x in data['features'] if str(x.get('properties', {}).get('type', '')).strip() == '4']
+          print(f"Feature totali: {len(data['features'])}; CTR: {len(ctr)}")
+          assert ctr, 'Nessun CTR nel dataset'
+          PY
+      - name: Pubblica archivio aggiornato
+        run: |
+          if git diff --quiet -- data/ctr-it.geojson; then
+            echo "Dati CTR già aggiornati"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ctr-it.geojson
+          git commit -m "Aggiorna CTR italiani"
+          git push
