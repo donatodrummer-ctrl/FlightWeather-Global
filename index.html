@@ -200,7 +200,10 @@ async function loadHistoricalTrail(a,key){
    if(firstAirborne<0)return;
    points=points.slice(firstAirborne);
   }
-  const live=flightHistory.get(key)||[];
+  // Il punto iniziale è l'ultimo decollo individuato nello storico.
+  // Esclude dalla scia anche eventuali punti live registrati prima di quel decollo.
+  const takeoffTime=points[0].time;
+  const live=(flightHistory.get(key)||[]).filter(p=>Number.isFinite(p.time)&&p.time>=takeoffTime);
   const merged=[...points,...live].sort((x,y)=>x.time-y.time);
   const unique=[];
   for(const p of merged){
