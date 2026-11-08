@@ -613,13 +613,13 @@ function refreshAirportLayers(){
   if(p.type==='small_airport'){
    if(!airfieldsEnabled||airfieldCount>=maxPoints)continue;
    const marker=L.circleMarker([lat,lon],{radius:airfieldRadius,color:'#fff0a6',weight:1,opacity:.95,fillColor:'#ffd43b',fillOpacity:.95,bubblingMouseEvents:false}).bindPopup(airportPopup(p,'Campo di volo'),{closeButton:true,autoPan:true,maxWidth:260});
-   if(p.icao_code)marker.bindTooltip(escapeHtml(p.icao_code),{permanent:true,direction:'right',offset:[6,0],className:'airport-icao-label',opacity:1});
+   if(p.icao_code)marker.bindTooltip(escapeHtml([p.icao_code,p.iata_code].filter(Boolean).join(' - ')),{permanent:true,direction:'right',offset:[6,0],className:'airport-icao-label',opacity:1});
    marker.addTo(airfieldLayer);
    airfieldCount++;
   }else{
    if(!airportsEnabled||airportCount>=maxPoints)continue;
    const marker=L.circleMarker([lat,lon],{radius:airportRadius,color:'#ffdadd',weight:1,opacity:1,fillColor:'#ff3b45',fillOpacity:.98,bubblingMouseEvents:false}).bindPopup(airportPopup(p,'Aeroporto'),{closeButton:true,autoPan:true,maxWidth:260});
-   if(p.icao_code)marker.bindTooltip(escapeHtml(p.icao_code),{permanent:true,direction:'right',offset:[6,0],className:'airport-icao-label',opacity:1});
+   if(p.icao_code)marker.bindTooltip(escapeHtml([p.icao_code,p.iata_code].filter(Boolean).join(' - ')),{permanent:true,direction:'right',offset:[6,0],className:'airport-icao-label',opacity:1});
    marker.addTo(airportLayer);
    airportCount++;
   }
