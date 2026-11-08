@@ -35,9 +35,11 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <label class="toggle"><input id="weatherToggle" type="checkbox"> Radar precipitazioni</label>
 <label class="toggle"><input id="aeroToggle" type="checkbox"> Frequenze radio aeronautiche</label>
 </div>
+<div class="searchbox" style="margin-top:9px"><input id="apiKeyInput" type="password" autocomplete="off" placeholder="Chiave API FlyItalyADSB"><button id="saveApiKey" type="button">Salva</button></div>
+ <div style="font-size:10px;color:#9fb1c6;margin:4px 0 7px">La chiave resta salvata solo in questo browser.</div>
 <div class="stats"><div><b id="planeCount">—</b>Aerei visibili</div><div><b id="radarTime">—</b>Ultimo radar</div></div>
 <div class="notice" id="notice">Apri la mappa su una zona e attiva il traffico aereo. Gli aerei vengono caricati nell'area attorno al centro della vista.</div>
-<div style="font-size:10px;color:#8fa4bb;margin-top:7px">Dati traffico ADS-B: <a href="https://adsb.fi/" target="_blank" rel="noopener noreferrer" style="color:#ffd43b">adsb.fi</a></div>
+<div style="font-size:10px;color:#8fa4bb;margin-top:7px">Dati traffico ADS-B: <a href="https://flyitalyadsb.com/dati/api/" target="_blank" rel="noopener noreferrer" style="color:#ffd43b">FlyItalyADSB</a></div>
 </section>
 <button class="refresh" id="refreshBtn">↻ Aggiorna</button>
 <button class="locate" id="locateBtn" title="Mostra la mia posizione GPS" aria-label="Mostra la mia posizione GPS">◎ GPS</button>
@@ -72,6 +74,9 @@ function animateAircraft(){
 }
 requestAnimationFrame(animateAircraft);
 const $=id=>document.getElementById(id);
+let flyItalyKey=localStorage.getItem('flyitalyadsb_key')||'';
+$('apiKeyInput').value=flyItalyKey;
+$('saveApiKey').addEventListener('click',()=>{const value=$('apiKeyInput').value.trim();if(!value){setNotice('Inserisci la chiave API ricevuta da FlyItalyADSB.',true);return}flyItalyKey=value;localStorage.setItem('flyitalyadsb_key',value);setNotice('Chiave salvata su questo browser. Carico il traffico…');loadPlanes();});
 function planeIcon(a){
  const angle=Number.isFinite(Number(a.track))?Number(a.track):0;
  const info=[a.t,a.desc,a.category,a.type].filter(Boolean).join(' ').toLowerCase();
@@ -160,21 +165,14 @@ async function loadPlanes(){
  const c=map.getCenter(),radius=Math.min(250,Math.max(30,Math.round(map.getBounds().getNorthEast().distanceTo(map.getBounds().getSouthWest())/1852/2)));
  $('topStatus').textContent='Aggiornamento traffico…';
  try{
-  const directUrl='https://api.adsb.lol/v2/point/'+c.lat.toFixed(4)+'/'+c.lng.toFixed(4)+'/'+radius;
-  const endpoints=[directUrl,'https://opendata.adsb.fi/api/v3/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius];
-  let aircraft=[],lastError=null,source='';
-  for(const url of endpoints){
-   try{
-    const res=await fetch(url,{headers:{Accept:'application/json'},credentials:'omit',mode:'cors'});
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    const data=await res.json();
-    const list=data.ac||data.aircraft||[];
-    const parsed=list.map(a=>({...a,seen:a.seen??a.seen_pos})).filter(a=>Number.isFinite(Number(a.lat))&&Number.isFinite(Number(a.lon)));
-    if(parsed.length){aircraft=parsed;source=url.includes('adsb.lol')?'adsb.lol':'adsb.fi';break;}
-    lastError=new Error('Nessun aeromobile restituito dal servizio');
-   }catch(err){lastError=err;}
-  }
-  if(!aircraft.length&&lastError)throw new Error('Servizio ADS-B momentaneamente non disponibile: '+lastError.message);
+  if(!flyItalyKey)throw new Error('Inserisci prima la chiave API FlyItalyADSB nel campo qui sopra.');
+  const url='https://api.flyitalyadsb.com/v2/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius;
+  const res=await fetch(url,{headers:{Accept:'application/json','X-Api-Key':flyItalyKey},credentials:'omit',mode:'cors'});
+  if(!res.ok)throw new Error('FlyItalyADSB HTTP '+res.status);
+  const data=await res.json();
+  const aircraft=(data.ac||[]).map(a=>({...a,seen:a.seen??a.seen_pos})).filter(a=>Number.isFinite(Number(a.lat))&&Number.isFinite(Number(a.lon)));
+  const source='FlyItalyADSB';
+  if(!aircraft.length)throw new Error('Nessun aeromobile rilevato in quest’area.');
 
   aircraftCache=aircraft;
   const now=Date.now();
@@ -375,6 +373,6 @@ $('locateBtn').addEventListener('click',()=>{
 
 let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes();clearTimeout(aeronauticalTimer);if($('aeroToggle').checked)aeronauticalTimer=setTimeout(loadAeronautical,900)},700)});
 loadRadar();loadPlanes();
-setInterval(()=>{if($('planesToggle').checked)loadPlanes()},2500);
+setInterval(()=>{if($('planesToggle').checked)loadPlanes()},5000);
 setInterval(()=>{if($('weatherToggle').checked)loadRadar()},600000);
 </script></body></html>
