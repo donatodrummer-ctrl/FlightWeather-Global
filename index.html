@@ -153,22 +153,52 @@ async function loadHistoricalTrail(a,key){
  if(historicalTrailLoads.has(loadKey))return;
  historicalTrailLoads.add(loadKey);
  try{
-  const url='https://api.flyitalyadsb.com/v2/history/'+encodeURIComponent(String(a.hex).toLowerCase())+'/'+today;
-  const res=await fetch(url,{headers:{Accept:'application/json','X-Api-Key':flyItalyKey},credentials:'omit',mode:'cors'});
-  if(!res.ok)throw new Error('Storico HTTP '+res.status);
-  const data=await res.json();
-  if(!Array.isArray(data.trace)||!data.trace.length)return;
-  const base=Number(data.timestamp);
-  let points=data.trace.map(p=>{
-   if(!Array.isArray(p)||!Number.isFinite(Number(p[1]))||!Number.isFinite(Number(p[2])))return null;
-   return {time:(base+Number(p[0]))*1000,lat:Number(p[1]),lon:Number(p[2]),alt:p[3]};
-  }).filter(Boolean).sort((x,y)=>x.time-y.time);
+  const headers={Accept:'application/json','X-Api-Key':flyItalyKey};
+  const baseUrl='https://api.flyitalyadsb.com/v2/history/'+encodeURIComponent(String(a.hex).toLowerCase());
+  let dates=[today];
+  try{
+   const datesRes=await fetch(baseUrl,{headers,credentials:'omit',mode:'cors'});
+   if(datesRes.ok){
+    const datesData=await datesRes.json();
+    if(Array.isArray(datesData.dates)){
+     dates=Array.from(new Set([...datesData.dates.filter(d=>typeof d==='string'&&d<=today),today])).sort().slice(-2);
+    }
+   }
+  }catch(e){console.warn('Elenco date storico non disponibile:',e)}
+  let points=[];
+  for(const date of dates){
+   const res=await fetch(baseUrl+'/'+date,{headers,credentials:'omit',mode:'cors'});
+   if(!res.ok){if(res.status!==404)console.warn('Storico '+date+' HTTP '+res.status);continue}
+   const data=await res.json();
+   const base=Number(data.timestamp);
+   if(!Number.isFinite(base)||!Array.isArray(data.trace))continue;
+   const dayPoints=data.trace.map(p=>{
+    if(!Array.isArray(p)||p[1]===null||p[1]===undefined||p[2]===null||p[2]===undefined)return null;
+    const offset=Number(p[0]),lat=Number(p[1]),lon=Number(p[2]);
+    if(!Number.isFinite(offset)||!Number.isFinite(lat)||!Number.isFinite(lon))return null;
+    return {time:(base+offset)*1000,lat,lon,alt:p[3]};
+   }).filter(Boolean);
+   points.push(...dayPoints);
+  }
+  points.sort((x,y)=>x.time-y.time);
   if(!points.length)return;
-  // Se l'aereo è atterrato e ripartito oggi, inizia dall'ultimo punto a terra
-  // precedente alla posizione attuale, così la linea segue il volo corrente.
-  let start=0;
-  for(let i=0;i<points.length;i++)if(points[i].alt==='ground')start=i;
-  points=points.slice(start);
+  // Cerca l'ultimo passaggio terra->aria: è il decollo più recente,
+  // anche se il volo è iniziato il giorno UTC precedente.
+  let startIndex=-1;
+  for(let i=0;i<points.length-1;i++){
+   const onGround=points[i].alt==='ground';
+   const nextIsAirborne=points.slice(i+1).some(p=>p.alt!=='ground'&&p.alt!==null&&p.alt!==undefined&&Number.isFinite(Number(p.alt)));
+   if(onGround&&nextIsAirborne)startIndex=i;
+  }
+  if(startIndex>=0){
+   points=points.slice(startIndex);
+  }else{
+   // Se lo storico non contiene il punto a terra, usa solo la parte
+   // aerea disponibile: non inventa il punto esatto di decollo.
+   const firstAirborne=points.findIndex(p=>p.alt!=='ground'&&p.alt!==null&&p.alt!==undefined&&Number.isFinite(Number(p.alt)));
+   if(firstAirborne<0)return;
+   points=points.slice(firstAirborne);
+  }
   const live=flightHistory.get(key)||[];
   const merged=[...points,...live].sort((x,y)=>x.time-y.time);
   const unique=[];
