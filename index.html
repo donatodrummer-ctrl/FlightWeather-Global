@@ -75,12 +75,12 @@ const $=id=>document.getElementById(id);
 let flyItalyKey=localStorage.getItem('flyitalyadsb_key')||'';
 $('apiKeyInput').value=flyItalyKey;
 $('saveApiKey').addEventListener('click',()=>{const value=$('apiKeyInput').value.trim();if(!value){setNotice('Inserisci la chiave API ricevuta da FlyItalyADSB.',true);return}flyItalyKey=value;localStorage.setItem('flyitalyadsb_key',value);setNotice('Chiave salvata su questo browser. Carico il traffico…');loadPlanes();});
-function planeIcon(a){
+function planeIcon(a,selected=false){
  const angle=Number.isFinite(Number(a.track))?Number(a.track):0;
  const info=[a.t,a.desc,a.category,a.type].filter(Boolean).join(' ').toLowerCase();
  const type=String(a.t||'').toUpperCase();
  let shape='<path d="M16 1 L19 12 L30 20 L30 23 L18 19 L18 29 L23 32 L23 34 L16 31 L9 34 L9 32 L14 29 L14 19 L2 23 L2 20 L13 12 Z"/>';
- let fill='#ffd43b',stroke='#594300';
+ let fill=selected?'#ff3030':'#ffd43b',stroke=selected?'#760000':'#594300';
  if(/helicopter|elicottero|rotor|\bheli\b/.test(info)||/^H[0-9A-Z]{3}$/.test(type)){
   fill='#39d6c5';stroke='#064b49';
   shape='<path d="M4 5 H28 M16 5 V11 M10 13 Q16 9 22 13 L24 18 H9 Q7 17 8 15 Z M22 15 L29 20 L28 22 L21 18 M11 18 L8 25 H10 L14 19 M16 5 V2 M2 27 H14"/>';
@@ -113,6 +113,9 @@ function planeIcon(a){
  return L.divIcon({className:'aircraft-icon',html,iconSize:[54,34],iconAnchor:[16,17]})
 }
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
+function updateAircraftIcons(){
+ aircraftCache.forEach(a=>{const key=String(a.hex||a.flight||('pos-'+a.lat+'-'+a.lon)).trim();const marker=aircraftMarkers.get(key);if(marker)marker.setIcon(planeIcon(a,key===pinnedAircraftKey))});
+}
 function drawSelectedTrail(){
  trailLayer.clearLayers();
  if(!pinnedAircraftKey)return;
@@ -211,12 +214,12 @@ async function loadPlanes(){
       aircraftMotions.set(key,{from:{lat:current.lat,lng:current.lng},to:target,start:now,duration:1900});
      }else aircraftMotions.delete(key);
     }
-    marker.setIcon(planeIcon(a));
+    marker.setIcon(planeIcon(a,key===pinnedAircraftKey));
      if(pinnedAircraftKey===key)showSelectedAircraft(a);
    }else{
-    marker=L.marker([a.lat,a.lon],{icon:planeIcon(a),aircraftKey:key,bubblingMouseEvents:false});
+    marker=L.marker([a.lat,a.lon],{icon:planeIcon(a,key===pinnedAircraftKey),aircraftKey:key,bubblingMouseEvents:false});
     marker.addTo(planeLayer);
-    marker.on('click',()=>{pinnedAircraftKey=key;showSelectedAircraft(a);drawSelectedTrail()});
+    marker.on('click',()=>{pinnedAircraftKey=key;updateAircraftIcons();showSelectedAircraft(a);drawSelectedTrail()});
     aircraftMarkers.set(key,marker);
    }
   });
@@ -300,7 +303,7 @@ $('locateBtn').addEventListener('click',()=>{
  },{enableHighAccuracy:true,timeout:15000,maximumAge:10000});
 });
 
-map.on('click',()=>{pinnedAircraftKey=null;showSelectedAircraft(null);drawSelectedTrail();setPanelCompact(true)});
+map.on('click',()=>{pinnedAircraftKey=null;updateAircraftIcons();showSelectedAircraft(null);drawSelectedTrail();setPanelCompact(true)});
 let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes()},700)});
 loadRadar();loadPlanes();
 setInterval(()=>{if($('planesToggle').checked)loadPlanes()},2000);
