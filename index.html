@@ -207,9 +207,9 @@ function updateAircraftLabels(){
   if(marker.getTooltip())marker.unbindTooltip();
   if(key===pinnedAircraftKey||showCrowdLabels){
    const call=String(a.flight||a.r||'Aereo').trim(),model=String(a.t||a.desc||'').trim();
-   const route=a.route||{},destination=route.to_iata||route.to_icao||route.to||a.dest||a.destination||a.to||'Dest. n/d';
+   const route=a.route||{},origin=route.from_iata||route.from_icao||route.from||a.orig||a.origin||a.from||'Orig. n/d',destination=route.to_iata||route.to_icao||route.to||a.dest||a.destination||a.to||'Dest. n/d';
    const altitude=niceAlt(a.alt_baro??a.alt_geom)||'Quota n/d';
-   const label=[call,altitude,String(destination).toUpperCase()].join(' · ');
+   const label=[call,altitude,String(origin).toUpperCase()+' → '+String(destination).toUpperCase()].join(' · ');
    const alert=squawkAlert(a);marker.bindTooltip(escapeHtml(label),{permanent:true,direction:'top',offset:[0,-13],className:'aircraft-label'+(alert?' emergency-label':''),opacity:1});
   }
  });
