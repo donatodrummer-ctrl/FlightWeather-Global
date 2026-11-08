@@ -46,10 +46,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <script>
 const map=L.map('map',{worldCopyJump:true}).setView([45.7,9.7],5);
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
-let baseTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,attribution:'© OpenStreetMap contributors © CARTO'}).addTo(map);
-let baseTileErrors=0,baseFallback=false;
-baseTiles.on('tileerror',()=>{baseTileErrors++;if(baseTileErrors>=2&&!baseFallback){baseFallback=true;map.removeLayer(baseTiles);baseTiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);setNotice('Mappa scura non raggiungibile: attivata la mappa OpenStreetMap di riserva.');}});
-baseTiles.on('load',()=>{baseTileErrors=0;});
+let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
 let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
 const aeronauticalLayer=L.layerGroup().addTo(map);
 let aeronauticalRequest=null,aeronauticalTimer=null,lastAeroBounds='';
@@ -159,12 +156,12 @@ async function loadPlanes(){
  const c=map.getCenter(),radius=Math.min(250,Math.max(30,Math.round(map.getBounds().getNorthEast().distanceTo(map.getBounds().getSouthWest())/1852/2)));
  $('topStatus').textContent='Aggiornamento traffico…';
  try{
-  const directUrl='https://opendata.adsb.fi/api/v3/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius;
+  const directUrl='https://api.adsb.lol/v2/point/'+c.lat.toFixed(4)+'/'+c.lng.toFixed(4)+'/'+radius;
   const endpoints=['https://proxy.cors.dev/'+directUrl];
   let aircraft=[],lastError=null,source='';
   for(const url of endpoints){
    try{
-    const res=await fetch(url,{headers:{Accept:'application/json'}});
+    const res=await fetch(url,{headers:{Accept:'application/json'},credentials:'omit'});
     if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
     const list=data.ac||data.aircraft||[];
