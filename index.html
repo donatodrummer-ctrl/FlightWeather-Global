@@ -157,11 +157,11 @@ async function loadPlanes(){
  $('topStatus').textContent='Aggiornamento traffico…';
  try{
   const directUrl='https://api.adsb.lol/v2/point/'+c.lat.toFixed(4)+'/'+c.lng.toFixed(4)+'/'+radius;
-  const endpoints=['https://proxy.cors.dev/'+directUrl];
+  const endpoints=[directUrl,'https://opendata.adsb.fi/api/v3/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius];
   let aircraft=[],lastError=null,source='';
   for(const url of endpoints){
    try{
-    const res=await fetch(url,{headers:{Accept:'application/json'},credentials:'omit'});
+    const res=await fetch(url,{headers:{Accept:'application/json'},credentials:'omit',mode:'cors'});
     if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
     const list=data.ac||data.aircraft||[];
