@@ -351,7 +351,7 @@ function showSelectedAircraft(a){
  const from=route&&(route.from_iata||route.from_icao||route.from);
  const to=route&&(route.to_iata||route.to_icao||route.to);
  const routeLabel=from&&to?(String(from).toUpperCase()+' → '+String(to).toUpperCase()):'Tratta non disponibile';
- const airlineLogo=airline?'<img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(airline[2])+'&sz=64" alt="" style="width:19px;height:19px;object-fit:contain;flex:0 0 19px;border:1px solid #fff9;border-radius:5px;background:#fff;padding:2px" onerror="this.style.display=\\'none\\'">':'';
+ const airlineLogo=airline?'<img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(airline[2])+'&sz=64" alt="" style="width:19px;height:19px;object-fit:contain;flex:0 0 19px;border:1px solid #fff9;border-radius:5px;background:#fff;padding:2px" onerror="this.style.display=\'none\'">':'';
  box.innerHTML='<h2>'+value(flight)+'</h2>'+
   '<div class="sub" style="display:flex;align-items:center;gap:6px;min-width:0;line-height:1.25">'+airlineLogo+'<span style="min-width:0;overflow-wrap:anywhere;font-size:13px;font-weight:750;line-height:1.2">'+(airline?value(airline[1])+' · ':'')+value(routeLabel)+'</span></div>'+
   '<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div><div>Velocità verticale<b>'+value(niceVertical(a.baro_rate??a.geom_rate))+'</b></div></div>'+
