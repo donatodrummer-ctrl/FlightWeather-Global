@@ -14,21 +14,23 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
-      - name: Scarica CTR OpenAIP Italia
+      - name: Scarica e filtra CTR OpenAIP Italia
         run: |
           mkdir -p data
           curl --fail --location --silent --show-error \
             'https://storage.openaip.net/openaip-system-exports/it_asp.geojson' \
-            -o data/ctr-it.geojson
+            -o /tmp/it-asp.geojson
           python - <<'PY'
           import json
-          with open('data/ctr-it.geojson', encoding='utf-8') as f:
+          with open('/tmp/it-asp.geojson', encoding='utf-8') as f:
               data = json.load(f)
           assert data.get('type') == 'FeatureCollection'
-          assert isinstance(data.get('features'), list) and data['features']
-          ctr = [x for x in data['features'] if str(x.get('properties', {}).get('type', '')).strip() == '4']
-          print(f"Feature totali: {len(data['features'])}; CTR: {len(ctr)}")
+          ctr = [x for x in data.get('features', []) if str(x.get('properties', {}).get('type', '')).strip() == '4']
           assert ctr, 'Nessun CTR nel dataset'
+          out = {'type': 'FeatureCollection', 'features': ctr}
+          with open('data/ctr-it.geojson', 'w', encoding='utf-8') as f:
+              json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
+          print(f"Feature originali: {len(data['features'])}; CTR: {len(ctr)}; file filtrato: {__import__('os').path.getsize('data/ctr-it.geojson')} byte")
           PY
       - name: Pubblica archivio aggiornato
         run: |
@@ -39,5 +41,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/ctr-it.geojson
-          git commit -m "Aggiorna CTR italiani"
+          git commit -m "Ottimizza archivio CTR italiani"
           git push
