@@ -604,19 +604,21 @@ function refreshAirportLayers(){
  if(zoom<5)return;
  if(!airportData)return;
  const maxPoints=1800;let airportCount=0,airfieldCount=0;
+ const airportRadius=Math.min(6.5,Math.max(2.6,2.6+(zoom-5)*0.48));
+ const airfieldRadius=Math.min(5.5,Math.max(2.2,2.2+(zoom-5)*0.40));
  for(const feature of airportData){
   const lon=Number(feature[0]),lat=Number(feature[1]);
   if(!Number.isFinite(lat)||!Number.isFinite(lon)||!bounds.contains([lat,lon]))continue;
   const p={type:feature[2],name:feature[3],iso_country:feature[4],municipality:feature[5],icao_code:feature[6],iata_code:feature[7]};
   if(p.type==='small_airport'){
    if(!airfieldsEnabled||airfieldCount>=maxPoints)continue;
-   const marker=L.circleMarker([lat,lon],{radius:3.7,color:'#fff0a6',weight:1,opacity:.95,fillColor:'#ffd43b',fillOpacity:.95,bubblingMouseEvents:false}).bindPopup(airportPopup(p,'Campo di volo'),{closeButton:true,autoPan:true,maxWidth:260});
+   const marker=L.circleMarker([lat,lon],{radius:airfieldRadius,color:'#fff0a6',weight:1,opacity:.95,fillColor:'#ffd43b',fillOpacity:.95,bubblingMouseEvents:false}).bindPopup(airportPopup(p,'Campo di volo'),{closeButton:true,autoPan:true,maxWidth:260});
    if(p.icao_code)marker.bindTooltip(escapeHtml(p.icao_code),{permanent:true,direction:'right',offset:[6,0],className:'airport-icao-label',opacity:1});
    marker.addTo(airfieldLayer);
    airfieldCount++;
   }else{
    if(!airportsEnabled||airportCount>=maxPoints)continue;
-   const marker=L.circleMarker([lat,lon],{radius:4.2,color:'#ffdadd',weight:1,opacity:1,fillColor:'#ff3b45',fillOpacity:.98,bubblingMouseEvents:false}).bindPopup(airportPopup(p,'Aeroporto'),{closeButton:true,autoPan:true,maxWidth:260});
+   const marker=L.circleMarker([lat,lon],{radius:airportRadius,color:'#ffdadd',weight:1,opacity:1,fillColor:'#ff3b45',fillOpacity:.98,bubblingMouseEvents:false}).bindPopup(airportPopup(p,'Aeroporto'),{closeButton:true,autoPan:true,maxWidth:260});
    if(p.icao_code)marker.bindTooltip(escapeHtml(p.icao_code),{permanent:true,direction:'right',offset:[6,0],className:'airport-icao-label',opacity:1});
    marker.addTo(airportLayer);
    airportCount++;
