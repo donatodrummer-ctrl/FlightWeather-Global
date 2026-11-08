@@ -382,7 +382,8 @@ async function loadRadar(){
   if(!radarFrames.length)throw new Error('Nessun fotogramma radar disponibile');
   const frame=radarFrames[radarFrames.length-1];
   if(radarLayer)map.removeLayer(radarLayer);
-  radarLayer=L.tileLayer(data.host+frame.path+'/256/{z}/{x}/{y}/2/1_1.png',{opacity:.62,maxNativeZoom:7,maxZoom:19,attribution:'Radar: <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>'});
+  const radarTileSize=window.devicePixelRatio>=2?512:256;
+  radarLayer=L.tileLayer(data.host+frame.path+'/'+radarTileSize+'/{z}/{x}/{y}/2/1_1.png',{tileSize:256,opacity:.72,maxNativeZoom:7,maxZoom:19,attribution:'Radar: <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>'});
   if($('weatherToggle').checked)radarLayer.addTo(map);
   $('radarTime').textContent=new Date(frame.time*1000).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
  }catch(e){$('radarTime').textContent='N/D';setNotice('Radar meteo non disponibile: '+e.message,true)}
