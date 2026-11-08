@@ -200,7 +200,9 @@ function updateAircraftLabels(){
   if(marker.getTooltip())marker.unbindTooltip();
   if(key===pinnedAircraftKey||showCrowdLabels){
    const call=String(a.flight||a.r||'Aereo').trim(),model=String(a.t||a.desc||'').trim();
-   const label=key===pinnedAircraftKey?[call,model].filter(Boolean).join(' · '):call;
+   const route=a.route||{},destination=route.to_iata||route.to_icao||route.to||a.dest||a.destination||a.to||'Dest. n/d';
+   const altitude=niceAlt(a.alt_baro??a.alt_geom)||'Quota n/d';
+   const label=[call,altitude,String(destination).toUpperCase()].join(' · ');
    marker.bindTooltip(escapeHtml(label),{permanent:true,direction:'top',offset:[0,-13],className:'aircraft-label',opacity:1});
   }
  });
