@@ -390,6 +390,13 @@ L.DomEvent.disableClickPropagation(locateButton);
 locateButton.addEventListener('click',event=>{
  event.preventDefault();
  event.stopPropagation();
+ // Il GPS interrompe il tracciamento dell'aereo selezionato.
+ pinnedAircraftKey=null;
+ followSelectedAircraft=false;
+ updateFollowButton();
+ updateAircraftIcons();
+ showSelectedAircraft(null);
+ drawSelectedTrail();
  if(!navigator.geolocation){
   const msg='Questo browser non rende disponibile la geolocalizzazione.';
   setNotice(msg,true);$('topStatus').textContent='GPS non supportato';return;
