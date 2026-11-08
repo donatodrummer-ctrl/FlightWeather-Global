@@ -185,7 +185,7 @@ async function loadPlanes(){
     const target={lat:Number(a.lat),lng:Number(a.lon)};
     const distance=Math.abs(current.lat-target.lat)+Math.abs(current.lng-target.lng);
     if(distance>0.000001){
-     aircraftMotions.set(key,{from:{lat:current.lat,lng:current.lng},to:target,start:now,duration:28000});
+     aircraftMotions.set(key,{from:{lat:current.lat,lng:current.lng},to:target,start:now,duration:4500});
     }else{
      aircraftMotions.delete(key);
     }
@@ -367,6 +367,6 @@ $('locateBtn').addEventListener('click',()=>{
 
 let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes();clearTimeout(aeronauticalTimer);if($('aeroToggle').checked)aeronauticalTimer=setTimeout(loadAeronautical,900)},700)});
 loadRadar();loadPlanes();
-setInterval(()=>{if($('planesToggle').checked)loadPlanes()},30000);
+setInterval(()=>{if($('planesToggle').checked)loadPlanes()},5000);
 setInterval(()=>{if($('weatherToggle').checked)loadRadar()},600000);
 </script></body></html>
