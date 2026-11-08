@@ -588,7 +588,7 @@ function airspacePopup(feature,kind){
  const freq=Array.isArray(p.frequencies)?p.frequencies.map(x=>escapeHtml(x.value||x.frequency||x)).join(', '):'';
  return '<div style="min-width:145px;max-width:210px;font-size:11px;line-height:1.35"><b style="font-size:12px">'+name+'</b><br><span style="color:#ffd43b;font-weight:800">'+kind+'</span><hr style="border:0;border-top:1px solid #40536a;margin:5px 0">'+(klass!==undefined?'<div><b>Classe:</b> '+escapeHtml(klass)+'</div>':'')+'<div><b>Limite inferiore:</b> '+escapeHtml(lower)+'</div><div><b>Limite superiore:</b> '+escapeHtml(upper)+'</div>'+(freq?'<div><b>Frequenza:</b> '+freq+'</div>':'')+'<div style="margin-top:6px;color:#9fb1c6;font-size:9px">Fonte: OpenAIP · CC BY-NC 4.0. Dato informativo, non ufficiale; verificare AIP ENAV e NOTAM.</div></div>';
 }
-async function setAirspaceEnabled(kind,enabled){
+async async function setAirspaceEnabled(kind,enabled){
  const ids={CTR:'ctrBtn',ATZ:'atzBtn',TMA:'tmaBtn'};
  const button=$(ids[kind]);
  if(button.disabled)return;
