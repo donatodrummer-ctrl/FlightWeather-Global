@@ -234,7 +234,7 @@ async function openFlightHistory(){
   const indexRes=await fetch(baseUrl,{headers,credentials:'omit',mode:'cors'});
   if(!indexRes.ok)throw new Error('Storico non disponibile (HTTP '+indexRes.status+')');
   const indexData=await indexRes.json();
-  const dates=Array.isArray(indexData.dates)?Array.from(new Set(indexData.dates.filter(d=>typeof d==='string'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(d)))).sort().slice(-45):[new Date().toISOString().slice(0,10)];
+  const dates=Array.isArray(indexData.dates)?Array.from(new Set(indexData.dates.filter(d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)))).sort().slice(-45):[new Date().toISOString().slice(0,10)];
   let points=[];
   for(const date of dates){
    const res=await fetch(baseUrl+'/'+date,{headers,credentials:'omit',mode:'cors'});
