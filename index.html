@@ -211,12 +211,16 @@ async function getRadioFrequencyData(){
  }
  return radioFrequencyDataPromise;
 }
-function radioMarker(lat,lon,title,kind,frequency,extra){
- const color=kind==='nav'?'#7b3fc6':'#087fbd';
- const icon=L.divIcon({className:'',html:'<div style="width:25px;height:25px;border:2px solid '+color+';border-radius:50%;background:#fff;color:'+color+';font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 5px #0008">'+(kind==='nav'?'◉':'R')+'</div>',iconSize:[25,25],iconAnchor:[12,12]});
+function radioAirportMarker(lat,lon,airport,items){
+ const icon=L.divIcon({className:'',html:'<div style="width:27px;height:27px;border:2px solid #087fbd;border-radius:50%;background:#fff;color:#087fbd;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 5px #0008">R</div>',iconSize:[27,27],iconAnchor:[13,13]});
+ const lines=items.map(f=>{
+  const type=String(f.type||'COM').toUpperCase();
+  const description=f.description? ' — '+escapeHtml(f.description):'';
+  return '<div style="display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid #34465b"><span><b style="color:#42c8e8">'+escapeHtml(type)+'</b>'+description+'</span><b style="white-space:nowrap">'+Number(f.frequency_mhz).toFixed(3)+' MHz</b></div>';
+ }).join('');
  const marker=L.marker([lat,lon],{icon});
- marker.bindPopup('<div style="min-width:190px"><b>'+escapeHtml(title)+'</b><br>'+escapeHtml(extra)+'<br><span style="color:#42c8e8;font-weight:800;font-size:16px"> '+escapeHtml(frequency)+'</span></div>');
- marker.bindTooltip(escapeHtml(frequency),{permanent:true,direction:'right',offset:[10,0],className:'aero-frequency-label'});
+ marker.bindPopup('<div style="min-width:245px;max-width:310px"><b>'+escapeHtml(airport.name||airport.ident||'Aeroporto')+' · '+escapeHtml(airport.ident||'')+'</b><div style="font-size:10px;color:#9fb1c6;margin:4px 0 7px">FREQUENZE RADIO AERONAUTICHE</div>'+lines+'</div>',{maxWidth:340});
+ marker.bindTooltip('COM · '+items.length,{permanent:true,direction:'right',offset:[10,0],className:'aero-frequency-label'});
  marker.addTo(aeronauticalLayer);
 }
 async function loadAeronautical(){
@@ -224,23 +228,27 @@ async function loadAeronautical(){
  if(map.getZoom()<5){aeronauticalLayer.clearLayers();lastAeroBounds='';setNotice('Ingrandisci la mappa almeno al livello 5 per visualizzare le frequenze radio.');return}
  const b=map.getBounds(),bbox=[b.getSouth(),b.getWest(),b.getNorth(),b.getEast()].map(v=>v.toFixed(3)).join(',');
  if(bbox===lastAeroBounds&&aeronauticalLayer.getLayers().length)return;
- lastAeroBounds=bbox;
- aeronauticalLayer.clearLayers();
- setNotice('Caricamento archivio frequenze radio aeronautiche…');
+ lastAeroBounds=bbox;aeronauticalLayer.clearLayers();
+ setNotice('Caricamento frequenze radio aeronautiche…');
  try{
   const {frequencies,airportByIdent}=await getRadioFrequencyData();
   if(!$('aeroToggle').checked)return;
-  const bounds=map.getBounds();let count=0;
+  const bounds=map.getBounds(),grouped=new Map();
   frequencies.forEach(f=>{
    const airport=airportByIdent.get(f.airport_ident);
    if(!airport)return;
    const lat=Number(airport.latitude_deg),lon=Number(airport.longitude_deg),mhz=Number(f.frequency_mhz);
    if(!Number.isFinite(lat)||!Number.isFinite(lon)||!Number.isFinite(mhz)||!bounds.contains([lat,lon]))return;
-   const label=(f.description||f.type||'Frequenza aeroporto')+' · '+f.airport_ident;
-   radioMarker(lat,lon,label,'airport',mhz.toFixed(3)+' MHz','Frequenza aeroportuale · '+(f.type||'Servizio'));
-   count++;
+   const type=String(f.type||'').toUpperCase();
+   if(/^(VOR|NDB|VOR-DME|VORTAC|NDB-DME|DME|TACAN)$/.test(type))return;
+   const key=String(f.airport_ident||airport.id);
+   if(!grouped.has(key))grouped.set(key,{airport,lat,lon,items:[]});
+   grouped.get(key).items.push(f);
   });
-  setNotice(count?'Visualizzate '+count+' frequenze radio nell’area. Sono mostrate tutte le frequenze aeroportuali disponibili, esclusi VOR e NDB.':'Nessuna frequenza radio registrata nell’area visibile. Prova ad allargare la mappa.');
+  let count=0;
+  grouped.forEach(group=>{group.items.sort((a,b)=>String(a.type).localeCompare(String(b.type)));radioAirportMarker(group.lat,group.lon,group.airport,group.items);count+=group.items.length});
+  const airports=grouped.size;
+  setNotice(count?'Caricate '+count+' frequenze su '+airports+' aeroporti. Tocca il simbolo blu per vedere l’elenco completo: TWR, GND, ATIS, APP, DEP, AFIS e gli altri servizi disponibili. VOR e NDB esclusi.':'Nessuna frequenza registrata nell’area visibile nell’archivio. Prova ad allargare la mappa.');
  }catch(e){
   lastAeroBounds='';
   setNotice('Archivio frequenze non disponibile: '+e.message+'. Controlla la connessione e riprova.',true);
