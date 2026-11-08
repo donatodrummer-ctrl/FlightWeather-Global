@@ -205,7 +205,7 @@ async function loadPlanes(){
     let history=flightHistory.get(key)||[];
     const last=history[history.length-1];
     if(!last||Math.abs(last.lat-Number(a.lat))+Math.abs(last.lon-Number(a.lon))>0.000001)history.push({lat:Number(a.lat),lon:Number(a.lon),time:now});
-    history=history.filter(p=>now-p.time<20*60*1000).slice(-40);
+    history=history.filter(p=>now-p.time<20*60*1000).slice(-600);
     flightHistory.set(key,history);
    }
 
