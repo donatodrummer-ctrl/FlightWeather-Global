@@ -15,7 +15,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .stats{display:flex;gap:14px;border-top:1px solid var(--line);margin-top:11px;padding-top:10px;color:var(--muted);font-size:12px}.stats b{color:var(--text);font-size:15px;display:block}
 .notice{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.4}.notice.error{color:#ffb4a9}
 .refresh{position:absolute;right:12px;top:12px;z-index:450;background:#101923ed;border:1px solid #526174;border-radius:6px;padding:10px 12px;color:var(--text);font-weight:650}
-.locate{position:absolute;right:12px;top:62px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:6px;padding:10px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.locate:disabled{opacity:.6}.follow{position:relative;display:block;width:100%;margin-top:9px;pointer-events:auto;touch-action:manipulation;background:#101923;border:1px solid #ff4545;border-radius:6px;padding:8px 10px;color:#fff;font-weight:750}.follow.active{background:#7d1717;border-color:#ff7777}
+.locate{position:absolute;right:12px;top:62px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:6px;padding:10px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.locate:disabled{opacity:.6}.history-toggle{position:absolute;right:12px;top:112px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #45d483;border-radius:6px;padding:9px 11px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.history-panel{position:absolute;right:12px;top:160px;z-index:1001;width:min(290px,calc(100vw - 24px));max-height:48dvh;overflow:auto;background:#101923f5;border:1px solid #45d483;border-radius:9px;padding:10px;box-shadow:0 8px 28px #000b}.history-panel[hidden]{display:none}.history-panel h3{font-size:13px;margin:0 0 8px}.history-panel .history-hint{font-size:11px;color:#aebdcb;padding:7px 2px}.history-panel button{display:block;width:100%;text-align:left;background:#172331;border:1px solid #344b5e;border-radius:6px;color:#f4f8ff;padding:8px;margin:5px 0;font-size:11px}.history-panel button:active,.history-panel button.active{border-color:#45d483;background:#173a2b}.history-panel button b{display:block;color:#7ce6a8;font-size:12px;margin-bottom:2px}.follow{position:relative;display:block;width:100%;margin-top:9px;pointer-events:auto;touch-action:manipulation;background:#101923;border:1px solid #ff4545;border-radius:6px;padding:8px 10px;color:#fff;font-weight:750}.follow.active{background:#7d1717;border-color:#ff7777}
 .aircraft-icon{background:transparent;border:0;color:#d4e34a;text-shadow:0 1px 5px #000;font-size:22px;line-height:24px;display:flex;align-items:center;justify-content:center}.aircraft-icon span{display:block;transform-origin:50% 50%;}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0b1727!important;color:#f4f8ff!important;border:1px solid #ffd43b;box-shadow:0 8px 28px #000b!important}.leaflet-popup-content{margin:12px 14px!important;color:#f4f8ff!important;font-size:13px;line-height:1.45}.leaflet-popup-close-button{color:#fff!important;font-size:22px!important}.leaflet-control-attribution{font-size:9px!important}
 .panel-toggle{display:block;margin:0 0 9px auto;background:#202a2d;border:1px solid #aebd43;border-radius:5px;color:#eaf2fb;padding:6px 10px;font-size:12px;font-weight:750;cursor:pointer}.panel.compact{top:12px!important;bottom:auto!important;left:8px!important;width:min(205px,calc(100vw - 16px))!important;padding:7px 10px!important;transition:all .22s ease}.panel.compact h1,.panel.compact .searchbox,.panel.compact .searchresults,.panel.compact .toggles,.panel.compact .notice{display:none!important}.panel.compact .panel-toggle{margin:0 0 5px auto;padding:4px 8px;font-size:11px}.panel.compact .stats{border:0;margin:0;padding:0;gap:18px}.panel.compact .stats b{font-size:13px;display:inline;margin-right:4px}.panel.compact .stats div{font-size:10px;white-space:nowrap}.panel:not(.compact){max-height:42dvh;overflow-y:auto;overscroll-behavior:contain}.selected-aircraft{position:absolute!important;z-index:455;top:auto!important;bottom:12px!important;right:12px!important;width:min(205px,calc(100vw - 24px));max-height:34dvh;overflow-y:auto;overscroll-behavior:contain;padding:10px 11px;border:1px solid #45566b;border-radius:9px;background:#101923f2;box-shadow:0 8px 24px #000a;backdrop-filter:blur(10px)}.selected-aircraft h2{font-size:13px;margin:0 0 3px;color:#fff}.selected-aircraft .sub{font-size:10px;color:#ffd43b;margin-bottom:6px}.selected-aircraft .data{display:grid;grid-template-columns:1fr 1fr;gap:7px}.selected-aircraft .data div{font-size:10px;color:#9fb1c6}.selected-aircraft .data b{display:block;color:#f4f8ff;font-size:12px;margin-top:2px}
@@ -42,6 +42,8 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 </section>
 <button class="refresh" id="refreshBtn">↻ Aggiorna</button>
 <button class="locate" id="locateBtn" title="Mostra la mia posizione GPS" aria-label="Mostra la mia posizione GPS">◎ GPS</button>
+<button class="history-toggle" id="historyBtn" type="button">▤ Storico volo</button>
+<section class="history-panel" id="historyPanel" hidden aria-label="Storico voli"></section>
 <div class="selected-aircraft" id="selectedAircraftInfo" hidden aria-live="polite"></div>
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -49,7 +51,8 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 const map=L.map('map',{worldCopyJump:true}).setView([45.7,9.7],5);
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
-let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
+let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),historicalTrailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
+let historicalFlights=[],historicalFlightsKey=null;
 const flightHistory=new Map();
 let aircraftCache=[];
 let pinnedAircraftKey=null;
@@ -216,6 +219,75 @@ async function loadHistoricalTrail(a,key){
   console.warn('Storico traccia non disponibile:',e);
  }
 }
+function closeHistoryPanel(){ $('historyPanel').hidden=true; historicalTrailLayer.clearLayers(); }
+async function openFlightHistory(){
+ const panel=$('historyPanel');
+ if(!pinnedAircraftKey){setNotice('Seleziona prima un aereo per consultare il suo storico.',true);return}
+ const a=aircraftCache.find(item=>String(item.hex||item.flight||('pos-'+item.lat+'-'+item.lon)).trim()===pinnedAircraftKey);
+ if(!a||!a.hex){setNotice('Storico non disponibile per questo aeromobile.',true);return}
+ if(!flyItalyKey){setNotice('Inserisci e salva la chiave API FlyItalyADSB per consultare lo storico.',true);return}
+ panel.hidden=false;panel.innerHTML='<h3>Storico voli · '+escapeHtml(String(a.flight||a.hex))+'</h3><div class="history-hint">Caricamento dei voli precedenti…</div>';
+ const key=pinnedAircraftKey;
+ try{
+  const headers={Accept:'application/json','X-Api-Key':flyItalyKey};
+  const baseUrl='https://api.flyitalyadsb.com/v2/history/'+encodeURIComponent(String(a.hex).toLowerCase());
+  const indexRes=await fetch(baseUrl,{headers,credentials:'omit',mode:'cors'});
+  if(!indexRes.ok)throw new Error('Storico non disponibile (HTTP '+indexRes.status+')');
+  const indexData=await indexRes.json();
+  const dates=Array.isArray(indexData.dates)?Array.from(new Set(indexData.dates.filter(d=>typeof d==='string'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(d)))).sort().slice(-45):[new Date().toISOString().slice(0,10)];
+  let points=[];
+  for(const date of dates){
+   const res=await fetch(baseUrl+'/'+date,{headers,credentials:'omit',mode:'cors'});
+   if(!res.ok)continue;
+   const data=await res.json(),base=Number(data.timestamp);
+   if(!Number.isFinite(base)||!Array.isArray(data.trace))continue;
+   for(const p of data.trace){
+    if(!Array.isArray(p)||p[1]===null||p[1]===undefined||p[2]===null||p[2]===undefined)continue;
+    const offset=Number(p[0]),lat=Number(p[1]),lon=Number(p[2]);
+    if(Number.isFinite(offset)&&Number.isFinite(lat)&&Number.isFinite(lon))points.push({time:(base+offset)*1000,lat,lon,alt:p[3]});
+   }
+  }
+  points.sort((x,y)=>x.time-y.time);
+  const flights=[];let current=null,lastGround=null;
+  for(const p of points){
+   const airborne=p.alt!=='ground'&&p.alt!==null&&p.alt!==undefined&&Number.isFinite(Number(p.alt));
+   if(airborne){
+    if(!current){current=[];if(lastGround)current.push(lastGround)}
+    current.push(p);lastGround=null;
+   }else{
+    if(current){current.push(p);if(current.length>2)flights.push(current);current=null}
+    lastGround=p;
+   }
+  }
+  if(current&&current.length>2)flights.push(current);
+  historicalFlights=flights.slice().reverse();historicalFlightsKey=key;
+  if(pinnedAircraftKey!==key)return;
+  panel.innerHTML='<h3>Storico voli · '+escapeHtml(String(a.flight||a.hex))+'</h3>';
+  if(!historicalFlights.length){panel.innerHTML+='<div class="history-hint">Nessun volo precedente disponibile nei dati ricevuti.</div>';return}
+  historicalFlights.forEach((flight,index)=>{
+   const first=flight[0],last=flight[flight.length-1];
+   const date=new Date(first.time).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'});
+   const from=new Date(first.time).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+   const to=new Date(last.time).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+   const button=document.createElement('button');button.type='button';button.dataset.flightIndex=String(index);
+   button.innerHTML='<b>'+escapeHtml(date+' · '+from+' – '+to)+'</b>'+flight.length+' rilevamenti ADS-B · Tocca per vedere la scia verde';
+   panel.appendChild(button);
+  });
+ }catch(error){panel.innerHTML='<h3>Storico voli</h3><div class="history-hint">'+escapeHtml(error.message||'Errore durante il caricamento dello storico.')+'</div>'}
+}
+$('historyBtn').addEventListener('click',event=>{event.preventDefault();event.stopPropagation();if(!$('historyPanel').hidden){closeHistoryPanel();return}openFlightHistory()});
+L.DomEvent.disableClickPropagation($('historyPanel'));
+$('historyPanel').addEventListener('click',event=>{
+ const button=event.target.closest('button[data-flight-index]');if(!button)return;
+ const flight=historicalFlights[Number(button.dataset.flightIndex)];if(!flight)return;
+ historicalTrailLayer.clearLayers();
+ const path=flight.map(p=>[p.lat,p.lon]);
+ if(path.length>1){
+  const line=L.polyline(path,{pane:'trailsPane',color:'#36d477',weight:4,opacity:.95,lineCap:'round',lineJoin:'round',interactive:false}).addTo(historicalTrailLayer);
+  map.fitBounds(line.getBounds().pad(.15),{maxZoom:9});
+ }
+ $('historyPanel').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===button));
+});
 function setPanelCompact(compact){const panel=document.querySelector('.panel');panel.classList.toggle('compact',compact);const button=$('panelToggle');if(button){button.textContent=compact?'⌃ Apri pannello':'⌄ Riduci pannello';button.setAttribute('aria-expanded',String(!compact))}}
 function updateFollowButton(){
  const button=$('followBtn');
@@ -321,7 +393,7 @@ async function loadPlanes(){
    }else{
     marker=L.marker([a.lat,a.lon],{icon:planeIcon(a,key===pinnedAircraftKey),aircraftKey:key,bubblingMouseEvents:false});
     marker.addTo(planeLayer);
-    marker.on('click',()=>{pinnedAircraftKey=key;followSelectedAircraft=false;lastFollowCenter=0;updateFollowButton();updateAircraftIcons();showSelectedAircraft(a);drawSelectedTrail();map.flyTo(marker.getLatLng(),Math.max(map.getZoom(),7),{animate:true,duration:.45});loadHistoricalTrail(a,key)});
+    marker.on('click',()=>{closeHistoryPanel();pinnedAircraftKey=key;followSelectedAircraft=false;lastFollowCenter=0;updateFollowButton();updateAircraftIcons();showSelectedAircraft(a);drawSelectedTrail();map.flyTo(marker.getLatLng(),Math.max(map.getZoom(),7),{animate:true,duration:.45});loadHistoricalTrail(a,key)});
     aircraftMarkers.set(key,marker);
    }
   });
@@ -390,7 +462,8 @@ L.DomEvent.disableClickPropagation(locateButton);
 locateButton.addEventListener('click',event=>{
  event.preventDefault();
  event.stopPropagation();
- // Il GPS interrompe il tracciamento dell'aereo selezionato.
+ // Il GPS interrompe il tracciamento e chiude lo storico del volo.
+ closeHistoryPanel();
  pinnedAircraftKey=null;
  followSelectedAircraft=false;
  updateFollowButton();
@@ -425,7 +498,7 @@ locateButton.addEventListener('click',event=>{
  },{enableHighAccuracy:true,timeout:20000,maximumAge:10000});
 });
 
-map.on('click',()=>{pinnedAircraftKey=null;followSelectedAircraft=false;updateFollowButton();updateAircraftIcons();showSelectedAircraft(null);drawSelectedTrail();setPanelCompact(true)});
+map.on('click',()=>{closeHistoryPanel();pinnedAircraftKey=null;followSelectedAircraft=false;updateFollowButton();updateAircraftIcons();showSelectedAircraft(null);drawSelectedTrail();setPanelCompact(true)});
 let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes()},700)});
 loadRadar();loadPlanes();
 setInterval(()=>{if($('planesToggle').checked)loadPlanes()},2000);
