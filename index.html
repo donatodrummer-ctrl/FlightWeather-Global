@@ -73,18 +73,34 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 <script>
 const map=L.map('map',{worldCopyJump:true,doubleClickZoom:true,tap:true}).setView([45.7,9.7],5);
 map.doubleClickZoom.enable();
-let lastMapTap=0,lastMapTapPoint=null;
-map.getContainer().addEventListener('touchend',function(e){
+let lastMapTap=0,lastMapTapPoint=null,zoomDrag=null;
+const mapEl=map.getContainer();
+mapEl.addEventListener('touchstart',function(e){
+ if(!e.touches||e.touches.length!==1)return;
+ const target=e.target;
+ if(target.closest('button,input,select,textarea,a,.leaflet-control,.leaflet-popup')){lastMapTap=0;lastMapTapPoint=null;zoomDrag=null;return;}
+ const t=e.touches[0],now=Date.now(),point=L.point(t.clientX,t.clientY);
+ if(lastMapTap&&now-lastMapTap<420&&lastMapTapPoint&&point.distanceTo(lastMapTapPoint)<40){
+  zoomDrag={startY:t.clientY,startZoom:map.getZoom(),point:L.point(t.clientX-mapEl.getBoundingClientRect().left,t.clientY-mapEl.getBoundingClientRect().top),moved:false};
+  lastMapTap=0;lastMapTapPoint=null;
+ }
+},{passive:true});
+mapEl.addEventListener('touchmove',function(e){
+ if(!zoomDrag||!e.touches||e.touches.length!==1)return;
+ const t=e.touches[0],dy=t.clientY-zoomDrag.startY;
+ if(Math.abs(dy)>7){zoomDrag.moved=true;e.preventDefault();const z=Math.max(map.getMinZoom(),Math.min(map.getMaxZoom(),zoomDrag.startZoom-dy/120));map.setZoomAround(zoomDrag.point,z,{animate:false});}
+},{passive:false});
+mapEl.addEventListener('touchend',function(e){
  if(!e.changedTouches||e.changedTouches.length!==1)return;
  const target=e.target;
- if(target.closest('button,input,select,textarea,a,.leaflet-control,.leaflet-popup')){lastMapTap=0;lastMapTapPoint=null;return;}
+ if(target.closest('button,input,select,textarea,a,.leaflet-control,.leaflet-popup')){lastMapTap=0;lastMapTapPoint=null;zoomDrag=null;return;}
  const t=e.changedTouches[0],now=Date.now(),point=L.point(t.clientX,t.clientY);
- if(lastMapTap&&now-lastMapTap<380&&lastMapTapPoint&&point.distanceTo(lastMapTapPoint)<35){
+ if(zoomDrag){
   e.preventDefault();
-  const rect=map.getContainer().getBoundingClientRect();
-  map.setZoomAround(L.point(t.clientX-rect.left,t.clientY-rect.top),map.getZoom()+1);
-  lastMapTap=0;lastMapTapPoint=null;
- }else{lastMapTap=now;lastMapTapPoint=point;}
+  if(!zoomDrag.moved){map.setZoomAround(zoomDrag.point,Math.min(map.getMaxZoom(),zoomDrag.startZoom+1));}
+  zoomDrag=null;lastMapTap=0;lastMapTapPoint=null;return;
+ }
+ lastMapTap=now;lastMapTapPoint=point;
 },{passive:false});
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,className:'basemap-dim',attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
