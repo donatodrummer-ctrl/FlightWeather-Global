@@ -38,7 +38,6 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 <body>
 <header><div class="brand">✈ <span>FlightWeather</span> Global</div><div class="status" id="topStatus">Mappa radar in inizializzazione…</div></header>
 <main><div id="map"></div>
-<input id="planesToggle" type="checkbox" checked hidden aria-hidden="true">
 <section class="panel compact" aria-label="Controlli mappa">
 <button class="panel-toggle" id="panelToggle" type="button" aria-expanded="false">⌃ Apri pannello</button>
 <h1>Cerca volo o aeroporto</h1>
@@ -364,8 +363,9 @@ function aircraftPopup(a){
  return '<div style="min-width:225px;max-width:290px;color:#eaf2fb"><div style="font-size:16px;font-weight:800;margin-bottom:3px">'+escapeHtml(title)+'</div>'+airlineHeader+'<div style="font-size:10px;color:#ffd43b;margin-bottom:8px">DATI AEROMOBILE · ADS-B</div>'+rows.join('')+(!airline?'<div style="font-size:10px;color:#9fb1c6;margin-top:8px">Compagnia non identificabile dal nominativo disponibile.</div>':'')+'</div>';
 }
 let planesLoading=false;
+let trafficEnabled=true;
 async function loadPlanes(){
- if(!$('planesToggle').checked){planeLayer.clearLayers();$('planeCount').textContent='0';return}
+ if(!trafficEnabled){planeLayer.clearLayers();$('planeCount').textContent='0';return}
  // Aggiornamento del traffico ogni 3 secondi, sia a mappa libera sia con un aereo selezionato.
  const minRefreshMs=3000;
  if(Date.now()<flyItalyBlockedUntil||Date.now()-lastLiveRequestAt<minRefreshMs)return;
@@ -497,9 +497,9 @@ function setLightningEnabled(enabled){
  else if(lightningLayer&&map.hasLayer(lightningLayer))map.removeLayer(lightningLayer);
 }
 $('panelToggle').addEventListener('click',()=>setPanelCompact(!document.querySelector('.panel').classList.contains('compact')));
-function setTrafficEnabled(enabled){$('planesToggle').checked=enabled;$('trafficBtn').classList.toggle('active',enabled);$('trafficBtn').textContent=enabled?'✈ TRAFFICO ON':'✈ TRAFFICO OFF';$('trafficBtn').setAttribute('aria-pressed',String(enabled));if(!enabled){planeLayer.clearLayers();$('planeCount').textContent='0';if(pinnedAircraftKey){pinnedAircraftKey=null;showSelectedAircraft(null);drawSelectedTrail()}}else loadPlanes()}
-$('trafficBtn').addEventListener('click',()=>setTrafficEnabled(!$('planesToggle').checked));
-$('planesToggle').addEventListener('change',loadPlanes);
+function setTrafficEnabled(enabled){trafficEnabled=enabled;$('trafficBtn').classList.toggle('active',enabled);$('trafficBtn').textContent=enabled?'✈ TRAFFICO ON':'✈ TRAFFICO OFF';$('trafficBtn').setAttribute('aria-pressed',String(enabled));if(!enabled){planeLayer.clearLayers();$('planeCount').textContent='0';if(pinnedAircraftKey){pinnedAircraftKey=null;showSelectedAircraft(null);drawSelectedTrail()}}else loadPlanes()}
+$('trafficBtn').addEventListener('click',()=>setTrafficEnabled(!trafficEnabled));
+
 $('weatherToggle').addEventListener('change',e=>setRadarEnabled(e.target.checked));
 $('lightningToggle').addEventListener('change',e=>setLightningEnabled(e.target.checked));
 $('altitudeBtn').addEventListener('click',()=>{altitudeColorMode=!altitudeColorMode;$('altitudeBtn').classList.toggle('active',altitudeColorMode);$('altitudeBtn').textContent=altitudeColorMode?'◈ QUOTA ON':'◈ QUOTA OFF';$('altitudeBtn').setAttribute('aria-pressed',String(altitudeColorMode));$('altitudeLegend').classList.toggle('visible',altitudeColorMode);drawSelectedTrail()});
@@ -553,7 +553,7 @@ map.on('click',()=>{pinnedAircraftKey=null;followSelectedAircraft=false;updateFo
 let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes()},700)});
 loadRadar();loadPlanes();
 // Il controllo e il caricamento del traffico sono impostati ogni 3 secondi.
-setInterval(()=>{if($('planesToggle').checked)loadPlanes()},3000);
+setInterval(()=>{if(trafficEnabled)loadPlanes()},3000);
 setInterval(()=>{if($('weatherToggle').checked)loadRadar()},600000);
 setInterval(()=>{if($('lightningToggle').checked)loadLightning()},15000);
 </script></body></html>
