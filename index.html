@@ -21,7 +21,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .stats{display:flex;gap:14px;border-top:1px solid var(--line);margin-top:11px;padding-top:10px;color:var(--muted);font-size:12px}.stats b{color:var(--text);font-size:15px;display:block}
 .notice{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.4}.notice.error{color:#ffb4a9}
 .refresh{position:absolute;right:12px;top:12px;z-index:450;background:#101923ed;border:1px solid #526174;border-radius:6px;padding:10px 12px;color:var(--text);font-weight:650}
-.locate{position:absolute;right:12px;top:62px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:6px;padding:10px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.locate:disabled{opacity:.6}.radar-button{position:absolute;right:12px;top:104px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #42b8ff;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}.radar-button.active{background:#07517a;border-color:#8bd7ff;color:#fff}.altitude-button{position:absolute;right:12px;top:135px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #a879ff;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}.altitude-button.active{background:#4b2878;border-color:#d4b7ff;color:#fff}.follow{position:relative;display:block;width:auto;min-width:0;margin:6px 0 0 auto;pointer-events:auto;touch-action:manipulation;background:#101923;border:1px solid #ff4545;border-radius:5px;padding:4px 7px;color:#fff;font-size:10px;line-height:1.2;font-weight:700}.follow.active{background:#7d1717;border-color:#ff7777}
+.locate{position:absolute;right:12px;top:62px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:6px;padding:10px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.locate:disabled{opacity:.6}.radar-button{position:absolute;right:12px;top:104px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #42b8ff;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}.radar-button.active{background:#07517a;border-color:#8bd7ff;color:#fff}.altitude-button{position:absolute;right:12px;top:135px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #a879ff;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}.altitude-button.active{background:#4b2878;border-color:#d4b7ff;color:#fff}.follow{position:relative;display:block;width:auto;min-width:0;margin:6px 0 0 auto;pointer-events:auto;touch-action:manipulation;background:#101923;border:1px solid #ff4545;border-radius:5px;padding:4px 7px;color:#fff;font-size:10px;line-height:1.2;font-weight:700}.follow.active{background:#7d1717;border-color:#ff7777}.multi-track-add{display:block;width:100%;margin:6px 0 0;padding:6px 8px;border:1px solid #42d6ff;border-radius:6px;background:#102b37;color:#dff8ff;font-size:10px;font-weight:800}.multi-track-add.active{background:#174b3d;border-color:#4ade80;color:#e5fff2}.multi-track-panel{position:absolute;left:10px;bottom:12px;z-index:900;width:min(190px,48vw);max-height:27dvh;overflow:auto;padding:8px;border:1px solid #42d6ff66;border-radius:8px;background:#101923ed;color:#eef4fb;box-shadow:0 4px 14px #0009;backdrop-filter:blur(8px);font-size:10px}.multi-track-panel[hidden]{display:none}.multi-track-title{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:850;margin-bottom:5px}.multi-track-row{display:flex;align-items:center;gap:5px;padding:4px 0;border-top:1px solid #ffffff1c}.multi-track-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%}.multi-track-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.multi-track-remove,.multi-track-fit{border:1px solid #536579;border-radius:5px;background:#1b2a3a;color:#fff;padding:3px 5px;font-size:9px;font-weight:750}.multi-track-fit{width:100%;margin-top:5px}
 .aircraft-icon{background:transparent;border:0;color:#d4e34a;text-shadow:0 1px 5px #000;font-size:22px;line-height:24px;display:flex;align-items:center;justify-content:center}.aircraft-icon span{display:block;transform-origin:50% 50%;}
 .radar-enhanced{filter:contrast(1.16) saturate(1.12)}
 .altitude-legend{position:absolute;right:12px;bottom:calc(18px + 34dvh);z-index:460;display:none;padding:8px 10px;border:1px solid #536579;border-radius:8px;background:#101923ed;color:#eef4fb;font-size:10px;line-height:1.65;box-shadow:0 4px 14px #0009;pointer-events:none;backdrop-filter:blur(8px)}
@@ -94,6 +94,7 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
  <div class="legend-row"><span class="swatch" style="background:#c084fc"></span>Oltre 8.000 m</div>
 </div>
 <div class="selected-aircraft" id="selectedAircraftInfo" hidden aria-live="polite"></div>
+<div class="multi-track-panel" id="multiTrackPanel" hidden aria-live="polite"></div>
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -102,7 +103,7 @@ map.doubleClickZoom.enable();
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,className:'basemap-dim',attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
 map.createPane('lightningPane');map.getPane('lightningPane').style.zIndex='420';map.getPane('lightningPane').style.pointerEvents='none';
-let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[],lightningLayer=null,ctrLayer=null,ctrDataLoaded=false,ctrLoading=false;
+let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),multiTrackLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[],lightningLayer=null,ctrLayer=null,ctrDataLoaded=false,ctrLoading=false;
 let airportData=null,airportLayer=L.layerGroup(),airfieldLayer=L.layerGroup(),airportsEnabled=false,airfieldsEnabled=false,airportLoadPromise=null;
 let windEnabled=false,windLayer=L.layerGroup(),windLoading=false,lastWindRefresh=0;
 let descentEnabled=false,descentLayer=L.layerGroup();
@@ -112,6 +113,8 @@ let alarmsEnabled=false;
 const alarmHistory=[];
 const alarmActive=new Map();
 let pinnedAircraftKey=null;
+const multiTrackKeys=new Set();
+const multiTrackColors=['#42d6ff','#ffad42','#c084fc','#4ade80','#fb7185','#facc15','#60a5fa','#f97316','#2dd4bf','#e879f9'];
 let followSelectedAircraft=false;
 let lastFollowCenter=0;
 // Animazione interpolata: aggiorna la posizione grafica ogni secondo
@@ -403,6 +406,75 @@ function updateFollowButton(){
  button.textContent=followSelectedAircraft?'◎ Segui attivo':'◎ Segui aereo';
  button.setAttribute('aria-pressed',String(followSelectedAircraft));
 }
+
+function drawMultiTrack(){
+ multiTrackLayer.clearLayers();
+ const bounds=[];
+ let index=0;
+ for(const key of multiTrackKeys){
+  const history=(flightHistory.get(key)||[]).filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon)));
+  const marker=aircraftMarkers.get(key);
+  const points=history.map(p=>[Number(p.lat),Number(p.lon)]);
+  if(marker){
+   const pos=marker.getLatLng(),last=points[points.length-1];
+   if(!last||Math.abs(last[0]-pos.lat)+Math.abs(last[1]-pos.lng)>0.000001)points.push([pos.lat,pos.lng]);
+  }
+  const color=multiTrackColors[index%multiTrackColors.length];
+  index++;
+  if(points.length>1)L.polyline(points,{pane:'trailsPane',color,weight:3,opacity:.95,dashArray:'3 6',lineCap:'round',interactive:false}).addTo(multiTrackLayer);
+  if(points.length){
+   const last=points[points.length-1];
+   L.circleMarker(last,{pane:'trailsPane',radius:6,color:'#ffffff',weight:2,fillColor:color,fillOpacity:1,interactive:false}).addTo(multiTrackLayer);
+   bounds.push(last);
+  }
+ }
+ renderMultiTrackPanel();
+}
+function renderMultiTrackPanel(){
+ const panel=$('multiTrackPanel');
+ if(!panel)return;
+ if(!multiTrackKeys.size){panel.hidden=true;panel.innerHTML='';return}
+ panel.hidden=false;
+ let index=0;
+ const rows=[];
+ for(const key of multiTrackKeys){
+  const a=aircraftCache.find(item=>String(item.hex||item.flight||'').trim()===key);
+  const label=a?(String(a.flight||a.r||'Aeromobile').trim()||'Aeromobile'):key;
+  const color=multiTrackColors[index%multiTrackColors.length];
+  index++;
+  rows.push('<div class="multi-track-row"><span class="multi-track-dot" style="background:'+color+'"></span><span class="multi-track-name">'+escapeHtml(label)+'</span><button class="multi-track-remove" type="button" data-track-remove="'+escapeHtml(key)+'" aria-label="Rimuovi '+escapeHtml(label)+'">✕</button></div>');
+ }
+ panel.innerHTML='<div class="multi-track-title"><span>◉ MULTI-TRACKING · '+multiTrackKeys.size+'/10</span></div>'+rows.join('')+'<button class="multi-track-fit" type="button" data-track-fit="1">⌖ INQUADRA TUTTI</button>';
+}
+function toggleMultiTrack(key){
+ if(!key)return;
+ if(multiTrackKeys.has(key))multiTrackKeys.delete(key);
+ else{
+  if(multiTrackKeys.size>=10){setNotice('Puoi seguire al massimo 10 aerei contemporaneamente.',true);return}
+  multiTrackKeys.add(key);
+ }
+ drawMultiTrack();
+}
+function fitMultiTrack(){
+ const points=[];
+ for(const key of multiTrackKeys){
+  const marker=aircraftMarkers.get(key);
+  if(marker)points.push(marker.getLatLng());
+  else{
+   const history=flightHistory.get(key)||[];
+   const last=history[history.length-1];
+   if(last)points.push([Number(last.lat),Number(last.lon)]);
+  }
+ }
+ if(points.length===1)map.flyTo(points[0],Math.max(map.getZoom(),7),{animate:true,duration:.5});
+ else if(points.length>1)map.fitBounds(L.latLngBounds(points).pad(.2),{maxZoom:9,animate:true});
+}
+$('multiTrackPanel').addEventListener('click',event=>{
+ const remove=event.target.closest('[data-track-remove]');
+ if(remove){multiTrackKeys.delete(remove.getAttribute('data-track-remove'));drawMultiTrack();return}
+ if(event.target.closest('[data-track-fit]'))fitMultiTrack();
+});
+
 function showSelectedAircraft(a){
  const box=$('selectedAircraftInfo');
  if(!a){box.hidden=true;box.innerHTML='';return}
@@ -419,8 +491,11 @@ function showSelectedAircraft(a){
  box.innerHTML='<h2>'+value(flight)+'</h2>'+
   '<div class="sub" style="display:flex;align-items:center;gap:6px;min-width:0;line-height:1.25">'+airlineLogo+'<span style="min-width:0;overflow-wrap:anywhere;font-size:13px;font-weight:750;line-height:1.2">'+(airline?value(airline[1])+' · ':'')+value(routeLabel)+'</span></div>'+
   alertBox+'<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Registrazione<b>'+value(a.r||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div><div>Velocità verticale<b>'+value(niceVertical(a.baro_rate??a.geom_rate))+'</b></div><div>Temperatura esterna (OAT)<b>'+value(niceOAT(a.oat))+'</b></div><div>Squawk<b>'+value(a.squawk||'n/d')+'</b></div></div>'+
-  '<button class="follow'+(followSelectedAircraft?' active':'')+'" id="followBtn" type="button" aria-pressed="'+String(followSelectedAircraft)+'">'+(followSelectedAircraft?'◎ Segui attivo':'◎ Segui aereo')+'</button>';
+  '<button class="follow'+(followSelectedAircraft?' active':'')+'" id="followBtn" type="button" aria-pressed="'+String(followSelectedAircraft)+'">'+(followSelectedAircraft?'◎ Segui attivo':'◎ Segui aereo')+'</button>'+
+  '<button class="multi-track-add'+(multiTrackKeys.has(String(a.hex||a.flight||'').trim())?' active':'')+'" id="multiTrackAddBtn" type="button">'+(multiTrackKeys.has(String(a.hex||a.flight||'').trim())?'✓ AEREO NEL MULTI-TRACK':'＋ AGGIUNGI AL MULTI-TRACK')+'</button>';
  box.hidden=false;
+ const trackButton=$('multiTrackAddBtn');
+ if(trackButton)trackButton.addEventListener('click',()=>{toggleMultiTrack(String(a.hex||a.flight||'').trim());showSelectedAircraft(a)});
 }
 
 function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n*0.3048).toLocaleString('it-IT')+' m':'n/d'}
@@ -563,7 +638,7 @@ async function loadPlanes(){
   // Rimuove gli aeromobili non più presenti nell'ultimo rilevamento.
   for(const [key,marker] of aircraftMarkers){
    if(!activeKeys.has(key)){
-    if(pinnedAircraftKey===key)continue;
+    if(pinnedAircraftKey===key||multiTrackKeys.has(key))continue;
     aircraftMotions.delete(key);
     planeLayer.removeLayer(marker);
     aircraftMarkers.delete(key);
@@ -571,6 +646,7 @@ async function loadPlanes(){
   }
   for(const [key,history] of flightHistory){if(!history.length||now-history[history.length-1].time>20*60*1000)flightHistory.delete(key)}
   drawSelectedTrail();
+  drawMultiTrack();
   updateAircraftLabels();
   applyAircraftFilters();
   $('topStatus').textContent='Traffico aggiornato · '+source+' · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
