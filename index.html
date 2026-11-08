@@ -393,13 +393,14 @@ function showSelectedAircraft(a){
  const alertBox=alert?'<div style="background:#721923;border:1px solid #ff5964;border-radius:6px;padding:7px;margin:6px 0;color:#fff;font-size:11px;font-weight:850">⚠ '+value(alert.text)+'</div>':'';
  box.innerHTML='<h2>'+value(flight)+'</h2>'+
   '<div class="sub" style="display:flex;align-items:center;gap:6px;min-width:0;line-height:1.25">'+airlineLogo+'<span style="min-width:0;overflow-wrap:anywhere;font-size:13px;font-weight:750;line-height:1.2">'+(airline?value(airline[1])+' · ':'')+value(routeLabel)+'</span></div>'+
-  alertBox+'<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Registrazione<b>'+value(a.r||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div><div>Velocità verticale<b>'+value(niceVertical(a.baro_rate??a.geom_rate))+'</b></div><div>Squawk<b>'+value(a.squawk||'n/d')+'</b></div></div>'+
+  alertBox+'<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Registrazione<b>'+value(a.r||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div><div>Velocità verticale<b>'+value(niceVertical(a.baro_rate??a.geom_rate))+'</b></div><div>Temperatura esterna (OAT)<b>'+value(niceOAT(a.oat))+'</b></div><div>Squawk<b>'+value(a.squawk||'n/d')+'</b></div></div>'+
   '<button class="follow'+(followSelectedAircraft?' active':'')+'" id="followBtn" type="button" aria-pressed="'+String(followSelectedAircraft)+'">'+(followSelectedAircraft?'◎ Segui attivo':'◎ Segui aereo')+'</button>';
  box.hidden=false;
 }
 
 function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n*0.3048).toLocaleString('it-IT')+' m':'n/d'}
 function niceSpeed(v){const n=Number(v);return Number.isFinite(n)?Math.round(n*1.852).toLocaleString('it-IT')+' km/h':'n/d'}
+function niceOAT(v){if(v===null||v===undefined||v===''||!Number.isFinite(Number(v)))return'N/D';return Math.round(Number(v))+' °C'}
 function niceVertical(v){const n=Number(v);return Number.isFinite(n)?(n>0?'+':'')+Math.round(n*0.3048).toLocaleString('it-IT')+' m/min':'n/d'}
 function niceNumber(v,digits=1,suffix=''){const n=Number(v);return Number.isFinite(n)?n.toFixed(digits)+suffix:'n/d'}
 const airlinePrefixes=[
