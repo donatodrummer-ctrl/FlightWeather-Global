@@ -26,6 +26,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .panel-toggle{display:block;margin:0 0 9px auto;background:#202a2d;border:1px solid #aebd43;border-radius:5px;color:#eaf2fb;padding:6px 10px;font-size:12px;font-weight:750;cursor:pointer}.panel.compact{top:12px!important;bottom:auto!important;left:8px!important;width:min(205px,calc(100vw - 16px))!important;padding:7px 10px!important;transition:all .22s ease}.panel.compact h1,.panel.compact .searchbox,.panel.compact .searchresults,.panel.compact .toggles,.panel.compact .notice{display:none!important}.panel.compact .panel-toggle{margin:0 0 5px auto;padding:4px 8px;font-size:11px}.panel.compact .stats{border:0;margin:0;padding:0;gap:18px}.panel.compact .stats b{font-size:13px;display:inline;margin-right:4px}.panel.compact .stats div{font-size:10px;white-space:nowrap}.panel:not(.compact){max-height:42dvh;overflow-y:auto;overscroll-behavior:contain}.selected-aircraft{position:absolute!important;z-index:455;top:auto!important;bottom:12px!important;right:12px!important;width:min(205px,calc(100vw - 24px));max-height:34dvh;overflow-y:auto;overscroll-behavior:contain;padding:10px 11px;border:1px solid #45566b;border-radius:9px;background:#101923f2;box-shadow:0 8px 24px #000a;backdrop-filter:blur(10px)}.selected-aircraft h2{font-size:13px;margin:0 0 3px;color:#fff}.selected-aircraft .sub{font-size:10px;color:#ffd43b;margin-bottom:6px}.selected-aircraft .data{display:grid;grid-template-columns:1fr 1fr;gap:7px}.selected-aircraft .data div{font-size:10px;color:#9fb1c6}.selected-aircraft .data b{display:block;color:#f4f8ff;font-size:12px;margin-top:2px}
 @media(max-width:600px){main > .panel,main > .panel.compact{position:fixed!important;top:auto!important;bottom:8px!important;left:8px!important;right:auto!important;width:min(170px,calc(44vw - 10px))!important;min-width:0!important;max-width:calc(44vw - 10px)!important;max-height:32dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain}.panel.compact{top:auto!important;bottom:8px!important}.panel:not(.compact){top:auto!important;bottom:8px!important;max-height:32dvh!important}main > #selectedAircraftInfo.selected-aircraft{position:fixed!important;top:66px!important;bottom:auto!important;left:calc(50% - 140px)!important;right:auto!important;transform:none!important;width:min(210px,calc(100vw - 32px))!important;min-width:0!important;max-width:210px!important;max-height:32dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;overflow-wrap:anywhere}.panel input{min-width:0!important;max-width:100%!important}.refresh{top:12px}.status{max-width:110px;text-align:right}}
 
+.traffic-button{position:absolute;right:12px;top:197px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}.traffic-button.active{background:#51420a;border-color:#ffe477;color:#fff2b0}
 .night-button{position:absolute;right:12px;top:166px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #4de0c1;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}
 .night-button.active{background:#073d43;border-color:#8affea;color:#bafff3;box-shadow:0 0 12px #20e6c455}
 main.night-mode #map .leaflet-tile-pane{filter:brightness(.42) saturate(.62) hue-rotate(155deg) contrast(1.12)}
@@ -44,7 +45,6 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 <div class="searchresults" id="searchResults"></div>
 <h1>Livelli mappa</h1>
 <div class="toggles">
-<label class="toggle"><input id="planesToggle" type="checkbox" checked> Traffico aereo live</label>
 <label class="toggle"><input id="weatherToggle" type="checkbox"> Radar precipitazioni</label>
 <label class="toggle"><input id="lightningToggle" type="checkbox"> Fulminazioni</label>
 
@@ -60,6 +60,7 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 <button class="locate" id="locateBtn" title="Mostra la mia posizione GPS" aria-label="Mostra la mia posizione GPS">◎ GPS</button>
 <button class="radar-button" id="radarBtn" type="button" aria-pressed="false">◉ RADAR OFF</button>
 <button class="altitude-button" id="altitudeBtn" type="button" aria-pressed="false">◈ QUOTA OFF</button>
+<button class="traffic-button active" id="trafficBtn" type="button" aria-pressed="true">✈ TRAFFICO ON</button>
 <button class="night-button" id="nightBtn" type="button" aria-pressed="false">◐ NOTTE OFF</button>
 <div id="altitudeLegend" class="altitude-legend" aria-label="Legenda colori quota">
  <div class="legend-title">Quota scia</div>
@@ -495,6 +496,8 @@ function setLightningEnabled(enabled){
  else if(lightningLayer&&map.hasLayer(lightningLayer))map.removeLayer(lightningLayer);
 }
 $('panelToggle').addEventListener('click',()=>setPanelCompact(!document.querySelector('.panel').classList.contains('compact')));
+function setTrafficEnabled(enabled){$('planesToggle').checked=enabled;$('trafficBtn').classList.toggle('active',enabled);$('trafficBtn').textContent=enabled?'✈ TRAFFICO ON':'✈ TRAFFICO OFF';$('trafficBtn').setAttribute('aria-pressed',String(enabled));if(!enabled){planeLayer.clearLayers();$('planeCount').textContent='0';if(selectedAircraft)showSelectedAircraft(null)}else loadPlanes()}
+$('trafficBtn').addEventListener('click',()=>setTrafficEnabled(!$('planesToggle').checked));
 $('planesToggle').addEventListener('change',loadPlanes);
 $('weatherToggle').addEventListener('change',e=>setRadarEnabled(e.target.checked));
 $('lightningToggle').addEventListener('change',e=>setLightningEnabled(e.target.checked));
