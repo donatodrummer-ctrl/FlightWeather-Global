@@ -42,7 +42,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <script>
 const map=L.map('map',{worldCopyJump:true}).setView([45.7,9.7],5);
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,attribution:'© OpenStreetMap contributors © CARTO'}).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
 let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
 const aeronauticalLayer=L.layerGroup().addTo(map);
 let aeronauticalRequest=null,aeronauticalTimer=null,lastAeroBounds='';
