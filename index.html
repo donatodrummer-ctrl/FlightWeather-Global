@@ -510,6 +510,7 @@ function toggleMultiTrack(key){
   multiTrackKeys.add(key);
   const selected=aircraftCache.find(item=>String(item.hex||item.flight||'').trim()===key);
   if(selected&&selected.hex)loadHistoricalTrail(selected,key).then(()=>drawMultiTrack());
+  loadAirportData().then(()=>drawMultiTrack()).catch(error=>console.warn('Archivio aeroporti per stima atterraggio non disponibile:',error));
  }
  drawMultiTrack();
 }
