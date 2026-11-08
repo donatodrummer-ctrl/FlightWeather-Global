@@ -25,7 +25,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0b1727!important;color:#f4f8ff!important;border:1px solid #ffd43b;box-shadow:0 8px 28px #000b!important}.leaflet-popup-content{margin:12px 14px!important;color:#f4f8ff!important;font-size:13px;line-height:1.45}.leaflet-popup-close-button{color:#fff!important;font-size:22px!important}.leaflet-control-attribution{font-size:9px!important}
 .airport-icao-label{background:#101923eF!important;border:1px solid #71839a!important;border-radius:4px!important;color:#fff!important;font-size:10px!important;font-weight:800!important;padding:2px 4px!important;box-shadow:0 1px 5px #000b!important;white-space:nowrap!important}.airport-icao-label:before{border-right-color:#71839a!important}
 .panel-toggle{display:block;margin:0 0 9px auto;background:#202a2d;border:1px solid #aebd43;border-radius:5px;color:#eaf2fb;padding:6px 10px;font-size:12px;font-weight:750;cursor:pointer}.panel.compact{top:12px!important;bottom:auto!important;left:8px!important;width:min(205px,calc(100vw - 16px))!important;padding:7px 10px!important;transition:all .22s ease}.panel.compact h1,.panel.compact .searchbox,.panel.compact .searchresults,.panel.compact .toggles,.panel.compact .notice{display:none!important}.panel.compact .panel-toggle{margin:0 0 5px auto;padding:4px 8px;font-size:11px}.panel.compact .stats{border:0;margin:0;padding:0;gap:18px}.panel.compact .stats b{font-size:13px;display:inline;margin-right:4px}.panel.compact .stats div{font-size:10px;white-space:nowrap}.panel:not(.compact){max-height:42dvh;overflow-y:auto;overscroll-behavior:contain}.selected-aircraft{position:absolute!important;z-index:455;top:auto!important;bottom:12px!important;right:12px!important;width:min(205px,calc(100vw - 24px));max-height:34dvh;overflow-y:auto;overscroll-behavior:contain;padding:10px 11px;border:1px solid #45566b;border-radius:9px;background:#101923f2;box-shadow:0 8px 24px #000a;backdrop-filter:blur(10px)}.selected-aircraft h2{font-size:13px;margin:0 0 3px;color:#fff}.selected-aircraft .sub{font-size:10px;color:#ffd43b;margin-bottom:6px}.selected-aircraft .data{display:grid;grid-template-columns:1fr 1fr;gap:7px}.selected-aircraft .data div{font-size:10px;color:#9fb1c6}.selected-aircraft .data b{display:block;color:#f4f8ff;font-size:12px;margin-top:2px}
-@media(max-width:600px){main > .panel,main > .panel.compact{position:fixed!important;top:auto!important;bottom:8px!important;left:8px!important;right:auto!important;width:min(170px,calc(44vw - 10px))!important;min-width:0!important;max-width:calc(44vw - 10px)!important;max-height:32dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain}.panel.compact{top:auto!important;bottom:8px!important}.panel:not(.compact){top:auto!important;bottom:8px!important;max-height:32dvh!important}main > #selectedAircraftInfo.selected-aircraft{position:fixed!important;top:66px!important;bottom:auto!important;left:calc(50% - 140px)!important;right:auto!important;transform:none!important;width:min(210px,calc(100vw - 32px))!important;min-width:0!important;max-width:210px!important;max-height:32dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;overflow-wrap:anywhere}.panel input{min-width:0!important;max-width:100%!important}.refresh{top:12px}.status{max-width:110px;text-align:right}}
+.wind-button{position:absolute;right:12px;top:320px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #58c9ff;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:10px;font-weight:750;box-shadow:0 2px 8px #0008}.wind-button.active{background:#103b50;border-color:#8be0ff;color:#d8f5ff}.wind-arrow{width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#63d7ff;text-shadow:0 1px 4px #001,0 0 5px #001;font-size:23px;font-weight:900;line-height:20px}.wind-arrow small{font-size:9px;line-height:11px;color:#fff;background:#081522dc;border-radius:3px;padding:1px 3px;white-space:nowrap}.aircraft-label{background:#101923ed!important;border:1px solid #ffd43b!important;border-radius:4px!important;color:#fff!important;font-size:10px!important;font-weight:800!important;padding:2px 5px!important;box-shadow:0 1px 5px #000b!important;white-space:nowrap!important}.aircraft-label:before{border-top-color:#ffd43b!important}@media(max-width:600px){main > .panel,main > .panel.compact{position:fixed!important;top:auto!important;bottom:8px!important;left:8px!important;right:auto!important;width:min(170px,calc(44vw - 10px))!important;min-width:0!important;max-width:calc(44vw - 10px)!important;max-height:32dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain}.panel.compact{top:auto!important;bottom:8px!important}.panel:not(.compact){top:auto!important;bottom:8px!important;max-height:32dvh!important}main > #selectedAircraftInfo.selected-aircraft{position:fixed!important;top:66px!important;bottom:auto!important;left:calc(50% - 140px)!important;right:auto!important;transform:none!important;width:min(210px,calc(100vw - 32px))!important;min-width:0!important;max-width:210px!important;max-height:32dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;overflow-wrap:anywhere}.panel input{min-width:0!important;max-width:100%!important}.refresh{top:12px}.status{max-width:110px;text-align:right}}
 
 .traffic-button{position:absolute;right:12px;top:197px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}.traffic-button.active{background:#51420a;border-color:#ffe477;color:#fff2b0}
 .night-button{position:absolute;right:12px;top:166px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #4de0c1;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}
@@ -70,6 +70,7 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
  <button class="ctr-button" id="ctrBtn" type="button" aria-pressed="false">CTR OFF</button>
  <button class="airport-button" id="airportBtn" type="button" aria-pressed="false">● AEROPORTI OFF</button>
  <button class="airfield-button" id="airfieldBtn" type="button" aria-pressed="false">● CAMPI OFF</button>
+<button class="wind-button" id="windBtn" type="button" aria-pressed="false">↗ VENTO OFF</button>
 <div id="altitudeLegend" class="altitude-legend" aria-label="Legenda colori quota">
  <div class="legend-title">Quota scia</div>
  <div class="legend-row"><span class="swatch" style="background:#42d6ff"></span>Sotto 3.000 m</div>
@@ -87,6 +88,7 @@ let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/
 map.createPane('lightningPane');map.getPane('lightningPane').style.zIndex='420';map.getPane('lightningPane').style.pointerEvents='none';
 let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[],lightningLayer=null,ctrLayer=null,ctrDataLoaded=false,ctrLoading=false;
 let airportData=null,airportLayer=L.layerGroup(),airfieldLayer=L.layerGroup(),airportsEnabled=false,airfieldsEnabled=false,airportLoadPromise=null;
+let windEnabled=false,windLayer=L.layerGroup(),windLoading=false,lastWindRefresh=0;
 const flightHistory=new Map();
 let aircraftCache=[];
 let pinnedAircraftKey=null;
@@ -190,8 +192,22 @@ function setNotice(message,error=false){$('notice').textContent=message;$('notic
 function updateSelectedMarkerPopups(){
  aircraftCache.forEach(a=>{const key=String(a.hex||a.flight||('pos-'+a.lat+'-'+a.lon)).trim();const marker=aircraftMarkers.get(key);if(marker&&marker.getPopup())marker.setPopupContent(aircraftPopup(a))});
 }
+function updateAircraftLabels(){
+ const showCrowdLabels=map.getZoom()>=8&&aircraftCache.length<=14;
+ aircraftCache.forEach(a=>{
+  const key=String(a.hex||a.flight||('pos-'+a.lat+'-'+a.lon)).trim(),marker=aircraftMarkers.get(key);
+  if(!marker)return;
+  if(marker.getTooltip())marker.unbindTooltip();
+  if(key===pinnedAircraftKey||showCrowdLabels){
+   const call=String(a.flight||a.r||'Aereo').trim(),model=String(a.t||a.desc||'').trim();
+   const label=key===pinnedAircraftKey?[call,model].filter(Boolean).join(' · '):call;
+   marker.bindTooltip(escapeHtml(label),{permanent:true,direction:'top',offset:[0,-13],className:'aircraft-label',opacity:1});
+  }
+ });
+}
 function updateAircraftIcons(){
  aircraftCache.forEach(a=>{const key=String(a.hex||a.flight||('pos-'+a.lat+'-'+a.lon)).trim();const marker=aircraftMarkers.get(key);if(marker)marker.setIcon(planeIcon(a,key===pinnedAircraftKey))});
+ updateAircraftLabels();
 }
 function trailStats(key){
  const history=(flightHistory.get(key)||[]).filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon))&&Number.isFinite(Number(p.time)));
@@ -339,7 +355,7 @@ function showSelectedAircraft(a){
  const airlineLogo=airline?'<img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(airline[2])+'&sz=64" alt="" style="width:19px;height:19px;object-fit:contain;flex:0 0 19px;border:1px solid #fff9;border-radius:5px;background:#fff;padding:2px" onerror="this.style.display=\'none\'">':'';
  box.innerHTML='<h2>'+value(flight)+'</h2>'+
   '<div class="sub" style="display:flex;align-items:center;gap:6px;min-width:0;line-height:1.25">'+airlineLogo+'<span style="min-width:0;overflow-wrap:anywhere;font-size:13px;font-weight:750;line-height:1.2">'+(airline?value(airline[1])+' · ':'')+value(routeLabel)+'</span></div>'+
-  '<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div><div>Velocità verticale<b>'+value(niceVertical(a.baro_rate??a.geom_rate))+'</b></div></div>'+
+  '<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Registrazione<b>'+value(a.r||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div><div>Velocità verticale<b>'+value(niceVertical(a.baro_rate??a.geom_rate))+'</b></div><div>Squawk<b>'+value(a.squawk||'n/d')+'</b></div></div>'+
   '<button class="follow'+(followSelectedAircraft?' active':'')+'" id="followBtn" type="button" aria-pressed="'+String(followSelectedAircraft)+'">'+(followSelectedAircraft?'◎ Segui attivo':'◎ Segui aereo')+'</button>';
  box.hidden=false;
 }
@@ -443,6 +459,7 @@ async function loadPlanes(){
   }
   for(const [key,history] of flightHistory){if(!history.length||now-history[history.length-1].time>20*60*1000)flightHistory.delete(key)}
   drawSelectedTrail();
+  updateAircraftLabels();
   $('planeCount').textContent=aircraft.length.toLocaleString('it-IT');
   $('topStatus').textContent='Traffico aggiornato · '+source+' · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   setNotice(aircraft.length?'Ricevuti '+aircraft.length+' aeromobili entro circa '+Math.round(radius*1.852)+' km dal centro della mappa.':'Nessun aeromobile rilevato in quest’area. Prova a spostare o ingrandire la mappa.');
@@ -513,6 +530,43 @@ $('weatherToggle').addEventListener('change',e=>setRadarEnabled(e.target.checked
 $('lightningToggle').addEventListener('change',e=>setLightningEnabled(e.target.checked));
 $('altitudeBtn').addEventListener('click',()=>{altitudeColorMode=!altitudeColorMode;$('altitudeBtn').classList.toggle('active',altitudeColorMode);$('altitudeBtn').textContent=altitudeColorMode?'◈ QUOTA ON':'◈ QUOTA OFF';$('altitudeBtn').setAttribute('aria-pressed',String(altitudeColorMode));$('altitudeLegend').classList.toggle('visible',altitudeColorMode);drawSelectedTrail()});
 $('nightBtn').addEventListener('click',()=>{const enabled=!document.querySelector('main').classList.contains('night-mode');document.querySelector('main').classList.toggle('night-mode',enabled);$('nightBtn').classList.toggle('active',enabled);$('nightBtn').textContent=enabled?'◐ NOTTE ON':'◐ NOTTE OFF';$('nightBtn').setAttribute('aria-pressed',String(enabled))});
+
+
+function windArrowIcon(speed,direction){
+ const bearing=(Number(direction)+180)%360;
+ return L.divIcon({className:'',html:'<div class="wind-arrow"><span style="display:block;transform:rotate('+bearing+'deg)">↑</span><small>'+Math.round(speed)+' km/h</small></div>',iconSize:[42,42],iconAnchor:[21,21]});
+}
+async function refreshWindLayer(){
+ if(!windEnabled||windLoading||Date.now()-lastWindRefresh<12000)return;
+ windLoading=true;lastWindRefresh=Date.now();
+ try{
+  const bounds=map.getBounds(),south=bounds.getSouth(),north=bounds.getNorth(),west=bounds.getWest(),east=bounds.getEast(),coords=[];
+  for(let y=0;y<3;y++)for(let x=0;x<3;x++){
+   coords.push({lat:Math.max(-80,Math.min(80,south+(north-south)*(y+.5)/3)),lon:Math.max(-179,Math.min(179,west+(east-west)*(x+.5)/3))});
+  }
+  const latitudes=coords.map(p=>p.lat.toFixed(3)).join(','),longitudes=coords.map(p=>p.lon.toFixed(3)).join(',');
+  const url='https://api.open-meteo.com/v1/forecast?latitude='+latitudes+'&longitude='+longitudes+'&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=kmh&timezone=auto';
+  const response=await fetch(url);if(!response.ok)throw new Error('Open-Meteo HTTP '+response.status);
+  const payload=await response.json(),items=Array.isArray(payload)?payload:[payload];
+  windLayer.clearLayers();
+  items.forEach((item,index)=>{
+   const current=item.current||{},speed=Number(current.wind_speed_10m),direction=Number(current.wind_direction_10m);
+   if(!Number.isFinite(speed)||!Number.isFinite(direction)||!coords[index])return;
+   const marker=L.marker([coords[index].lat,coords[index].lon],{icon:windArrowIcon(speed,direction),interactive:true,zIndexOffset:300});
+   marker.bindTooltip('Vento '+Math.round(speed)+' km/h · da '+Math.round(direction)+'°',{direction:'top'});windLayer.addLayer(marker);
+  });
+  if(!map.hasLayer(windLayer))windLayer.addTo(map);
+  $('topStatus').textContent='Vento aggiornato · Open-Meteo';
+  setNotice('Vento a 10 m: frecce orientate nella direzione di provenienza, velocità in km/h. Fonte: Open-Meteo.');
+ }catch(error){setNotice('Dati vento non disponibili: '+error.message,true)}
+ finally{windLoading=false;}
+}
+function setWindEnabled(enabled){
+ windEnabled=enabled;const button=$('windBtn');
+ button.classList.toggle('active',enabled);button.textContent=enabled?'↗ VENTO ON':'↗ VENTO OFF';button.setAttribute('aria-pressed',String(enabled));
+ if(enabled){lastWindRefresh=0;refreshWindLayer()}else{windLayer.clearLayers();if(map.hasLayer(windLayer))map.removeLayer(windLayer);}
+}
+$('windBtn').addEventListener('click',()=>setWindEnabled(!windEnabled));
 
 function ctrLimitText(limit){
  if(!limit)return 'N/D';
@@ -605,8 +659,10 @@ function airportPopup(p,type){
  const name=escapeHtml(p.name||'Senza nome');
  const place=[p.municipality,p.iso_country].filter(Boolean).map(escapeHtml).join(', ');
  const codes=[p.icao_code?'ICAO '+escapeHtml(p.icao_code):'',p.iata_code?'IATA '+escapeHtml(p.iata_code):''].filter(Boolean).join(' · ');
+ const icao=String(p.icao_code||'').toUpperCase();
+ const weatherLink=/^[A-Z0-9]{4}$/.test(icao)?'<div style="margin-top:7px"><a href="https://aviationweather.gov/data/metar/?id='+icao+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#17364a;border:1px solid #58c9ff;border-radius:5px;padding:5px 7px;color:#d8f5ff;text-decoration:none;font-weight:750">☁ METAR / TAF ufficiali · '+icao+'</a></div>':'';
  const category=p.type==='small_airport'?'Piccolo aeroporto / campo di volo':p.type==='medium_airport'?'Aeroporto medio':p.type==='large_airport'?'Aeroporto principale':p.type==='heliport'?'Eliporto':p.type==='seaplane_base'?'Base per idrovolanti':escapeHtml(p.type||'N/D');
- return '<div style="min-width:125px;max-width:185px;font-size:11px;line-height:1.3"><b style="font-size:12px">'+name+'</b><br><span style="color:#ffd43b;font-weight:700">'+type+'</span><hr style="border:0;border-top:1px solid #40536a;margin:5px 0">'+(place?'<div><b>Località:</b> '+place+'</div>':'')+'<div><b>Categoria:</b> '+category+'</div>'+(codes?'<div><b>Codici:</b> '+escapeHtml(codes)+'</div>':'')+'<div style="margin-top:5px;color:#9fb1c6;font-size:9px">Fonte: OurAirports · dati informativi, non aeronautici ufficiali</div></div>';
+ return '<div style="min-width:125px;max-width:185px;font-size:11px;line-height:1.3"><b style="font-size:12px">'+name+'</b><br><span style="color:#ffd43b;font-weight:700">'+type+'</span><hr style="border:0;border-top:1px solid #40536a;margin:5px 0">'+(place?'<div><b>Località:</b> '+place+'</div>':'')+'<div><b>Categoria:</b> '+category+'</div>'+(codes?'<div><b>Codici:</b> '+escapeHtml(codes)+'</div>':'')+weatherLink+'<div style="margin-top:5px;color:#9fb1c6;font-size:9px">Fonte: OurAirports · dati informativi, non aeronautici ufficiali</div></div>';
 }
 function bindAirportLabelInfo(marker,p,type){
  const label=[p.icao_code,p.iata_code].filter(Boolean).join(' - ');
@@ -721,10 +777,11 @@ locateButton.addEventListener('click',event=>{
 });
 
 map.on('click',()=>{pinnedAircraftKey=null;followSelectedAircraft=false;updateFollowButton();updateAircraftIcons();showSelectedAircraft(null);drawSelectedTrail();setPanelCompact(true)});
-let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes();refreshAirportLayers()},250)});map.on('zoomend',()=>refreshAirportLayers());
+let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes();refreshAirportLayers();if(windEnabled){lastWindRefresh=0;refreshWindLayer()}},250)});map.on('zoomend',()=>{refreshAirportLayers();updateAircraftLabels();if(windEnabled){lastWindRefresh=0;refreshWindLayer()}});
 loadRadar();loadPlanes();setAirportLayerEnabled('airport',true);
 // Il controllo e il caricamento del traffico sono impostati ogni 3 secondi.
 setInterval(()=>{if(trafficEnabled)loadPlanes()},3000);
 setInterval(()=>{if($('weatherToggle').checked)loadRadar()},600000);
 setInterval(()=>{if($('lightningToggle').checked)loadLightning()},15000);
+setInterval(()=>{if(windEnabled){lastWindRefresh=0;refreshWindLayer()}},900000);
 </script></body></html>
