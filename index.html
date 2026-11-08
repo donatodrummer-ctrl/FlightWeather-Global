@@ -57,7 +57,7 @@ let pinnedAircraftKey=null;
 // tra due rilevamenti ADS-B ricevuti dal server.
 const aircraftMarkers=new Map();
 const aircraftMotions=new Map();
-setInterval(()=>{
+function animateAircraft(){
  const now=Date.now();
  for(const [key,motion] of aircraftMotions){
   const marker=aircraftMarkers.get(key);
@@ -68,7 +68,9 @@ setInterval(()=>{
   marker.setLatLng([lat,lon]);
   if(progress>=1)aircraftMotions.delete(key);
  }
-},1000);
+ requestAnimationFrame(animateAircraft);
+}
+requestAnimationFrame(animateAircraft);
 const $=id=>document.getElementById(id);
 function planeIcon(a){
  const angle=Number.isFinite(Number(a.track))?Number(a.track):0;
