@@ -196,7 +196,7 @@ function altitudeTrailColor(alt){
 }
 function drawSelectedTrail(){
  trailLayer.clearLayers();
- if(!pinnedAircraftKey)return;
+ if(!altitudeColorMode||!pinnedAircraftKey)return;
  const history=flightHistory.get(pinnedAircraftKey)||[];
  const points=history.map(p=>({lat:Number(p.lat),lon:Number(p.lon),alt:p.alt}));
  const marker=aircraftMarkers.get(pinnedAircraftKey);
