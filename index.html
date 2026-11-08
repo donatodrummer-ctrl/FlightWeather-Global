@@ -548,6 +548,7 @@ async function refreshWindLayer(){
   const url='https://api.open-meteo.com/v1/forecast?latitude='+latitudes+'&longitude='+longitudes+'&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=kmh&timezone=auto';
   const response=await fetch(url);if(!response.ok)throw new Error('Open-Meteo HTTP '+response.status);
   const payload=await response.json(),items=Array.isArray(payload)?payload:[payload];
+  if(!windEnabled)return;
   windLayer.clearLayers();
   items.forEach((item,index)=>{
    const current=item.current||{},speed=Number(current.wind_speed_10m),direction=Number(current.wind_direction_10m);
