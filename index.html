@@ -505,7 +505,7 @@ function predictConvergence(a,b){
  const lat1=Number(a.lat),lat2=Number(b.lat),lon1=Number(a.lon),lon2=Number(b.lon),meanLat=(lat1+lat2)/2,cos=Math.cos(meanLat*Math.PI/180);
  const rx=(lon2-lon1)*111320*cos,ry=(lat2-lat1)*111320;
  const speedA=Number(a.gs)*0.514444,speedB=Number(b.gs)*0.514444,trackA=Number(a.track)*Math.PI/180,trackB=Number(b.track)*Math.PI/180;
- const vx=speedB*Math.sin(trackB)-speedA*Math.sin(trackA),vy=speedB*Math.cos(trackB)-speedA*Math.cos(trackA),v2=vx*vx+vy*vy;
+ const vAx=speedA*Math.sin(trackA),vAy=speedA*Math.cos(trackA),vBx=speedB*Math.sin(trackB),vBy=speedB*Math.cos(trackB),vx=vBx-vAx,vy=vBy-vAy,v2=vx*vx+vy*vy;
  if(v2<1)return null;
  const seconds=-(rx*vx+ry*vy)/v2;
  if(seconds<30||seconds>300)return null;
@@ -514,8 +514,8 @@ function predictConvergence(a,b){
  const altA=altitudeFeet(a),altB=altitudeFeet(b),rateA=Number(a.baro_rate??a.geom_rate),rateB=Number(b.baro_rate??b.geom_rate);
  let vertical=null;
  if(altA!==null&&altB!==null&&Number.isFinite(rateA)&&Number.isFinite(rateB))vertical=Math.abs((altB-altA)*0.3048+(rateB-rateA)*0.3048/60*seconds);
- const cpaA={lat:lat1+(vy*seconds/111320),lon:lon1+(vx*seconds/(111320*cos))};
- const cpaB={lat:lat2+(vy*seconds/111320),lon:lon2+(vx*seconds/(111320*cos))};
+ const cpaA={lat:lat1+(vAy*seconds/111320),lon:lon1+(vAx*seconds/(111320*cos))};
+ const cpaB={lat:lat2+(vBy*seconds/111320),lon:lon2+(vBx*seconds/(111320*cos))};
  return {seconds,distance,vertical,qualified:vertical!==null&&vertical<=300,cpaA,cpaB};
 }
 function detectHoldingPattern(key){
