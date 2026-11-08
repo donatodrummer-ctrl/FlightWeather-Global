@@ -181,14 +181,10 @@ async function loadPlanes(){
 
    let marker=aircraftMarkers.get(key);
    if(marker){
-    const current=marker.getLatLng();
     const target={lat:Number(a.lat),lng:Number(a.lon)};
-    const distance=Math.abs(current.lat-target.lat)+Math.abs(current.lng-target.lng);
-    if(distance>0.000001){
-     aircraftMotions.set(key,{from:{lat:current.lat,lng:current.lng},to:target,start:now,duration:4500});
-    }else{
-     aircraftMotions.delete(key);
-    }
+    // Mostra esclusivamente le coordinate reali appena ricevute dal feed ADS-B.
+    aircraftMotions.delete(key);
+    marker.setLatLng([target.lat,target.lng]);
     marker.setIcon(planeIcon(a));
     marker.setPopupContent(aircraftPopup(a));
    }else{
