@@ -15,7 +15,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .stats{display:flex;gap:14px;border-top:1px solid var(--line);margin-top:11px;padding-top:10px;color:var(--muted);font-size:12px}.stats b{color:var(--text);font-size:15px;display:block}
 .notice{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.4}.notice.error{color:#ffb4a9}
 .refresh{position:absolute;right:12px;top:12px;z-index:450;background:#101923ed;border:1px solid #526174;border-radius:6px;padding:10px 12px;color:var(--text);font-weight:650}
-.locate{position:absolute;right:12px;top:62px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:6px;padding:10px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.locate:disabled{opacity:.6}.follow{position:absolute;right:12px;top:112px;z-index:1000;display:none;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ff4545;border-radius:6px;padding:10px 12px;color:#fff;font-weight:750;box-shadow:0 3px 12px #0008}.follow.active{background:#7d1717;border-color:#ff7777}
+.locate{position:absolute;right:12px;top:62px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:6px;padding:10px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.locate:disabled{opacity:.6}.follow{position:relative;display:block;width:100%;margin-top:9px;pointer-events:auto;touch-action:manipulation;background:#101923;border:1px solid #ff4545;border-radius:6px;padding:8px 10px;color:#fff;font-weight:750}.follow.active{background:#7d1717;border-color:#ff7777}
 .aircraft-icon{background:transparent;border:0;color:#d4e34a;text-shadow:0 1px 5px #000;font-size:22px;line-height:24px;display:flex;align-items:center;justify-content:center}.aircraft-icon span{display:block;transform-origin:50% 50%;}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0b1727!important;color:#f4f8ff!important;border:1px solid #ffd43b;box-shadow:0 8px 28px #000b!important}.leaflet-popup-content{margin:12px 14px!important;color:#f4f8ff!important;font-size:13px;line-height:1.45}.leaflet-popup-close-button{color:#fff!important;font-size:22px!important}.leaflet-control-attribution{font-size:9px!important}
 .panel-toggle{display:block;margin:0 0 9px auto;background:#202a2d;border:1px solid #aebd43;border-radius:5px;color:#eaf2fb;padding:6px 10px;font-size:12px;font-weight:750;cursor:pointer}.panel.compact{top:12px!important;bottom:auto!important;left:8px!important;width:min(205px,calc(100vw - 16px))!important;padding:7px 10px!important;transition:all .22s ease}.panel.compact h1,.panel.compact .searchbox,.panel.compact .searchresults,.panel.compact .toggles,.panel.compact .notice{display:none!important}.panel.compact .panel-toggle{margin:0 0 5px auto;padding:4px 8px;font-size:11px}.panel.compact .stats{border:0;margin:0;padding:0;gap:18px}.panel.compact .stats b{font-size:13px;display:inline;margin-right:4px}.panel.compact .stats div{font-size:10px;white-space:nowrap}.panel:not(.compact){max-height:42dvh;overflow-y:auto;overscroll-behavior:contain}.selected-aircraft{position:absolute!important;z-index:455;top:auto!important;bottom:12px!important;right:12px!important;width:min(205px,calc(100vw - 24px));max-height:34dvh;overflow-y:auto;overscroll-behavior:contain;padding:10px 11px;border:1px solid #45566b;border-radius:9px;background:#101923f2;box-shadow:0 8px 24px #000a;backdrop-filter:blur(10px)}.selected-aircraft h2{font-size:13px;margin:0 0 3px;color:#fff}.selected-aircraft .sub{font-size:10px;color:#ffd43b;margin-bottom:6px}.selected-aircraft .data{display:grid;grid-template-columns:1fr 1fr;gap:7px}.selected-aircraft .data div{font-size:10px;color:#9fb1c6}.selected-aircraft .data b{display:block;color:#f4f8ff;font-size:12px;margin-top:2px}
@@ -42,7 +42,6 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 </section>
 <button class="refresh" id="refreshBtn">↻ Aggiorna</button>
 <button class="locate" id="locateBtn" title="Mostra la mia posizione GPS" aria-label="Mostra la mia posizione GPS">◎ GPS</button>
-<button class="follow" id="followBtn" type="button" aria-pressed="false">◎ Segui aereo</button>
 <div class="selected-aircraft" id="selectedAircraftInfo" hidden aria-live="polite"></div>
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -178,7 +177,7 @@ async function loadHistoricalTrail(a,key){
 function setPanelCompact(compact){const panel=document.querySelector('.panel');panel.classList.toggle('compact',compact);const button=$('panelToggle');if(button){button.textContent=compact?'⌃ Apri pannello':'⌄ Riduci pannello';button.setAttribute('aria-expanded',String(!compact))}}
 function updateFollowButton(){
  const button=$('followBtn');
- button.style.display=pinnedAircraftKey?'block':'none';
+ if(!button)return;
  button.classList.toggle('active',followSelectedAircraft);
  button.textContent=followSelectedAircraft?'◎ Segui attivo':'◎ Segui aereo';
  button.setAttribute('aria-pressed',String(followSelectedAircraft));
@@ -194,7 +193,8 @@ function showSelectedAircraft(a){
  const to=route&&(route.to_iata||route.to_icao||route.to);
  const routeLabel=from&&to?(String(from).toUpperCase()+' → '+String(to).toUpperCase()):'Non disponibile';
  box.innerHTML='<h2>'+value(flight)+'</h2>'+(airline?'<div class="sub">'+value(airline[1])+'</div>':'<div class="sub">Dati ADS-B · aereo selezionato</div>')+
-  '<div class="data"><div style="grid-column:1/-1">Tratta<b>'+value(routeLabel)+'</b></div><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div></div>';
+  '<div class="data"><div style="grid-column:1/-1">Tratta<b>'+value(routeLabel)+'</b></div><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div></div>'+
+  '<button class="follow'+(followSelectedAircraft?' active':'')+'" id="followBtn" type="button" aria-pressed="'+String(followSelectedAircraft)+'">'+(followSelectedAircraft?'◎ Segui attivo':'◎ Segui aereo')+'</button>';
  box.hidden=false;
 }
 function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n*0.3048).toLocaleString('it-IT')+' m':'n/d'}
@@ -339,7 +339,7 @@ $('panelToggle').addEventListener('click',()=>setPanelCompact(!document.querySel
 $('planesToggle').addEventListener('change',loadPlanes);
 $('weatherToggle').addEventListener('change',e=>{if(!radarLayer){loadRadar();return}if(e.target.checked)radarLayer.addTo(map);else map.removeLayer(radarLayer)});
 $('refreshBtn').addEventListener('click',()=>{loadPlanes();if($('weatherToggle').checked)loadRadar()});
-$('followBtn').addEventListener('click',()=>{if(!pinnedAircraftKey)return;followSelectedAircraft=!followSelectedAircraft;lastFollowCenter=0;updateFollowButton();if(followSelectedAircraft){const marker=aircraftMarkers.get(pinnedAircraftKey);if(marker)map.panTo(marker.getLatLng(),{animate:true,duration:.35})}});
+$('selectedAircraftInfo').addEventListener('click',event=>{if(!event.target.closest('#followBtn')||!pinnedAircraftKey)return;followSelectedAircraft=!followSelectedAircraft;lastFollowCenter=0;updateFollowButton();if(followSelectedAircraft){const marker=aircraftMarkers.get(pinnedAircraftKey);if(marker)map.panTo(marker.getLatLng(),{animate:true,duration:.35})}});
 let gpsMarker=null,gpsAccuracy=null;
 const locateButton=$('locateBtn');
 L.DomEvent.disableClickPropagation(locateButton);
