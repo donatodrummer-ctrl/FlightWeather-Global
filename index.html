@@ -37,6 +37,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 </div>
 <div class="stats"><div><b id="planeCount">—</b>Aerei visibili</div><div><b id="radarTime">—</b>Ultimo radar</div></div>
 <div class="notice" id="notice">Apri la mappa su una zona e attiva il traffico aereo. Gli aerei vengono caricati nell'area attorno al centro della vista.</div>
+<div style="font-size:10px;color:#8fa4bb;margin-top:7px">Dati traffico ADS-B: <a href="https://adsb.fi/" target="_blank" rel="noopener noreferrer" style="color:#42c8e8">adsb.fi</a></div>
 </section>
 <button class="refresh" id="refreshBtn">↻ Aggiorna</button>
 <button class="locate" id="locateBtn" title="Mostra la mia posizione GPS" aria-label="Mostra la mia posizione GPS">◎ GPS</button>
@@ -121,10 +122,10 @@ async function loadPlanes(){
  const c=map.getCenter(),radius=Math.min(250,Math.max(30,Math.round(map.getBounds().getNorthEast().distanceTo(map.getBounds().getSouthWest())/1852/2)));
  $('topStatus').textContent='Aggiornamento traffico…';
  try{
-  const url='/api/aircraft?lat='+c.lat.toFixed(4)+'&lon='+c.lng.toFixed(4)+'&dist='+radius;
+  const url='https://opendata.adsb.fi/api/v3/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius;
   const res=await fetch(url,{headers:{Accept:'application/json'}});
-  if(!res.ok)throw new Error('Servizio aerei: HTTP '+res.status);
-  const data=await res.json(),aircraft=(data.aircraft||[]).filter(a=>Number.isFinite(a.lat)&&Number.isFinite(a.lon));
+  if(!res.ok)throw new Error('Servizio ADS-B: HTTP '+res.status);
+  const data=await res.json(),aircraft=(data.ac||data.aircraft||[]).map(a=>({...a,seen:a.seen??a.seen_pos})).filter(a=>Number.isFinite(Number(a.lat))&&Number.isFinite(Number(a.lon)));
   aircraftCache=aircraft;
   let reopenKey=null;planeLayer.eachLayer(marker=>{if(marker.isPopupOpen()&&marker.options.aircraftKey)reopenKey=marker.options.aircraftKey});
   planeLayer.clearLayers();
