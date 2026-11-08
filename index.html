@@ -93,7 +93,7 @@ function fetchFlyItaly(url,options){
  const run=async()=>{
   const wait=Math.max(0,flyItalyNextRequestAt-Date.now(),flyItalyBlockedUntil-Date.now());
   if(wait)await waitMs(wait);
-  flyItalyNextRequestAt=Date.now()+4000;
+  flyItalyNextRequestAt=Date.now()+3000;
   const response=await fetch(url,options);
   if(response.status===429){flyItalyBlockedUntil=Date.now()+flyItalyBackoffMs;flyItalyBackoffMs=Math.min(flyItalyBackoffMs*2,300000)}
   else if(response.ok)flyItalyBackoffMs=60000;
@@ -299,8 +299,8 @@ function aircraftPopup(a){
 let planesLoading=false;
 async function loadPlanes(){
  if(!$('planesToggle').checked){planeLayer.clearLayers();$('planeCount').textContent='0';return}
- // Poll live non più frequente di 10 secondi; rispetta anche la pausa dopo HTTP 429.
- if(Date.now()<flyItalyBlockedUntil||Date.now()-lastLiveRequestAt<10000)return;
+ // Poll live non più frequente di 3 secondi; rispetta anche la pausa dopo HTTP 429.
+ if(Date.now()<flyItalyBlockedUntil||Date.now()-lastLiveRequestAt<3000)return;
  if(planesLoading)return;
  planesLoading=true;
  lastLiveRequestAt=Date.now();
@@ -460,6 +460,6 @@ locateButton.addEventListener('click',event=>{
 map.on('click',()=>{pinnedAircraftKey=null;followSelectedAircraft=false;updateFollowButton();updateAircraftIcons();showSelectedAircraft(null);drawSelectedTrail();setPanelCompact(true)});
 let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes()},700)});
 loadRadar();loadPlanes();
-setInterval(()=>{if($('planesToggle').checked)loadPlanes()},10000);
+setInterval(()=>{if($('planesToggle').checked)loadPlanes()},3000);
 setInterval(()=>{if($('weatherToggle').checked)loadRadar()},600000);
 </script></body></html>
