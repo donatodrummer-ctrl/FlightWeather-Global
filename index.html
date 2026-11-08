@@ -75,6 +75,14 @@ function animateAircraft(){
 }
 requestAnimationFrame(animateAircraft);
 const $=id=>document.getElementById(id);
+const settingsPanel=document.querySelector('.panel');
+if(settingsPanel){
+ settingsPanel.style.touchAction='pan-y';
+ settingsPanel.style.overscrollBehavior='contain';
+ ['touchstart','touchmove','touchend','touchcancel','pointerdown','pointermove','pointerup','wheel'].forEach(type=>{
+  settingsPanel.addEventListener(type,event=>event.stopPropagation(),{passive:true});
+ });
+}
 let flyItalyKey=localStorage.getItem('flyitalyadsb_key')||'';
 $('apiKeyInput').value=flyItalyKey;
 $('saveApiKey').addEventListener('click',()=>{const value=$('apiKeyInput').value.trim();if(!value){setNotice('Inserisci la chiave API ricevuta da FlyItalyADSB.',true);return}flyItalyKey=value;localStorage.setItem('flyitalyadsb_key',value);setNotice('Chiave salvata su questo browser. Carico il traffico…');loadPlanes();});
