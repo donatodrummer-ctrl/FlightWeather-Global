@@ -531,20 +531,20 @@ async function setCtrEnabled(enabled){
  const button=$('ctrBtn');
  if(button.disabled)return;
  button.disabled=true;
- if(enabled){
-  button.textContent='CTR…';
-  try{
+ try{
+  if(enabled){
+   button.textContent='CTR…';
    if(!ctrDataLoaded){
-    const response=await fetch('./data/ctr-it.geojson?'+Date.now(),{cache:'no-store',headers:{'Accept':'application/geo+json, application/json'}});
-    if(!response.ok)throw new Error('Archivio CTR non pronto (HTTP '+response.status+')');
+    const response=await fetch('./data/ctr-it.geojson',{cache:'no-store'});
+    if(!response.ok)throw new Error('Archivio CTR non raggiungibile (HTTP '+response.status+')');
     const data=await response.json();
-    if(!data||!Array.isArray(data.features))throw new Error('Archivio CTR non valido');
+    if(!data||!Array.isArray(data.features))throw new Error('Formato GeoJSON CTR non valido');
     const features=data.features.filter(feature=>{
      const p=feature.properties||{};
      const raw=p.type??p.airspaceType??p.airspace_type??p.typeName??'';
-     return String(raw).trim().toUpperCase()==='CTR'||Number(raw)===4;
+     return Number(raw)===4||String(raw).trim().toUpperCase()==='CTR';
     });
-    if(!features.length)throw new Error('Nessun CTR trovato nei dati scaricati');
+    if(!features.length)throw new Error('Nessun CTR presente nel GeoJSON');
     ctrLayer=L.geoJSON({type:'FeatureCollection',features},{
      style:{color:'#ff6872',weight:2.2,opacity:.95,fillColor:'#ff6872',fillOpacity:.055,dashArray:'7 5'},
      onEachFeature:(feature,layer)=>{
@@ -560,18 +560,28 @@ async function setCtrEnabled(enabled){
     ctrDataLoaded=true;
    }
    if(ctrLayer&&!map.hasLayer(ctrLayer))ctrLayer.addTo(map);
-   button.classList.add('active');button.textContent='CTR ON';button.setAttribute('aria-pressed','true');
-   setNotice('CTR italiani attivi · dati OpenAIP indicativi, non ufficiali.');$('topStatus').textContent='CTR italiani attivi · dato indicativo';
-  }catch(error){
-   button.classList.remove('active');button.textContent='CTR OFF';button.setAttribute('aria-pressed','false');
-   const message='CTR non disponibili: '+error.message;
-   setNotice(message,true);$('topStatus').textContent=message;
+   button.classList.add('active');
+   button.textContent='CTR ON';
+   button.setAttribute('aria-pressed','true');
+   setNotice('CTR italiani attivi · 113 aree OpenAIP indicative, non ufficiali.');
+   $('topStatus').textContent='CTR italiani attivi · dato indicativo';
+  }else{
+   if(ctrLayer&&map.hasLayer(ctrLayer))map.removeLayer(ctrLayer);
+   button.classList.remove('active');
+   button.textContent='CTR OFF';
+   button.setAttribute('aria-pressed','false');
+   setNotice('Livello CTR disattivato.');
   }
- }else{
-  if(ctrLayer&&map.hasLayer(ctrLayer))map.removeLayer(ctrLayer);
-  button.classList.remove('active');button.textContent='CTR OFF';button.setAttribute('aria-pressed','false');
+ }catch(error){
+  button.classList.remove('active');
+  button.textContent='CTR OFF';
+  button.setAttribute('aria-pressed','false');
+  const message='CTR non disponibili: '+error.message;
+  setNotice(message,true);
+  $('topStatus').textContent=message;
+ }finally{
+  button.disabled=false;
  }
- button.disabled=false;
 }
 $('ctrBtn').addEventListener('click',()=>setCtrEnabled(!$('ctrBtn').classList.contains('active')));
 
