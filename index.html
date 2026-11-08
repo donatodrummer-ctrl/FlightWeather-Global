@@ -181,22 +181,23 @@ async function loadHistoricalTrail(a,key){
    points.push(...dayPoints);
   }
   points.sort((x,y)=>x.time-y.time);
-  if(!points.length)return;
+  if(!points.length){historicalTrailLoads.delete(loadKey);return}
   // Cerca l'ultimo passaggio terra->aria: è il decollo più recente,
   // anche se il volo è iniziato il giorno UTC precedente.
+  const isGround=alt=>alt==='ground'||(alt!==null&&alt!==undefined&&Number.isFinite(Number(alt))&&Number(alt)===0);
+  const isAirborne=alt=>!isGround(alt)&&alt!==null&&alt!==undefined&&Number.isFinite(Number(alt));
   let startIndex=-1,airborneAfter=false;
   for(let i=points.length-1;i>=0;i--){
    const p=points[i];
-   const isAirborne=p.alt!=='ground'&&p.alt!==null&&p.alt!==undefined&&Number.isFinite(Number(p.alt));
-   if(isAirborne)airborneAfter=true;
-   else if(p.alt==='ground'&&airborneAfter){startIndex=i;break}
+   if(isAirborne(p.alt))airborneAfter=true;
+   else if(isGround(p.alt)&&airborneAfter){startIndex=i;break}
   }
   if(startIndex>=0){
    points=points.slice(startIndex);
   }else{
    // Se lo storico non contiene il punto a terra, usa solo la parte
    // aerea disponibile: non inventa il punto esatto di decollo.
-   const firstAirborne=points.findIndex(p=>p.alt!=='ground'&&p.alt!==null&&p.alt!==undefined&&Number.isFinite(Number(p.alt)));
+   const firstAirborne=points.findIndex(p=>isAirborne(p.alt));
    if(firstAirborne<0)return;
    points=points.slice(firstAirborne);
   }
@@ -213,6 +214,7 @@ async function loadHistoricalTrail(a,key){
   flightHistory.set(key,unique.slice(-12000));
   if(pinnedAircraftKey===key)drawSelectedTrail();
  }catch(e){
+  historicalTrailLoads.delete(loadKey);
   console.warn('Storico traccia non disponibile:',e);
  }
 }
