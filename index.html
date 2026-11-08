@@ -461,7 +461,7 @@ function renderMultiTrackPanel(){
    pairs.push('<div class="multi-track-pair"><span>'+escapeHtml(first.label)+' ↔ '+escapeHtml(second.label)+'</span><b>'+distance+'</b></div>');
   }
  }
- const distanceBlock=pairs.length?'<details class="multi-track-distances"><summary>Distanze tra aeromobili ('+pairs.length+')</summary>'+pairs.join('')+'</details>':'<div class="multi-track-hint">Aggiungi un altro aereo per confrontare le distanze.</div>';
+ const distanceBlock=pairs.length?'<div class="multi-track-distances"><div class="multi-track-distance-title">DISTANZA TRA AEREI</div>'+pairs.join('')+'</div>':'<div class="multi-track-hint">Aggiungi un altro aereo per confrontare le distanze.</div>';
  panel.innerHTML='<div class="multi-track-title"><span>◉ MULTI-TRACKING · '+multiTrackKeys.size+'/10</span><span>LIVE</span></div>'+rows.join('')+distanceBlock+'<button class="multi-track-fit" type="button" data-track-fit="1">⌖ INQUADRA TUTTI</button>';
 }
 function toggleMultiTrack(key){
