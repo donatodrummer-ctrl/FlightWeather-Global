@@ -17,7 +17,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .refresh{position:absolute;right:12px;top:12px;z-index:450;background:#101923ed;border:1px solid #526174;border-radius:6px;padding:10px 12px;color:var(--text);font-weight:650}
 .locate{position:absolute;right:12px;top:62px;z-index:450;background:#101923ed;border:1px solid #ffd43b;border-radius:6px;padding:10px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.locate:disabled{opacity:.6}
 .aircraft-icon{background:transparent;border:0;color:#d4e34a;text-shadow:0 1px 5px #000;font-size:22px;line-height:24px;display:flex;align-items:center;justify-content:center}.aircraft-icon span{display:block;transform-origin:50% 50%;}
-.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0b1727!important;color:#f4f8ff!important;border:1px solid #ffd43b;box-shadow:0 8px 28px #000b!important}.leaflet-popup-content{margin:12px 14px!important;color:#f4f8ff!important;font-size:13px;line-height:1.45}.leaflet-popup-close-button{color:#fff!important;font-size:22px!important}.leaflet-control-attribution{font-size:9px!important}.aero-frequency-label{background:#fff!important;border:1px solid #7b3fc6!important;border-radius:4px!important;color:#39205e!important;font-size:10px!important;font-weight:800!important;padding:2px 4px!important;box-shadow:0 1px 4px #0005!important}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0b1727!important;color:#f4f8ff!important;border:1px solid #ffd43b;box-shadow:0 8px 28px #000b!important}.leaflet-popup-content{margin:12px 14px!important;color:#f4f8ff!important;font-size:13px;line-height:1.45}.leaflet-popup-close-button{color:#fff!important;font-size:22px!important}.leaflet-control-attribution{font-size:9px!important}
 .panel-toggle{display:block;margin:0 0 9px auto;background:#202a2d;border:1px solid #aebd43;border-radius:5px;color:#eaf2fb;padding:6px 10px;font-size:12px;font-weight:750;cursor:pointer}.panel.compact{top:auto!important;bottom:8px!important;left:8px!important;width:min(230px,calc(100vw - 16px))!important;padding:7px 10px!important;transition:all .22s ease}.panel.compact h1,.panel.compact .searchbox,.panel.compact .searchresults,.panel.compact .toggles,.panel.compact .notice{display:none!important}.panel.compact .panel-toggle{margin:0 0 5px auto;padding:4px 8px;font-size:11px}.panel.compact .stats{border:0;margin:0;padding:0;gap:18px}.panel.compact .stats b{font-size:13px;display:inline;margin-right:4px}.panel.compact .stats div{font-size:10px;white-space:nowrap}
 @media(max-width:600px){.panel{top:auto;bottom:22px;width:calc(100vw - 24px)}.refresh{top:12px}.status{max-width:110px;text-align:right}}
 </style></head>
@@ -33,7 +33,6 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <div class="toggles">
 <label class="toggle"><input id="planesToggle" type="checkbox" checked> Traffico aereo live</label>
 <label class="toggle"><input id="weatherToggle" type="checkbox"> Radar precipitazioni</label>
-<label class="toggle"><input id="aeroToggle" type="checkbox"> Frequenze radio aeronautiche</label>
 </div>
 <div class="searchbox" style="margin-top:9px"><input id="apiKeyInput" type="password" autocomplete="off" placeholder="Chiave API FlyItalyADSB"><button id="saveApiKey" type="button">Salva</button></div>
  <div style="font-size:10px;color:#9fb1c6;margin:4px 0 7px">La chiave resta salvata solo in questo browser.</div>
@@ -50,8 +49,6 @@ const map=L.map('map',{worldCopyJump:true}).setView([45.7,9.7],5);
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
 let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[];
-const aeronauticalLayer=L.layerGroup().addTo(map);
-let aeronauticalRequest=null,aeronauticalTimer=null,lastAeroBounds='';
 const flightHistory=new Map();
 let aircraftCache=[];
 let pinnedAircraftKey=null;
@@ -246,91 +243,6 @@ async function searchMap(){
 $('searchBtn').addEventListener('click',searchMap);
 $('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')searchMap()});
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function aeroIcon(kind){
- const symbol=kind==='airport'?'✈':kind==='nav'?'◉':'';
- const color=kind==='airport'?'#087fbd':kind==='nav'?'#7b3fc6':'#087fbd';
- return L.divIcon({className:'',html:'<div style="width:24px;height:24px;border:1.5px solid '+color+';border-radius:50%;background:#fff;color:'+color+';font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 5px #0008">'+symbol+'</div>',iconSize:[24,24],iconAnchor:[12,12]});
-}
-let radioFrequencyDataPromise=null;
-function parseCSV(text){
- const rows=[];let row=[],field='',quoted=false;
- for(let i=0;i<text.length;i++){
-  const ch=text[i],next=text[i+1];
-  if(quoted){if(ch==='"'&&next==='"'){field+='"';i++}else if(ch==='"')quoted=false;else field+=ch}
-  else if(ch==='"')quoted=true;
-  else if(ch===','){row.push(field);field=''}
-  else if(ch==='\n'){row.push(field);rows.push(row);row=[];field=''}
-  else if(ch!=='\r')field+=ch;
- }
- if(field.length||row.length){row.push(field);rows.push(row)}
- if(!rows.length)return[];
- const headers=rows.shift().map(x=>x.trim());
- return rows.filter(r=>r.some(v=>v.trim())).map(r=>Object.fromEntries(headers.map((h,i)=>[h,(r[i]||'').trim()])));
-}
-/* Archivio radio: struttura pronta per dati ufficiali AIP ENAV verificati.
-   Finché il dataset ENAV non viene importato, viene usato OurAirports come riferimento preliminare;
-   non è una fonte ufficiale né garantisce copertura o aggiornamento completi. */
-const officialItalyRadioFrequencies=[]; // Formato previsto: {airport_ident,type,description,frequency_mhz,source,validity}
-async function getRadioFrequencyData(){
- if(!radioFrequencyDataPromise){
-  radioFrequencyDataPromise=(async()=>{
-   const base='https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/';
-   const urls=['airports.csv','airport-frequencies.csv'];
-   const responses=await Promise.all(urls.map(async file=>{
-    const response=await fetch(base+file,{cache:'force-cache'});
-    if(!response.ok)throw new Error('Archivio frequenze non raggiungibile ('+file+', HTTP '+response.status+')');
-    return parseCSV(await response.text());
-   }));
-   const [airports,frequencies]=responses;
-   const airportByIdent=new Map(airports.map(a=>[a.ident,a]));
-   return {frequencies,airportByIdent};
-  })().catch(error=>{radioFrequencyDataPromise=null;throw error});
- }
- return radioFrequencyDataPromise;
-}
-function radioAirportMarker(lat,lon,airport,items){
- const icon=L.divIcon({className:'',html:'<div style="width:27px;height:27px;border:2px solid #087fbd;border-radius:50%;background:#fff;color:#087fbd;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 5px #0008">R</div>',iconSize:[27,27],iconAnchor:[13,13]});
- const lines=items.map(f=>{
-  const type=String(f.type||'COM').toUpperCase();
-  const description=f.description? ' — '+escapeHtml(f.description):'';
-  return '<div style="display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid #34465b"><span><b style="color:#42c8e8">'+escapeHtml(type)+'</b>'+description+'</span><b style="white-space:nowrap">'+Number(f.frequency_mhz).toFixed(3)+' MHz</b></div>';
- }).join('');
- const marker=L.marker([lat,lon],{icon});
- marker.bindPopup('<div style="min-width:245px;max-width:310px"><b>'+escapeHtml(airport.name||airport.ident||'Aeroporto')+' · '+escapeHtml(airport.ident||'')+'</b><div style="font-size:10px;color:#9fb1c6;margin:4px 0 7px">FREQUENZE RADIO AERONAUTICHE</div>'+lines+'</div>',{maxWidth:340});
- marker.bindTooltip('COM · '+items.length,{permanent:true,direction:'right',offset:[10,0],className:'aero-frequency-label'});
- marker.addTo(aeronauticalLayer);
-}
-async function loadAeronautical(){
- if(!$('aeroToggle').checked){aeronauticalLayer.clearLayers();lastAeroBounds='';return}
- if(map.getZoom()<5){aeronauticalLayer.clearLayers();lastAeroBounds='';setNotice('Ingrandisci la mappa almeno al livello 5 per visualizzare le frequenze radio.');return}
- const b=map.getBounds(),bbox=[b.getSouth(),b.getWest(),b.getNorth(),b.getEast()].map(v=>v.toFixed(3)).join(',');
- if(bbox===lastAeroBounds&&aeronauticalLayer.getLayers().length)return;
- lastAeroBounds=bbox;aeronauticalLayer.clearLayers();
- setNotice('Caricamento frequenze radio aeronautiche…');
- try{
-  const {frequencies,airportByIdent}=await getRadioFrequencyData();
-  if(!$('aeroToggle').checked)return;
-  const bounds=map.getBounds(),grouped=new Map();
-  frequencies.forEach(f=>{
-   const airport=airportByIdent.get(f.airport_ident);
-   if(!airport)return;
-   const lat=Number(airport.latitude_deg),lon=Number(airport.longitude_deg),mhz=Number(f.frequency_mhz);
-   if(!Number.isFinite(lat)||!Number.isFinite(lon)||!Number.isFinite(mhz)||!bounds.contains([lat,lon]))return;
-   const type=String(f.type||'').toUpperCase();
-   if(/^(VOR|NDB|VOR-DME|VORTAC|NDB-DME|DME|TACAN)$/.test(type))return;
-   const key=String(f.airport_ident||airport.id);
-   if(!grouped.has(key))grouped.set(key,{airport,lat,lon,items:[]});
-   grouped.get(key).items.push(f);
-  });
-  let count=0;
-  grouped.forEach(group=>{group.items.sort((a,b)=>String(a.type).localeCompare(String(b.type)));radioAirportMarker(group.lat,group.lon,group.airport,group.items);count+=group.items.length});
-  const airports=grouped.size;
-  setNotice(count?'Caricate '+count+' frequenze su '+airports+' aeroporti. Tocca il simbolo blu per vedere TWR, GND, ATIS, APP, DEP e AFIS quando disponibili. Fonte attuale: archivio preliminare OurAirports, da verificare; non sostituisce l’AIP ENAV.':'Nessuna frequenza registrata nell’area visibile nell’archivio. Prova ad allargare la mappa.');
- }catch(e){
-  lastAeroBounds='';
-  setNotice('Archivio frequenze non disponibile: '+e.message+'. Controlla la connessione e riprova.',true);
- }
-}
 async function loadRadar(){
  try{
   const res=await fetch('https://api.rainviewer.com/public/weather-maps.json');
@@ -347,7 +259,6 @@ async function loadRadar(){
 $('panelToggle').addEventListener('click',()=>setPanelCompact(!document.querySelector('.panel').classList.contains('compact')));
 $('planesToggle').addEventListener('change',loadPlanes);
 $('weatherToggle').addEventListener('change',e=>{if(!radarLayer){loadRadar();return}if(e.target.checked)radarLayer.addTo(map);else map.removeLayer(radarLayer)});
-$('aeroToggle').addEventListener('change',()=>{lastAeroBounds='';loadAeronautical()});
 $('refreshBtn').addEventListener('click',()=>{loadPlanes();if($('weatherToggle').checked)loadRadar()});
 let gpsMarker=null,gpsAccuracy=null;
 $('locateBtn').addEventListener('click',()=>{
@@ -371,7 +282,7 @@ $('locateBtn').addEventListener('click',()=>{
  },{enableHighAccuracy:true,timeout:15000,maximumAge:10000});
 });
 
-let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes();clearTimeout(aeronauticalTimer);if($('aeroToggle').checked)aeronauticalTimer=setTimeout(loadAeronautical,900)},700)});
+let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes()},700)});
 loadRadar();loadPlanes();
 setInterval(()=>{if($('planesToggle').checked)loadPlanes()},2000);
 setInterval(()=>{if($('weatherToggle').checked)loadRadar()},600000);
