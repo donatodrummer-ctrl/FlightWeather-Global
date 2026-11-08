@@ -18,13 +18,14 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .locate{position:absolute;right:12px;top:62px;z-index:450;background:#0b1727ee;border:1px solid #42c8e8;border-radius:10px;padding:10px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0005}.locate:disabled{opacity:.6}
 .aircraft-icon{background:transparent;border:0;color:#51d5f2;text-shadow:0 1px 5px #001;font-size:22px;line-height:24px;display:flex;align-items:center;justify-content:center}.aircraft-icon span{display:block;transform-origin:50% 50%;}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0b1727!important;color:#f4f8ff!important;border:1px solid #42c8e8;box-shadow:0 8px 28px #000b!important}.leaflet-popup-content{margin:12px 14px!important;color:#f4f8ff!important;font-size:13px;line-height:1.45}.leaflet-popup-close-button{color:#fff!important;font-size:22px!important}.leaflet-control-attribution{font-size:9px!important}.aero-frequency-label{background:#fff!important;border:1px solid #7b3fc6!important;border-radius:4px!important;color:#39205e!important;font-size:10px!important;font-weight:800!important;padding:2px 4px!important;box-shadow:0 1px 4px #0005!important}
-.panel.compact{top:auto!important;bottom:8px!important;left:8px!important;width:min(210px,calc(100vw - 16px))!important;padding:7px 10px!important;transition:all .22s ease}.panel.compact h1,.panel.compact .searchbox,.panel.compact .searchresults,.panel.compact .toggles,.panel.compact .notice{display:none!important}.panel.compact .stats{border:0;margin:0;padding:0;gap:18px}.panel.compact .stats b{font-size:13px;display:inline;margin-right:4px}.panel.compact .stats div{font-size:10px;white-space:nowrap}
+.panel-toggle{display:block;margin:0 0 9px auto;background:#12354a;border:1px solid #42c8e8;border-radius:8px;color:#eaf2fb;padding:6px 10px;font-size:12px;font-weight:750;cursor:pointer}.panel.compact{top:auto!important;bottom:8px!important;left:8px!important;width:min(230px,calc(100vw - 16px))!important;padding:7px 10px!important;transition:all .22s ease}.panel.compact h1,.panel.compact .searchbox,.panel.compact .searchresults,.panel.compact .toggles,.panel.compact .notice{display:none!important}.panel.compact .panel-toggle{margin:0 0 5px auto;padding:4px 8px;font-size:11px}.panel.compact .stats{border:0;margin:0;padding:0;gap:18px}.panel.compact .stats b{font-size:13px;display:inline;margin-right:4px}.panel.compact .stats div{font-size:10px;white-space:nowrap}
 @media(max-width:600px){.panel{top:auto;bottom:22px;width:calc(100vw - 24px)}.refresh{top:12px}.status{max-width:110px;text-align:right}}
 </style></head>
 <body>
 <header><div class="brand">✈ <span>FlightWeather</span> Global</div><div class="status" id="topStatus">Mappa in inizializzazione…</div></header>
 <main><div id="map"></div>
 <section class="panel" aria-label="Controlli mappa">
+<button class="panel-toggle" id="panelToggle" type="button" aria-expanded="true">⌄ Riduci pannello</button>
 <h1>Cerca volo o aeroporto</h1>
 <div class="searchbox"><input id="searchInput" type="search" placeholder="Volo, registrazione, ICAO o aeroporto"><button id="searchBtn">Cerca</button></div>
 <div class="searchresults" id="searchResults"></div>
@@ -83,7 +84,7 @@ function planeIcon(a){
  return L.divIcon({className:'aircraft-icon',html,iconSize:[54,34],iconAnchor:[16,17]})
 }
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
-function setPanelCompact(compact){document.querySelector('.panel').classList.toggle('compact',compact)}
+function setPanelCompact(compact){const panel=document.querySelector('.panel');panel.classList.toggle('compact',compact);const button=$('panelToggle');if(button){button.textContent=compact?'⌃ Apri pannello':'⌄ Riduci pannello';button.setAttribute('aria-expanded',String(!compact))}}
 function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n*0.3048).toLocaleString('it-IT')+' m':'n/d'}
 function niceSpeed(v){const n=Number(v);return Number.isFinite(n)?Math.round(n*1.852).toLocaleString('it-IT')+' km/h':'n/d'}
 function niceVertical(v){const n=Number(v);return Number.isFinite(n)?(n>0?'+':'')+Math.round(n*0.3048).toLocaleString('it-IT')+' m/min':'n/d'}
@@ -273,6 +274,7 @@ async function loadRadar(){
   $('radarTime').textContent=new Date(frame.time*1000).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
  }catch(e){$('radarTime').textContent='N/D';setNotice('Radar meteo non disponibile: '+e.message,true)}
 }
+$('panelToggle').addEventListener('click',()=>setPanelCompact(!document.querySelector('.panel').classList.contains('compact')));
 $('planesToggle').addEventListener('change',loadPlanes);
 $('weatherToggle').addEventListener('change',e=>{if(!radarLayer){loadRadar();return}if(e.target.checked)radarLayer.addTo(map);else map.removeLayer(radarLayer)});
 $('aeroToggle').addEventListener('change',()=>{lastAeroBounds='';loadAeronautical()});
