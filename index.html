@@ -199,9 +199,11 @@ function showSelectedAircraft(a){
  const route=a.route;
  const from=route&&(route.from_iata||route.from_icao||route.from);
  const to=route&&(route.to_iata||route.to_icao||route.to);
- const routeLabel=from&&to?(String(from).toUpperCase()+' → '+String(to).toUpperCase()):'Non disponibile';
- box.innerHTML='<h2>'+value(flight)+'</h2>'+(airline?'<div class="sub">'+value(airline[1])+'</div>':'<div class="sub">Dati ADS-B · aereo selezionato</div>')+
-  '<div class="data"><div style="grid-column:1/-1">Tratta<b>'+value(routeLabel)+'</b></div><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div></div>'+
+ const routeLabel=from&&to?(String(from).toUpperCase()+' → '+String(to).toUpperCase()):'Tratta non disponibile';
+ const airlineLogo=airline?'<img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(airline[2])+'&sz=64" alt="" style="width:19px;height:19px;object-fit:contain;flex:0 0 19px;border:1px solid #fff9;border-radius:5px;background:#fff;padding:2px" onerror="this.style.display=\'none\'">':'';
+ box.innerHTML='<h2>'+value(flight)+'</h2>'+
+  '<div class="sub" style="display:flex;align-items:center;gap:6px;min-width:0;line-height:1.25">'+airlineLogo+'<span style="min-width:0;overflow-wrap:anywhere">'+(airline?value(airline[1])+' · ':'')+value(routeLabel)+'</span></div>'+
+  '<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div></div>'+
   '<button class="follow'+(followSelectedAircraft?' active':'')+'" id="followBtn" type="button" aria-pressed="'+String(followSelectedAircraft)+'">'+(followSelectedAircraft?'◎ Segui attivo':'◎ Segui aereo')+'</button>';
  box.hidden=false;
 }
