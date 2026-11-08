@@ -136,7 +136,7 @@ function showSelectedAircraft(a){
  const airline=airlineForFlight(a.flight);
  const value=v=>escapeHtml(v??'n/d');
  box.innerHTML='<h2>'+value(flight)+'</h2>'+(airline?'<div class="sub">'+value(airline[1])+'</div>':'<div class="sub">Dati ADS-B · aereo selezionato</div>')+
-  '<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div><div>Squawk<b>'+value(a.squawk||'n/d')+'</b></div></div>';
+  '<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div></div>';
  box.hidden=false;
 }
 function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n*0.3048).toLocaleString('it-IT')+' m':'n/d'}
@@ -161,7 +161,6 @@ function aircraftPopup(a){
   row('Modello / tipo',a.t||a.desc||'n/d'),
   row('Quota',niceAlt(a.alt_baro??a.alt_geom)),
   row('Velocità',niceSpeed(a.gs)),
-  row('Squawk',a.squawk||'n/d')
  ];
  return '<div style="min-width:225px;max-width:290px;color:#eaf2fb"><div style="font-size:16px;font-weight:800;margin-bottom:3px">'+escapeHtml(title)+'</div>'+airlineHeader+'<div style="font-size:10px;color:#ffd43b;margin-bottom:8px">DATI AEROMOBILE · ADS-B</div>'+rows.join('')+(!airline?'<div style="font-size:10px;color:#9fb1c6;margin-top:8px">Compagnia non identificabile dal nominativo disponibile.</div>':'')+'</div>';
 }
