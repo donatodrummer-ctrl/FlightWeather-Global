@@ -530,8 +530,10 @@ async function setCtrEnabled(enabled){
    ctrLoading=true;
    try{
     const sources=[
-     'https://storage.openaip.net/openaip-system-exports/it_asp.geojson',
-     'https://storage.googleapis.com/29f98e10-a489-4c82-ae5e-489dbcd4912f/it_asp.geojson'
+     'https://storage.googleapis.com/29f98e10-a489-4c82-ae5e-489dbcd4912f/it.asp.geojson',
+     'https://storage.googleapis.com/29f98e10-a489-4c82-ae5e-489dbcd4912f/it_asp.geojson',
+     'https://storage.openaip.net/openaip-system-exports/it.asp.geojson',
+     'https://storage.openaip.net/openaip-system-exports/it_asp.geojson'
     ];
     let data=null,lastError=null;
     for(const source of sources){
@@ -546,8 +548,9 @@ async function setCtrEnabled(enabled){
     if(!data)throw lastError||new Error('Dati CTR non raggiungibili');
     const features=(data.features||[]).filter(feature=>{
      const p=feature.properties||{};
-     const type=String(p.typeName||p.type||p.airspaceType||'').toUpperCase();
-     return type==='CTR'||type==='4'||Number(p.type)===4;
+     const raw=p.typeName??p.type??p.airspaceType??p.airspace_type??'';
+     const type=String(raw).trim().toUpperCase();
+     return type==='CTR'||type==='4'||Number(raw)===4;
     });
     if(!features.length)throw new Error('Nessun CTR trovato nel dataset');
     ctrLayer=L.geoJSON({type:'FeatureCollection',features},{
