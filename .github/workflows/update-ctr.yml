@@ -1,4 +1,4 @@
-name: Aggiorna dati CTR italiani
+name: Aggiorna dati CTR e aeroporti
 on:
   push:
     branches: [main]
@@ -8,7 +8,7 @@ on:
 permissions:
   contents: write
 jobs:
-  refresh-ctr:
+  refresh-data:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,25 +21,50 @@ jobs:
             'https://storage.openaip.net/openaip-system-exports/it_asp.geojson' \
             -o /tmp/it-asp.geojson
           python - <<'PY'
-          import json
+          import json, os
           with open('/tmp/it-asp.geojson', encoding='utf-8') as f:
               data = json.load(f)
           assert data.get('type') == 'FeatureCollection'
           ctr = [x for x in data.get('features', []) if str(x.get('properties', {}).get('type', '')).strip() == '4']
           assert ctr, 'Nessun CTR nel dataset'
-          out = {'type': 'FeatureCollection', 'features': ctr}
           with open('data/ctr-it.geojson', 'w', encoding='utf-8') as f:
-              json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
-          print(f"Feature originali: {len(data['features'])}; CTR: {len(ctr)}; file filtrato: {__import__('os').path.getsize('data/ctr-it.geojson')} byte")
+              json.dump({'type':'FeatureCollection','features':ctr}, f, ensure_ascii=False, separators=(',', ':'))
+          print(f"CTR: {len(ctr)}; file: {os.path.getsize('data/ctr-it.geojson')} byte")
           PY
-      - name: Pubblica archivio aggiornato
+      - name: Scarica e compatta aeroporti e campi di volo globali
         run: |
-          if [ -z "$(git status --porcelain -- data/ctr-it.geojson)" ]; then
-            echo "Dati CTR già aggiornati"
+          curl --fail --location --silent --show-error \
+            'https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv' \
+            -o /tmp/airports.csv
+          python - <<'PY'
+          import csv, json, os
+          features = []
+          with open('/tmp/airports.csv', newline='', encoding='utf-8') as f:
+              for row in csv.DictReader(f):
+                  kind = row.get('type', '')
+                  if kind not in ('large_airport', 'medium_airport', 'small_airport'):
+                      continue
+                  try:
+                      lat, lon = float(row['latitude_deg']), float(row['longitude_deg'])
+                  except (ValueError, TypeError, KeyError):
+                      continue
+                  if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+                      continue
+                  props = {k: row.get(k, '') for k in ('type', 'name', 'iso_country', 'municipality', 'icao_code', 'iata_code')}
+                  features.append({'type':'Feature','geometry':{'type':'Point','coordinates':[lon,lat]},'properties':props})
+          assert features, 'Nessun aeroporto valido nel dataset OurAirports'
+          with open('data/airports.geojson', 'w', encoding='utf-8') as f:
+              json.dump({'type':'FeatureCollection','features':features}, f, ensure_ascii=False, separators=(',', ':'))
+          print(f"Punti aeroportuali: {len(features)}; file: {os.path.getsize('data/airports.geojson')} byte")
+          PY
+      - name: Pubblica archivi aggiornati
+        run: |
+          if [ -z "$(git status --porcelain -- data/ctr-it.geojson data/airports.geojson)" ]; then
+            echo "Dati già aggiornati"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ctr-it.geojson
-          git commit -m "Ottimizza archivio CTR italiani"
+          git add data/ctr-it.geojson data/airports.geojson
+          git commit -m "Aggiorna CTR e punti aeroportuali"
           git push
