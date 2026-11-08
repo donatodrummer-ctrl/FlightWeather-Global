@@ -169,13 +169,7 @@ function trailStats(key){
   const a=Math.sin(dLat/2)**2+Math.cos(rad(p.lat))*Math.cos(rad(q.lat))*Math.sin(dLon/2)**2;
   km+=6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
  }
- const minutes=Math.max(0,(history[history.length-1].time-history[0].time)/60000);
- return {km,minutes};
-}
-function formatTrailDuration(minutes){
- if(!Number.isFinite(minutes)||minutes<0)return 'n/d';
- const total=Math.round(minutes),hours=Math.floor(total/60),mins=total%60;
- return hours?hours+' h '+mins+' min':mins+' min';
+ return {km};
 }
 function drawSelectedTrail(){
  trailLayer.clearLayers();
@@ -296,7 +290,7 @@ function showSelectedAircraft(a){
  const airlineLogo=airline?'<img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(airline[2])+'&sz=64" alt="" style="width:19px;height:19px;object-fit:contain;flex:0 0 19px;border:1px solid #fff9;border-radius:5px;background:#fff;padding:2px" onerror="this.style.display=\'none\'">':'';
  box.innerHTML='<h2>'+value(flight)+'</h2>'+
   '<div class="sub" style="display:flex;align-items:center;gap:6px;min-width:0;line-height:1.25">'+airlineLogo+'<span style="min-width:0;overflow-wrap:anywhere;font-size:13px;font-weight:750;line-height:1.2">'+(airline?value(airline[1])+' · ':'')+value(routeLabel)+'</span></div>'+
-  '<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div><div>Velocità verticale<b>'+value(niceVertical(a.baro_rate??a.geom_rate))+'</b></div>'+(()=>{const stats=trailStats(pinnedAircraftKey);return '<div>Distanza scia<b>'+(stats?niceNumber(stats.km,1,' km'):'n/d')+'</b></div><div>Durata scia<b>'+(stats?formatTrailDuration(stats.minutes):'n/d')+'</b></div>'})()+'</div>'+
+  '<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div><div>Velocità verticale<b>'+value(niceVertical(a.baro_rate??a.geom_rate))+'</b></div>'+(()=>{const stats=trailStats(pinnedAircraftKey);return '<div>Distanza scia<b>'+(stats?niceNumber(stats.km,1,' km'):'n/d')+'</b></div>'})()+'</div>'+
   '<button class="follow'+(followSelectedAircraft?' active':'')+'" id="followBtn" type="button" aria-pressed="'+String(followSelectedAircraft)+'">'+(followSelectedAircraft?'◎ Segui attivo':'◎ Segui aereo')+'</button>';
  box.hidden=false;
 }
