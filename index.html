@@ -2,6 +2,9 @@
 <html lang="it">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#07111f"><title>FlightWeather Global</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
@@ -839,6 +842,9 @@ $('airportBtn').classList.remove('active');$('airportBtn').setAttribute('aria-pr
 $('airfieldBtn').classList.remove('active');$('airfieldBtn').setAttribute('aria-pressed','false');$('airfieldBtn').textContent='● CAMPI OFF';
 $('airportBtn').addEventListener('click',()=>setAirportLayerEnabled('airport',!airportsEnabled));
 $('airfieldBtn').addEventListener('click',()=>setAirportLayerEnabled('airfield',!airfieldsEnabled));
+// Protezione: nessun layer aeroporti può comparire se il relativo interruttore è OFF.
+map.on('layeradd',event=>{if(event.layer===airportLayer&&!airportsEnabled)map.removeLayer(airportLayer);if(event.layer===airfieldLayer&&!airfieldsEnabled)map.removeLayer(airfieldLayer)});
+map.removeLayer(airportLayer);map.removeLayer(airfieldLayer);
 
 
 function setRadarEnabled(enabled){$('weatherToggle').checked=enabled;$('radarBtn').classList.toggle('active',enabled);$('radarBtn').textContent=enabled?'◉ RADAR ON':'◉ RADAR OFF';$('radarBtn').setAttribute('aria-pressed',String(enabled));if(!radarLayer){if(enabled)loadRadar();return}if(enabled)radarLayer.addTo(map);else map.removeLayer(radarLayer)}
