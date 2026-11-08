@@ -348,8 +348,9 @@ locateButton.addEventListener('click',event=>{
   gpsAccuracy=L.circle([lat,lon],{radius:accuracy,color:'#1689ff',weight:1.5,fillColor:'#1689ff',fillOpacity:.12}).addTo(map);
   const gpsIcon=L.divIcon({className:'',html:'<div style="width:20px;height:20px;border:3px solid white;border-radius:50%;background:#1689ff;box-shadow:0 0 0 7px #1689ff44,0 1px 6px #0009"></div>',iconSize:[20,20],iconAnchor:[10,10]});
   gpsMarker=L.marker([lat,lon],{icon:gpsIcon,zIndexOffset:1000}).addTo(map).bindPopup('<b>La tua posizione GPS</b><br>Precisione stimata: '+Math.round(accuracy)+' m');
-  map.setView([lat,lon],Math.max(map.getZoom(),12));
-  gpsMarker.openPopup();
+  const targetZoom=Math.max(map.getZoom(),13);
+  map.flyTo([lat,lon],targetZoom,{animate:true,duration:1.2});
+  map.once('moveend',()=>{gpsMarker&&gpsMarker.openPopup()});
   setNotice('Posizione GPS individuata. Precisione stimata: circa '+Math.round(accuracy)+' metri.');
   $('topStatus').textContent='GPS attivo · posizione individuata';
   locateButton.disabled=false;locateButton.textContent='◎ GPS';
