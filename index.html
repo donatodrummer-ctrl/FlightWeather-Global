@@ -211,10 +211,8 @@ async function loadPlanes(){
      if(pinnedAircraftKey===key)showSelectedAircraft(a);
    }else{
     marker=L.marker([a.lat,a.lon],{icon:planeIcon(a),aircraftKey:key});
-    marker.bindPopup(aircraftPopup(a),{maxWidth:320,closeButton:true,autoPan:true});
     marker.addTo(planeLayer);
-    marker.on('popupopen',()=>{pinnedAircraftKey=key;showSelectedAircraft(a);drawSelectedTrail()});
-    marker.on('popupclose',()=>{if(pinnedAircraftKey===key){pinnedAircraftKey=null;showSelectedAircraft(null);drawSelectedTrail()}});
+    marker.on('click',()=>{pinnedAircraftKey=key;showSelectedAircraft(a);drawSelectedTrail()});
     aircraftMarkers.set(key,marker);
    }
   });
