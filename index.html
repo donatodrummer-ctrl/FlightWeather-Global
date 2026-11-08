@@ -187,7 +187,7 @@ async function loadAeronautical(){
  if(aeronauticalRequest)aeronauticalRequest.abort();
  aeronauticalRequest=new AbortController();
  setNotice('Caricamento dati aeronautici OpenStreetMap…');
- const query='[out:json][timeout:25];(nwr["aeroway"="aerodrome"]('+bbox+');way["aeroway"="runway"]('+bbox+');nwr["aeroway"="navigationaid"]('+bbox+');nwr["navigationaid"]('+bbox+'););out center geom;';
+ const query='[out:json][timeout:18];(nwr["aeroway"="navigationaid"]('+bbox+');nwr["navigationaid"]('+bbox+'););out center tags;';
  try{
   const endpoints=[
    'https://overpass-api.de/api/interpreter',
@@ -199,7 +199,7 @@ async function loadAeronautical(){
    const attemptController=new AbortController();
    const abortAttempt=()=>attemptController.abort();
    aeronauticalRequest.signal.addEventListener('abort',abortAttempt,{once:true});
-   const timeoutId=setTimeout(()=>attemptController.abort(),7000);
+   const timeoutId=setTimeout(()=>attemptController.abort(),12000);
    try{
     const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:'data='+encodeURIComponent(query),signal:attemptController.signal});
     if(!response.ok)throw new Error('HTTP '+response.status);
@@ -208,7 +208,7 @@ async function loadAeronautical(){
     data=payload;break;
    }catch(error){
     if(aeronauticalRequest.signal.aborted)throw error;
-    lastError=error.name==='AbortError'?'timeout dopo 7 secondi':(error.message||'errore di rete');
+    lastError=error.name==='AbortError'?'timeout dopo 12 secondi':(error.message||'errore di rete');
    }finally{
     clearTimeout(timeoutId);
     aeronauticalRequest.signal.removeEventListener('abort',abortAttempt);
@@ -216,34 +216,20 @@ async function loadAeronautical(){
   }
   if(!data)throw new Error('Server OpenStreetMap non raggiungibili ('+lastError+')');
   aeronauticalLayer.clearLayers();
-  let airports=0,runways=0,navaids=0;
+  let navaids=0;
   (data.elements||[]).forEach(el=>{
-   const tags=el.tags||{},name=tags.name||tags.ref||'Senza nome';
-   if(tags.aeroway==='runway'&&Array.isArray(el.geometry)){
-    const coords=el.geometry.map(p=>[p.lat,p.lon]);
-    if(coords.length>1){
-     L.polyline(coords,{color:'#1677b8',weight:4,opacity:.9,dashArray:'8 4'}).bindPopup('<b>Pista</b><br>'+escapeHtml(name)+(tags.ref?'<br>Identificativo: '+escapeHtml(tags.ref):'')+(tags.surface?'<br>Fondo: '+escapeHtml(tags.surface):'')).addTo(aeronauticalLayer);
-     runways++;
-    }
-    return;
-   }
+   const tags=el.tags||{},name=tags.name||tags.ref||tags.ident||'Radioassistenza';
    const center=el.type==='node'?{lat:el.lat,lon:el.lon}:el.center||(el.lat&&el.lon?{lat:el.lat,lon:el.lon}:null);
    if(!center)return;
-   if(tags.aeroway==='aerodrome'){
-    const marker=L.marker([center.lat,center.lon],{icon:aeroIcon('airport')});
-    marker.bindPopup('<b>✈ '+escapeHtml(name)+'</b><br>Aeroporto / aerodromo'+(tags.iata?'<br>IATA: '+escapeHtml(tags.iata):'')+(tags.icao?'<br>ICAO: '+escapeHtml(tags.icao):''));
-    marker.addTo(aeronauticalLayer);airports++;
-   }else if(tags.aeroway==='navigationaid'||tags.navigationaid){
-    const aid=tags.navigationaid||tags.aviation||'Radioassistenza';
-    const frequency=tags.frequency||tags.freq||tags.frequency_mhz||tags.frequency_khz||tags.vhf_frequency||tags.uhf_frequency||tags['frequency:vhf']||tags['frequency:uhf']||'';
-    const marker=L.marker([center.lat,center.lon],{icon:aeroIcon('nav')});
-    const frequencyText=frequency?String(frequency):'Non pubblicata su OpenStreetMap';
-    marker.bindPopup('<b>'+escapeHtml(name)+'</b><br>Radioassistenza: '+escapeHtml(aid)+'<br><b>Frequenza radio: '+escapeHtml(frequencyText)+'</b>'+(tags.ref?'<br>Identificativo: '+escapeHtml(tags.ref):''));
-    if(frequency)marker.bindTooltip(escapeHtml(frequency),{permanent:true,direction:'right',offset:[10,0],className:'aero-frequency-label'});
-    marker.addTo(aeronauticalLayer);navaids++;
-   }
+   const aid=tags.navigationaid||tags.aviation||'Radioassistenza';
+   const frequency=tags.frequency||tags.freq||tags.frequency_mhz||tags.frequency_khz||tags.vhf_frequency||tags.uhf_frequency||tags['frequency:vhf']||tags['frequency:uhf']||'';
+   const marker=L.marker([center.lat,center.lon],{icon:aeroIcon('nav')});
+   const frequencyText=frequency?String(frequency):'Non pubblicata su OpenStreetMap';
+   marker.bindPopup('<b>'+escapeHtml(name)+'</b><br>Radioassistenza: '+escapeHtml(aid)+'<br><b>Frequenza radio: '+escapeHtml(frequencyText)+'</b>'+(tags.ref?'<br>Identificativo: '+escapeHtml(tags.ref):''));
+   if(frequency)marker.bindTooltip(escapeHtml(frequency),{permanent:true,direction:'right',offset:[10,0],className:'aero-frequency-label'});
+   marker.addTo(aeronauticalLayer);navaids++;
   });
-  setNotice('Dati aeronautici caricati: '+airports+' aeroporti, '+runways+' piste, '+navaids+' radioassistenze (OpenStreetMap).');
+  setNotice(navaids?'Caricate '+navaids+' radioassistenze OpenStreetMap. Le frequenze sono mostrate se presenti nei dati.':'Nessuna radioassistenza censita in quest’area su OpenStreetMap.');
  }catch(e){
   if(e.name==='AbortError')return;
   lastAeroBounds='';
