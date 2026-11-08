@@ -86,7 +86,7 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 <button class="wind-button" id="windBtn" type="button" aria-pressed="false">↗ VENTO OFF</button>
   <button class="descent-button" id="descentBtn" type="button" aria-pressed="false">↘ DISCESA OFF</button>
  <button class="alarm-button" id="alarmBtn" type="button" aria-pressed="false">⚠ ALLARMI OFF</button>
- <section class="alarm-panel" id="alarmPanel" hidden aria-live="polite" aria-label="Allarmi aeronautici"><div class="alarm-title">⚠ MONITORAGGIO ALLARMI</div><div id="alarmList" class="alarm-empty">Nessun allarme rilevato.</div></section>
+ <section class="alarm-panel" id="alarmPanel" hidden aria-live="polite" aria-label="Allarmi aeronautici"><div class="alarm-title">⚠ MONITORAGGIO ALLARMI</div><button id="alarmAudioBtn" type="button" style="width:100%;margin:5px 0 8px;padding:6px;border:1px solid #536579;border-radius:6px;background:#263548;color:#fff;font-size:10px;font-weight:800">🔇 AUDIO OFF</button><div id="alarmList" class="alarm-empty">Nessun allarme rilevato.</div></section>
 <div id="altitudeLegend" class="altitude-legend" aria-label="Legenda colori quota">
  <div class="legend-title">Quota scia</div>
  <div class="legend-row"><span class="swatch" style="background:#42d6ff"></span>Sotto 3.000 m</div>
@@ -110,6 +110,7 @@ let descentEnabled=false,descentLayer=L.layerGroup();
 const flightHistory=new Map();
 let aircraftCache=[];
 let alarmsEnabled=false;
+let alarmAudioEnabled=false,alarmAudioContext=null;
 const alarmHistory=[];
 const alarmActive=new Map();
 let pinnedAircraftKey=null;
@@ -236,6 +237,12 @@ function planeIcon(a,selected=false){
  return L.divIcon({className:'aircraft-icon',html,iconSize:[54,34],iconAnchor:[16,17]})
 }
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
+function playAlarmTone(kind='proximity'){
+ if(!alarmAudioEnabled||!alarmAudioContext)return;
+ try{const ctx=alarmAudioContext,now=ctx.currentTime,emergency=kind==='emergency';const count=emergency?3:2;for(let i=0;i<count;i++){const osc=ctx.createOscillator(),gain=ctx.createGain(),start=now+i*(emergency?.22:.28);osc.type='sine';osc.frequency.value=emergency?880:660;gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.16,start+.025);gain.gain.exponentialRampToValueAtTime(.0001,start+(emergency?.16:.18));osc.connect(gain);gain.connect(ctx.destination);osc.start(start);osc.stop(start+(emergency?.18:.2));}}catch(e){console.warn('Audio allarmi non disponibile',e)}
+}
+function updateAlarmAudioButton(){const b=$('alarmAudioBtn');if(!b)return;b.textContent=alarmAudioEnabled?'🔊 AUDIO ON':'🔇 AUDIO OFF';b.style.borderColor=alarmAudioEnabled?'#4ade80':'#536579';b.style.background=alarmAudioEnabled?'#174b3d':'#263548';b.setAttribute('aria-pressed',String(alarmAudioEnabled));}
+function setAlarmAudioEnabled(enabled){alarmAudioEnabled=enabled;if(enabled){const AC=window.AudioContext||window.webkitAudioContext;if(!AC){alarmAudioEnabled=false;setNotice('Audio non supportato da questo browser.',true)}else{if(!alarmAudioContext)alarmAudioContext=new AC();if(alarmAudioContext.state==='suspended')alarmAudioContext.resume();playAlarmTone('proximity');}}updateAlarmAudioButton();}
 function updateSelectedMarkerPopups(){
  aircraftCache.forEach(a=>{const key=String(a.hex||a.flight||('pos-'+a.lat+'-'+a.lon)).trim();const marker=aircraftMarkers.get(key);if(marker&&marker.getPopup())marker.setPopupContent(aircraftPopup(a))});
 }
@@ -489,7 +496,7 @@ function renderMultiTrackPanel(){
    if(distanceKm!==null&&distanceKm<=PROXIMITY_ALERT_KM){
     currentPairKeys.add(pairKey);
     closePairs.push('<div class="multi-track-pair proximity-pair"><span>⚠ '+escapeHtml(first.label)+' ↔ '+escapeHtml(second.label)+'</span><b>'+distance+'</b></div>');
-    if(!proximityAlertPairs.has(pairKey))setNotice('Attenzione: '+first.label+' e '+second.label+' sono a '+distance+' di distanza.',true);
+    if(!proximityAlertPairs.has(pairKey)){setNotice('Attenzione: '+first.label+' e '+second.label+' sono a '+distance+' di distanza.',true);playAlarmTone('proximity');}
     proximityAlertPairs.add(pairKey);
    }else if(distanceKm!==null&&distanceKm>PROXIMITY_RESET_KM){
     proximityAlertPairs.delete(pairKey);
@@ -599,6 +606,7 @@ function scanAircraftAlarms(aircraft){
    alarmActive.set(key,item);
    alarmHistory.unshift(item);
    if(alarmHistory.length>30)alarmHistory.length=30;
+   playAlarmTone('emergency');
   }
  });
  for(const key of alarmActive.keys())if(!seen.has(key))alarmActive.delete(key);
@@ -614,6 +622,8 @@ function setAlarmsEnabled(enabled){
  else $('alarmPanel').hidden=true;
 }
 $('alarmBtn').addEventListener('click',()=>setAlarmsEnabled(!alarmsEnabled));
+$('alarmAudioBtn').addEventListener('click',()=>setAlarmAudioEnabled(!alarmAudioEnabled));
+updateAlarmAudioButton();
 function aircraftPopup(a){
  const row=(label,value)=>'<div style="display:flex;justify-content:space-between;gap:14px;padding:4px 0;border-bottom:1px solid #34465b"><span style="color:#9fb1c6">'+label+'</span><b style="text-align:right">'+escapeHtml(value??'n/d')+'</b></div>';
  const flight=String(a.flight||'').trim();
