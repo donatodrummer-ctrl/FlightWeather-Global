@@ -34,6 +34,8 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .airport-button,.airfield-button{position:absolute;right:12px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:10px;font-weight:750;box-shadow:0 2px 8px #0008}
 .airport-button{top:260px;border:1px solid #ff4b55}.airport-button.active{background:#55151c;color:#ffdadd}
 .airfield-button{top:290px;border:1px solid #ffd43b}.airfield-button.active{background:#55440b;color:#fff0a6}
+.alarm-button{position:absolute;right:12px;top:350px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ff5964;border-radius:5px;padding:6px 9px;color:#fff;font-size:10px;font-weight:800;box-shadow:0 2px 8px #0008}.alarm-button.active{background:#741923;border-color:#ff9aa1;box-shadow:0 0 12px #ff263a66}
+.alarm-panel{position:absolute;z-index:1200;top:104px;right:12px;width:min(270px,calc(100vw - 24px));max-height:34dvh;overflow:auto;padding:10px;border:1px solid #ff5964;border-radius:8px;background:#101923f5;color:#f4f8ff;box-shadow:0 8px 24px #000b;backdrop-filter:blur(10px)}.alarm-panel[hidden]{display:none!important}.alarm-title{font-size:12px;font-weight:850;margin-bottom:7px;color:#ffb3b8}.alarm-empty{font-size:11px;color:#aebdce;padding:5px 0}.alarm-item{padding:7px 0;border-top:1px solid #51313b;font-size:11px;line-height:1.4}.alarm-item b{color:#fff}.alarm-item small{display:block;color:#aebdce;font-size:10px}
 main.night-mode #map .leaflet-tile-pane{filter:brightness(.42) saturate(.62) hue-rotate(155deg) contrast(1.12)}
 main.night-mode .aircraft-icon{filter:drop-shadow(0 0 1px #62ffe0);text-shadow:0 0 2px #62ffe0,0 1px 4px #000}
 main.night-mode .leaflet-popup-content-wrapper,main.night-mode .leaflet-popup-tip{background:#031b25!important;border-color:#35d9bd!important;box-shadow:0 0 14px #12c8a655!important}
@@ -71,6 +73,8 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
  <button class="airport-button" id="airportBtn" type="button" aria-pressed="false">● AEROPORTI OFF</button>
  <button class="airfield-button" id="airfieldBtn" type="button" aria-pressed="false">● CAMPI OFF</button>
 <button class="wind-button" id="windBtn" type="button" aria-pressed="false">↗ VENTO OFF</button>
+ <button class="alarm-button" id="alarmBtn" type="button" aria-pressed="false">⚠ ALLARMI OFF</button>
+ <section class="alarm-panel" id="alarmPanel" hidden aria-live="polite" aria-label="Allarmi aeronautici"><div class="alarm-title">⚠ MONITORAGGIO ALLARMI</div><div id="alarmList" class="alarm-empty">Nessun allarme rilevato.</div></section>
 <div id="altitudeLegend" class="altitude-legend" aria-label="Legenda colori quota">
  <div class="legend-title">Quota scia</div>
  <div class="legend-row"><span class="swatch" style="background:#42d6ff"></span>Sotto 3.000 m</div>
@@ -91,6 +95,9 @@ let airportData=null,airportLayer=L.layerGroup(),airfieldLayer=L.layerGroup(),ai
 let windEnabled=false,windLayer=L.layerGroup(),windLoading=false,lastWindRefresh=0;
 const flightHistory=new Map();
 let aircraftCache=[];
+let alarmsEnabled=false;
+const alarmHistory=[];
+const alarmActive=new Map();
 let pinnedAircraftKey=null;
 let followSelectedAircraft=false;
 let lastFollowCenter=0;
@@ -380,6 +387,45 @@ function squawkAlert(a){
  const alerts={'7500':'Codice 7500 · Interferenza illecita','7600':'Codice 7600 · Avaria comunicazioni radio','7700':'Codice 7700 · Emergenza generale'};
  return alerts[code]?{code,text:alerts[code]}:null;
 }
+function updateAlarmPanel(){
+ const panel=$('alarmPanel'),list=$('alarmList');
+ if(!alarmsEnabled){panel.hidden=true;return}
+ panel.hidden=false;
+ const active=[...alarmActive.values()].sort((a,b)=>b.timestamp-a.timestamp);
+ const recent=alarmHistory.slice(0,8);
+ if(!active.length&&!recent.length){list.className='alarm-empty';list.textContent='Nessun allarme rilevato. Il monitoraggio è attivo.';return}
+ list.className='';
+ const activeHtml=active.map(item=>'<div class="alarm-item"><b>● ATTIVO · '+escapeHtml(item.flight)+'</b><br>'+escapeHtml(item.alert.text)+'<small>'+new Date(item.timestamp).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'</small></div>').join('');
+ const historyHtml=recent.length?'<div style="font-size:10px;color:#aebdce;font-weight:800;margin-top:8px">ULTIMI ALLARMI RICEVUTI</div>'+recent.map(item=>'<div class="alarm-item"><b>'+escapeHtml(item.flight)+'</b> · '+escapeHtml(item.alert.code)+'<br>'+escapeHtml(item.alert.text)+'<small>'+new Date(item.timestamp).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'</small></div>').join(''):'';
+ list.innerHTML=activeHtml+historyHtml;
+}
+function scanAircraftAlarms(aircraft){
+ const seen=new Set(),now=Date.now();
+ aircraft.forEach(a=>{
+  const key=String(a.hex||a.flight||('pos-'+a.lat+'-'+a.lon)).trim(),alert=squawkAlert(a);
+  if(!alert)return;
+  seen.add(key);
+  const previous=alarmActive.get(key);
+  if(!previous||previous.alert.code!==alert.code){
+   const item={key,flight:String(a.flight||a.r||a.hex||'Aeromobile'),alert,timestamp:now};
+   alarmActive.set(key,item);
+   alarmHistory.unshift(item);
+   if(alarmHistory.length>30)alarmHistory.length=30;
+  }
+ });
+ for(const key of alarmActive.keys())if(!seen.has(key))alarmActive.delete(key);
+ updateAlarmPanel();
+}
+function setAlarmsEnabled(enabled){
+ alarmsEnabled=enabled;
+ const button=$('alarmBtn');
+ button.classList.toggle('active',enabled);
+ button.textContent=enabled?'⚠ ALLARMI ON':'⚠ ALLARMI OFF';
+ button.setAttribute('aria-pressed',String(enabled));
+ if(enabled)scanAircraftAlarms(aircraftCache);
+ else $('alarmPanel').hidden=true;
+}
+$('alarmBtn').addEventListener('click',()=>setAlarmsEnabled(!alarmsEnabled));
 function aircraftPopup(a){
  const row=(label,value)=>'<div style="display:flex;justify-content:space-between;gap:14px;padding:4px 0;border-bottom:1px solid #34465b"><span style="color:#9fb1c6">'+label+'</span><b style="text-align:right">'+escapeHtml(value??'n/d')+'</b></div>';
  const flight=String(a.flight||'').trim();
@@ -421,6 +467,7 @@ async function loadPlanes(){
   if(!aircraft.length)throw new Error('Nessun aeromobile rilevato in quest’area.');
 
   aircraftCache=aircraft;
+  if(alarmsEnabled)scanAircraftAlarms(aircraft);
   const now=Date.now();
   const activeKeys=new Set();
   aircraft.forEach(a=>{
