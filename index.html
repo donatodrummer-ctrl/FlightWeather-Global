@@ -38,6 +38,7 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 <body>
 <header><div class="brand">✈ <span>FlightWeather</span> Global</div><div class="status" id="topStatus">Mappa radar in inizializzazione…</div></header>
 <main><div id="map"></div>
+<input id="planesToggle" type="checkbox" checked hidden aria-hidden="true">
 <section class="panel compact" aria-label="Controlli mappa">
 <button class="panel-toggle" id="panelToggle" type="button" aria-expanded="false">⌃ Apri pannello</button>
 <h1>Cerca volo o aeroporto</h1>
@@ -496,7 +497,7 @@ function setLightningEnabled(enabled){
  else if(lightningLayer&&map.hasLayer(lightningLayer))map.removeLayer(lightningLayer);
 }
 $('panelToggle').addEventListener('click',()=>setPanelCompact(!document.querySelector('.panel').classList.contains('compact')));
-function setTrafficEnabled(enabled){$('planesToggle').checked=enabled;$('trafficBtn').classList.toggle('active',enabled);$('trafficBtn').textContent=enabled?'✈ TRAFFICO ON':'✈ TRAFFICO OFF';$('trafficBtn').setAttribute('aria-pressed',String(enabled));if(!enabled){planeLayer.clearLayers();$('planeCount').textContent='0';if(selectedAircraft)showSelectedAircraft(null)}else loadPlanes()}
+function setTrafficEnabled(enabled){$('planesToggle').checked=enabled;$('trafficBtn').classList.toggle('active',enabled);$('trafficBtn').textContent=enabled?'✈ TRAFFICO ON':'✈ TRAFFICO OFF';$('trafficBtn').setAttribute('aria-pressed',String(enabled));if(!enabled){planeLayer.clearLayers();$('planeCount').textContent='0';if(pinnedAircraftKey){pinnedAircraftKey=null;showSelectedAircraft(null);drawSelectedTrail()}}else loadPlanes()}
 $('trafficBtn').addEventListener('click',()=>setTrafficEnabled(!$('planesToggle').checked));
 $('planesToggle').addEventListener('change',loadPlanes);
 $('weatherToggle').addEventListener('change',e=>setRadarEnabled(e.target.checked));
