@@ -86,6 +86,23 @@ if(settingsPanel){
  });
 }
 let flyItalyKey=localStorage.getItem('flyitalyadsb_key')||'';
+// Limita tutte le chiamate FlyItalyADSB (live e storico) a una ogni 4 secondi.
+let flyItalyQueue=Promise.resolve(),flyItalyNextRequestAt=0,flyItalyBlockedUntil=0,flyItalyBackoffMs=60000,lastLiveRequestAt=0;
+const waitMs=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function fetchFlyItaly(url,options){
+ const run=async()=>{
+  const wait=Math.max(0,flyItalyNextRequestAt-Date.now(),flyItalyBlockedUntil-Date.now());
+  if(wait)await waitMs(wait);
+  flyItalyNextRequestAt=Date.now()+4000;
+  const response=await fetch(url,options);
+  if(response.status===429){flyItalyBlockedUntil=Date.now()+flyItalyBackoffMs;flyItalyBackoffMs=Math.min(flyItalyBackoffMs*2,300000)}
+  else if(response.ok)flyItalyBackoffMs=60000;
+  return response;
+ };
+ const task=flyItalyQueue.then(run,run);
+ flyItalyQueue=task.then(()=>undefined,()=>undefined);
+ return task;
+}
 $('apiKeyInput').value=flyItalyKey;
 $('saveApiKey').addEventListener('click',()=>{const value=$('apiKeyInput').value.trim();if(!value){setNotice('Inserisci la chiave API ricevuta da FlyItalyADSB.',true);return}flyItalyKey=value;localStorage.setItem('flyitalyadsb_key',value);setNotice('Chiave salvata su questo browser. Carico il traffico…');loadPlanes();});
 function planeIcon(a,selected=false){
@@ -159,7 +176,7 @@ async function loadHistoricalTrail(a,key){
   const baseUrl='https://api.flyitalyadsb.com/v2/history/'+encodeURIComponent(String(a.hex).toLowerCase());
   let dates=[today];
   try{
-   const datesRes=await fetch(baseUrl,{headers,credentials:'omit',mode:'cors'});
+   const datesRes=await fetchFlyItaly(baseUrl,{headers,credentials:'omit',mode:'cors'});
    if(datesRes.ok){
     const datesData=await datesRes.json();
     if(Array.isArray(datesData.dates)){
@@ -169,7 +186,7 @@ async function loadHistoricalTrail(a,key){
   }catch(e){console.warn('Elenco date storico non disponibile:',e)}
   let points=[];
   for(const date of dates){
-   const res=await fetch(baseUrl+'/'+date,{headers,credentials:'omit',mode:'cors'});
+   const res=await fetchFlyItaly(baseUrl+'/'+date,{headers,credentials:'omit',mode:'cors'});
    if(!res.ok){if(res.status!==404)console.warn('Storico '+date+' HTTP '+res.status);continue}
    const data=await res.json();
    const base=Number(data.timestamp);
@@ -282,15 +299,17 @@ function aircraftPopup(a){
 let planesLoading=false;
 async function loadPlanes(){
  if(!$('planesToggle').checked){planeLayer.clearLayers();$('planeCount').textContent='0';return}
- // Evita richieste sovrapposte ai feed ADS-B pubblici.
+ // Poll live non più frequente di 10 secondi; rispetta anche la pausa dopo HTTP 429.
+ if(Date.now()<flyItalyBlockedUntil||Date.now()-lastLiveRequestAt<10000)return;
  if(planesLoading)return;
  planesLoading=true;
+ lastLiveRequestAt=Date.now();
  const c=map.getCenter(),radius=Math.min(250,Math.max(30,Math.round(map.getBounds().getNorthEast().distanceTo(map.getBounds().getSouthWest())/1852/2)));
  $('topStatus').textContent='Aggiornamento traffico…';
  try{
   if(!flyItalyKey)throw new Error('Inserisci prima la chiave API FlyItalyADSB nel campo qui sopra.');
   const url='https://api.flyitalyadsb.com/v2/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius+'?with=route';
-  const res=await fetch(url,{headers:{Accept:'application/json','X-Api-Key':flyItalyKey},credentials:'omit',mode:'cors'});
+  const res=await fetchFlyItaly(url,{headers:{Accept:'application/json','X-Api-Key':flyItalyKey},credentials:'omit',mode:'cors'});
   if(!res.ok)throw new Error('FlyItalyADSB HTTP '+res.status);
   const data=await res.json();
   const aircraft=(data.ac||[]).map(a=>({...a,seen:a.seen??a.seen_pos})).filter(a=>Number.isFinite(Number(a.lat))&&Number.isFinite(Number(a.lon)));
@@ -350,7 +369,7 @@ async function loadPlanes(){
   $('planeCount').textContent=aircraft.length.toLocaleString('it-IT');
   $('topStatus').textContent='Traffico aggiornato · '+source+' · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   setNotice(aircraft.length?'Ricevuti '+aircraft.length+' aeromobili entro circa '+Math.round(radius*1.852)+' km dal centro della mappa.':'Nessun aeromobile rilevato in quest’area. Prova a spostare o ingrandire la mappa.');
- }catch(e){$('topStatus').textContent='Traffico non disponibile';setNotice(e.message+' — Mantengo gli ultimi aerei ricevuti e riprovo automaticamente.',true)}
+ }catch(e){if(String(e.message).includes('429')){$('topStatus').textContent='Limite API · pausa automatica';setNotice('FlyItalyADSB ha risposto 429: sospendo le richieste per almeno 60 secondi e poi riprovo, aumentando la pausa se necessario.',true)}else{$('topStatus').textContent='Traffico non disponibile';setNotice(e.message+' — Mantengo gli ultimi aerei ricevuti e riprovo automaticamente.',true)}}
  finally{planesLoading=false;}
 }
 async function searchMap(){
@@ -441,6 +460,6 @@ locateButton.addEventListener('click',event=>{
 map.on('click',()=>{pinnedAircraftKey=null;followSelectedAircraft=false;updateFollowButton();updateAircraftIcons();showSelectedAircraft(null);drawSelectedTrail();setPanelCompact(true)});
 let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes()},700)});
 loadRadar();loadPlanes();
-setInterval(()=>{if($('planesToggle').checked)loadPlanes()},2000);
+setInterval(()=>{if($('planesToggle').checked)loadPlanes()},10000);
 setInterval(()=>{if($('weatherToggle').checked)loadRadar()},600000);
 </script></body></html>
