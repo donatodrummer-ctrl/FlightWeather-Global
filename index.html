@@ -432,6 +432,28 @@ function drawMultiTrack(){
  }
  renderMultiTrackPanel();
 }
+function altitudeFeet(a){const raw=a&&(a.alt_baro??a.alt_geom);if(raw===null||raw===undefined||raw===''||raw==='ground')return null;const n=Number(raw);return Number.isFinite(n)?n:null}
+function verticalSeparation(a,b){const x=altitudeFeet(a),y=altitudeFeet(b);return x===null||y===null?null:Math.round(Math.abs(x-y)*0.3048)}
+function detectHoldingPattern(key){
+ const history=(flightHistory.get(key)||[]).filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon))&&Number.isFinite(Number(p.time)));
+ if(history.length<10)return false;
+ const points=history.slice(-36);if(points.length<10||points[points.length-1].time-points[0].time<8*60*1000)return false;
+ const centerLat=points.reduce((v,p)=>v+Number(p.lat),0)/points.length,centerLon=points.reduce((v,p)=>v+Number(p.lon),0)/points.length,cos=Math.cos(centerLat*Math.PI/180);
+ const xy=points.map(p=>({x:(Number(p.lon)-centerLon)*111320*cos,y:(Number(p.lat)-centerLat)*111320})),radii=xy.map(p=>Math.hypot(p.x,p.y)),meanRadius=radii.reduce((v,n)=>v+n,0)/radii.length;
+ if(meanRadius<450||meanRadius>8500||Math.max(...radii)-Math.min(...radii)>Math.max(1800,meanRadius*.85))return false;
+ let turn=0;for(let i=1;i<xy.length;i++){const a=Math.atan2(xy[i-1].y,xy[i-1].x),b=Math.atan2(xy[i].y,xy[i].x);let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d< -Math.PI)d+=Math.PI*2;turn+=d}
+ return Math.abs(turn)>=Math.PI*1.55;
+}
+function landingEstimate(a){
+ const route=a&&a.route?a.route:{},code=String(route.to_icao||route.to_iata||route.to||a&&(a.dest||a.destination||a.to)||'').trim().toUpperCase();
+ if(!code||!airportData)return null;
+ const dest=airportData.find(p=>String(p[6]||'').toUpperCase()===code||String(p[7]||'').toUpperCase()===code);
+ if(!dest)return null;
+ const lat=Number(a.lat),lon=Number(a.lon),dlat=Number(dest[1]),dlon=Number(dest[0]),knots=Number(a.gs);
+ if(!Number.isFinite(lat)||!Number.isFinite(lon)||!Number.isFinite(dlat)||!Number.isFinite(dlon)||!Number.isFinite(knots)||knots<55)return null;
+ const distance=map.distance([lat,lon],[dlat,dlon])/1000;if(distance>450)return null;
+ return {distance,minutes:Math.max(1,Math.round(distance/(knots*1.852)*60)),name:dest[3]||code,code};
+}
 function renderMultiTrackPanel(){
  const panel=$('multiTrackPanel');
  if(!panel)return;
@@ -449,9 +471,9 @@ function renderMultiTrackPanel(){
   const altitude=a?niceAlt(a.alt_baro??a.alt_geom):'N/D';
   const speed=a?niceSpeed(a.gs):'N/D';
   const lat=a?Number(a.lat):NaN,lon=a?Number(a.lon):NaN;
-  tracked.push({key,label,color,destination:String(destination).toUpperCase(),altitude,speed,lat,lon});
+  const holding=detectHoldingPattern(key),eta=a?landingEstimate(a):null;tracked.push({key,label,color,destination:String(destination).toUpperCase(),altitude,speed,lat,lon,a,holding,eta});
  }
- const rows=tracked.map(item=>'<div class="multi-track-row multi-track-data-row"><span class="multi-track-dot" style="background:'+item.color+'"></span><span class="multi-track-name"><b>'+escapeHtml(item.label)+'</b><small>Qta '+escapeHtml(item.altitude)+' · '+escapeHtml(item.speed)+'</small><small>Dest. '+escapeHtml(item.destination)+'</small></span><button class="multi-track-remove" type="button" data-track-remove="'+escapeHtml(item.key)+'" aria-label="Rimuovi '+escapeHtml(item.label)+'">✕</button></div>');
+ const rows=tracked.map(item=>'<div class="multi-track-row multi-track-data-row"><span class="multi-track-dot" style="background:'+item.color+'"></span><span class="multi-track-name"><b>'+escapeHtml(item.label)+'</b><small>Qta '+escapeHtml(item.altitude)+' · '+escapeHtml(item.speed)+'</small><small>Dest. '+escapeHtml(item.destination)+'</small>'+(item.holding?'<small style="color:#ffca66;font-weight:800">◌ POSSIBILE CIRCUITO D’ATTESA</small>':'')+(item.eta?'<small style="color:#8fe3a2">Atterraggio stimato: '+item.eta.minutes+' min · '+item.eta.distance.toFixed(1).replace('.',',')+' km</small>':'')+'</span><button class="multi-track-remove" type="button" data-track-remove="'+escapeHtml(item.key)+'" aria-label="Rimuovi '+escapeHtml(item.label)+'">✕</button></div>');
  const pairs=[],closePairs=[];
  const currentPairKeys=new Set();
  for(let i=0;i<tracked.length;i++){
@@ -463,7 +485,7 @@ function renderMultiTrackPanel(){
     distanceKm=map.distance([first.lat,first.lon],[second.lat,second.lon])/1000;
     distance=distanceKm.toFixed(1).replace('.',',')+' km';
    }
-   pairs.push('<div class="multi-track-pair"><span>'+escapeHtml(first.label)+' ↔ '+escapeHtml(second.label)+'</span><b>'+distance+'</b></div>');
+   const vertical=verticalSeparation(first.a,second.a);pairs.push('<div class="multi-track-pair"><span>'+escapeHtml(first.label)+' ↔ '+escapeHtml(second.label)+'</span><b>'+distance+(vertical===null?'':'<small style="display:block;color:'+(vertical<300?'#ff7777':'#a9bfd2')+';font-size:8px;text-align:right">Δ quota '+vertical.toLocaleString('it-IT')+' m</small>')+'</b></div>');
    if(distanceKm!==null&&distanceKm<=PROXIMITY_ALERT_KM){
     currentPairKeys.add(pairKey);
     closePairs.push('<div class="multi-track-pair proximity-pair"><span>⚠ '+escapeHtml(first.label)+' ↔ '+escapeHtml(second.label)+'</span><b>'+distance+'</b></div>');
@@ -526,7 +548,7 @@ function showSelectedAircraft(a){
  const alertBox=alert?'<div style="background:#721923;border:1px solid #ff5964;border-radius:6px;padding:7px;margin:6px 0;color:#fff;font-size:11px;font-weight:850">⚠ '+value(alert.text)+'</div>':'';
  box.innerHTML='<h2>'+value(flight)+'</h2>'+
   '<div class="sub" style="display:flex;align-items:center;gap:6px;min-width:0;line-height:1.25">'+airlineLogo+'<span style="min-width:0;overflow-wrap:anywhere;font-size:13px;font-weight:750;line-height:1.2">'+(airline?value(airline[1])+' · ':'')+value(routeLabel)+'</span></div>'+
-  alertBox+'<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Registrazione<b>'+value(a.r||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div><div>Velocità verticale<b>'+value(niceVertical(a.baro_rate??a.geom_rate))+'</b></div><div>Temperatura esterna (OAT)<b>'+value(niceOAT(a.oat))+'</b></div><div>Squawk<b>'+value(a.squawk||'n/d')+'</b></div></div>'+
+  alertBox+'<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Registrazione<b>'+value(a.r||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div><div>Velocità verticale<b>'+value(niceVertical(a.baro_rate??a.geom_rate))+'</b></div><div>Temperatura esterna (OAT)<b>'+value(niceOAT(a.oat))+'</b></div><div>Squawk<b>'+value(a.squawk||'n/d')+'</b></div></div>'+(detectHoldingPattern(String(a.hex||a.flight||'').trim())?'<div style="margin-top:6px;color:#ffca66;font-size:10px;font-weight:800">◌ POSSIBILE CIRCUITO D’ATTESA</div>':'')+(landingEstimate(a)?'<div style="margin-top:6px;color:#8fe3a2;font-size:10px">Atterraggio stimato: '+landingEstimate(a).minutes+' min · '+landingEstimate(a).distance.toFixed(1).replace('.',',')+' km</div>':'')+'<div style="font-size:9px;color:#91a8c4;margin-top:4px">Stime indicative basate sui dati ADS-B, non informazioni ATC.</div>'+
   '<button class="follow'+(followSelectedAircraft?' active':'')+'" id="followBtn" type="button" aria-pressed="'+String(followSelectedAircraft)+'">'+(followSelectedAircraft?'◎ Segui attivo':'◎ Segui aereo')+'</button>'+
   '<button class="multi-track-add'+(multiTrackKeys.has(String(a.hex||a.flight||'').trim())?' active':'')+'" id="multiTrackAddBtn" type="button">'+(multiTrackKeys.has(String(a.hex||a.flight||'').trim())?'✓ AEREO NEL MULTI-TRACK':'＋ AGGIUNGI AL MULTI-TRACK')+'</button>';
  box.hidden=false;
