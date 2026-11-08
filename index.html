@@ -149,7 +149,7 @@ async function loadPlanes(){
  const c=map.getCenter(),radius=Math.min(250,Math.max(30,Math.round(map.getBounds().getNorthEast().distanceTo(map.getBounds().getSouthWest())/1852/2)));
  $('topStatus').textContent='Aggiornamento traffico…';
  try{
-  const directUrl='https://api.adsb.lol/v2/point/'+c.lat.toFixed(4)+'/'+c.lng.toFixed(4)+'/'+radius;
+  const directUrl='https://opendata.adsb.fi/api/v3/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius;
   const endpoints=['https://proxy.cors.dev/'+directUrl];
   let aircraft=[],lastError=null,source='';
   for(const url of endpoints){
@@ -159,7 +159,7 @@ async function loadPlanes(){
     const data=await res.json();
     const list=data.ac||data.aircraft||[];
     const parsed=list.map(a=>({...a,seen:a.seen??a.seen_pos})).filter(a=>Number.isFinite(Number(a.lat))&&Number.isFinite(Number(a.lon)));
-    if(parsed.length){aircraft=parsed;source='adsb.lol';break;}
+    if(parsed.length){aircraft=parsed;source='adsb.fi';break;}
     lastError=new Error('Nessun aeromobile restituito dal servizio');
    }catch(err){lastError=err;}
   }
@@ -363,6 +363,6 @@ $('locateBtn').addEventListener('click',()=>{
 
 let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes();clearTimeout(aeronauticalTimer);if($('aeroToggle').checked)aeronauticalTimer=setTimeout(loadAeronautical,900)},700)});
 loadRadar();loadPlanes();
-setInterval(()=>{if($('planesToggle').checked)loadPlanes()},5000);
+setInterval(()=>{if($('planesToggle').checked)loadPlanes()},1200);
 setInterval(()=>{if($('weatherToggle').checked)loadRadar()},600000);
 </script></body></html>
