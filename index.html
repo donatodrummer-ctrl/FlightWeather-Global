@@ -225,10 +225,10 @@ async function loadPlanes(){
   // Rimuove gli aeromobili non più presenti nell'ultimo rilevamento.
   for(const [key,marker] of aircraftMarkers){
    if(!activeKeys.has(key)){
+    if(pinnedAircraftKey===key)continue;
     aircraftMotions.delete(key);
     planeLayer.removeLayer(marker);
     aircraftMarkers.delete(key);
-    if(pinnedAircraftKey===key){pinnedAircraftKey=null;showSelectedAircraft(null);}
    }
   }
   for(const [key,history] of flightHistory){if(!history.length||now-history[history.length-1].time>20*60*1000)flightHistory.delete(key)}
