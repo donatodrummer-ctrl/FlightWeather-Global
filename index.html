@@ -221,7 +221,9 @@ function radioAirportMarker(lat,lon,airport,items){
   return '<div style="display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid #34465b"><span><b style="color:#42c8e8">'+escapeHtml(type)+'</b>'+description+'</span><b style="white-space:nowrap">'+Number(f.frequency_mhz).toFixed(3)+' MHz</b></div>';
  }).join('');
  const marker=L.marker([lat,lon],{icon});
- marker.bindPopup('<div style="min-width:245px;max-width:310px"><b>'+escapeHtml(airport.name||airport.ident||'Aeroporto')+' · '+escapeHtml(airport.ident||'')+'</b><div style="font-size:10px;color:#9fb1c6;margin:4px 0 7px">FREQUENZE RADIO AERONAUTICHE</div>'+lines+'</div>',{maxWidth:340});
+ const skyVectorUrl='https://skyvector.com/airport/'+encodeURIComponent(String(airport.ident||'').trim().toUpperCase());
+ const skyVectorLink=airport.ident?'<div style="margin-top:9px;padding-top:8px;border-top:1px solid #34465b"><a href="'+skyVectorUrl+'" target="_blank" rel="noopener noreferrer" style="color:#42c8e8;font-weight:750;text-decoration:none">Apri frequenze su SkyVector ↗</a></div>':'';
+ marker.bindPopup('<div style="min-width:245px;max-width:310px"><b>'+escapeHtml(airport.name||airport.ident||'Aeroporto')+' · '+escapeHtml(airport.ident||'')+'</b><div style="font-size:10px;color:#9fb1c6;margin:4px 0 7px">FREQUENZE RADIO AERONAUTICHE</div>'+lines+skyVectorLink+'</div>',{maxWidth:340});
  marker.bindTooltip('COM · '+items.length,{permanent:true,direction:'right',offset:[10,0],className:'aero-frequency-label'});
  marker.addTo(aeronauticalLayer);
 }
