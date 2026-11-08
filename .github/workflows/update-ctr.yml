@@ -31,14 +31,14 @@ jobs:
               json.dump({'type':'FeatureCollection','features':ctr}, f, ensure_ascii=False, separators=(',', ':'))
           print(f"CTR: {len(ctr)}; file: {os.path.getsize('data/ctr-it.geojson')} byte")
           PY
-      - name: Scarica e compatta aeroporti e campi di volo globali
+      - name: Scarica e comprime aeroporti e campi di volo globali
         run: |
           curl --fail --location --silent --show-error \
             'https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv' \
             -o /tmp/airports.csv
           python - <<'PY'
-          import csv, json, os
-          features = []
+          import csv, json, os, gzip
+          points = []
           with open('/tmp/airports.csv', newline='', encoding='utf-8') as f:
               for row in csv.DictReader(f):
                   kind = row.get('type', '')
@@ -50,21 +50,23 @@ jobs:
                       continue
                   if not (-90 <= lat <= 90 and -180 <= lon <= 180):
                       continue
-                  props = {k: row.get(k, '') for k in ('type', 'name', 'iso_country', 'municipality', 'icao_code', 'iata_code')}
-                  features.append({'type':'Feature','geometry':{'type':'Point','coordinates':[lon,lat]},'properties':props})
-          assert features, 'Nessun aeroporto valido nel dataset OurAirports'
-          with open('data/airports.geojson', 'w', encoding='utf-8') as f:
-              json.dump({'type':'FeatureCollection','features':features}, f, ensure_ascii=False, separators=(',', ':'))
-          print(f"Punti aeroportuali: {len(features)}; file: {os.path.getsize('data/airports.geojson')} byte")
+                  points.append([lon,lat,kind,row.get('name',''),row.get('iso_country',''),row.get('municipality',''),row.get('icao_code',''),row.get('iata_code','')])
+          assert points, 'Nessun aeroporto valido nel dataset OurAirports'
+          raw = json.dumps(points, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
+          with open('data/airports.json', 'wb') as f:
+              f.write(raw)
+          with gzip.open('data/airports.json.gz', 'wb', compresslevel=9) as f:
+              f.write(raw)
+          print(f"Punti: {len(points)}; JSON: {len(raw)} byte; GZIP: {os.path.getsize('data/airports.json.gz')} byte")
           PY
       - name: Pubblica archivi aggiornati
         run: |
-          if [ -z "$(git status --porcelain -- data/ctr-it.geojson data/airports.geojson)" ]; then
+          if [ -z "$(git status --porcelain -- data/ctr-it.geojson data/airports.json data/airports.json.gz)" ]; then
             echo "Dati già aggiornati"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ctr-it.geojson data/airports.geojson
-          git commit -m "Aggiorna CTR e punti aeroportuali"
+          git add data/ctr-it.geojson data/airports.json data/airports.json.gz
+          git commit -m "Aggiorna CTR e dati aeroportuali compressi"
           git push
