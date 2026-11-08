@@ -196,7 +196,11 @@ function parseCSV(text){
  const headers=rows.shift().map(x=>x.trim());
  return rows.filter(r=>r.some(v=>v.trim())).map(r=>Object.fromEntries(headers.map((h,i)=>[h,(r[i]||'').trim()])));
 }
-/* Archivio radio: struttura pronta per dati ufficiali AIP ENAV verificati.\n   Finché il dataset ENAV non viene importato, viene usato OurAirports come riferimento preliminare;\n   non è una fonte ufficiale né garantisce copertura o aggiornamento completi. */\nconst officialItalyRadioFrequencies=[]; // Formato previsto: {airport_ident,type,description,frequency_mhz,source,validity}\nasync function getRadioFrequencyData(){
+/* Archivio radio: struttura pronta per dati ufficiali AIP ENAV verificati.
+   Finché il dataset ENAV non viene importato, viene usato OurAirports come riferimento preliminare;
+   non è una fonte ufficiale né garantisce copertura o aggiornamento completi. */
+const officialItalyRadioFrequencies=[]; // Formato previsto: {airport_ident,type,description,frequency_mhz,source,validity}
+async function getRadioFrequencyData(){
  if(!radioFrequencyDataPromise){
   radioFrequencyDataPromise=(async()=>{
    const base='https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/';
