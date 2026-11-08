@@ -29,6 +29,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .traffic-button{position:absolute;right:12px;top:197px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}.traffic-button.active{background:#51420a;border-color:#ffe477;color:#fff2b0}
 .night-button{position:absolute;right:12px;top:166px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #4de0c1;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}
 .night-button.active{background:#073d43;border-color:#8affea;color:#bafff3;box-shadow:0 0 12px #20e6c455}
+.ctr-button{position:absolute;right:12px;top:228px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ff6872;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}.ctr-button.active{background:#4a1720;border-color:#ff9aa1;color:#ffdadd}
 main.night-mode #map .leaflet-tile-pane{filter:brightness(.42) saturate(.62) hue-rotate(155deg) contrast(1.12)}
 main.night-mode .aircraft-icon{filter:drop-shadow(0 0 1px #62ffe0);text-shadow:0 0 2px #62ffe0,0 1px 4px #000}
 main.night-mode .leaflet-popup-content-wrapper,main.night-mode .leaflet-popup-tip{background:#031b25!important;border-color:#35d9bd!important;box-shadow:0 0 14px #12c8a655!important}
@@ -62,6 +63,7 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 <button class="altitude-button" id="altitudeBtn" type="button" aria-pressed="false">◈ QUOTA OFF</button>
 <button class="traffic-button active" id="trafficBtn" type="button" aria-pressed="true">✈ TRAFFICO ON</button>
 <button class="night-button" id="nightBtn" type="button" aria-pressed="false">◐ NOTTE OFF</button>
+ <button class="ctr-button" id="ctrBtn" type="button" aria-pressed="false">CTR OFF</button>
 <div id="altitudeLegend" class="altitude-legend" aria-label="Legenda colori quota">
  <div class="legend-title">Quota scia</div>
  <div class="legend-row"><span class="swatch" style="background:#42d6ff"></span>Sotto 3.000 m</div>
@@ -77,7 +79,7 @@ map.doubleClickZoom.enable();
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,className:'basemap-dim',attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
 map.createPane('lightningPane');map.getPane('lightningPane').style.zIndex='420';map.getPane('lightningPane').style.pointerEvents='none';
-let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[],lightningLayer=null;
+let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[],lightningLayer=null,ctrLayer=null,ctrDataLoaded=false,ctrLoading=false;
 const flightHistory=new Map();
 let aircraftCache=[];
 let pinnedAircraftKey=null;
@@ -504,6 +506,68 @@ $('weatherToggle').addEventListener('change',e=>setRadarEnabled(e.target.checked
 $('lightningToggle').addEventListener('change',e=>setLightningEnabled(e.target.checked));
 $('altitudeBtn').addEventListener('click',()=>{altitudeColorMode=!altitudeColorMode;$('altitudeBtn').classList.toggle('active',altitudeColorMode);$('altitudeBtn').textContent=altitudeColorMode?'◈ QUOTA ON':'◈ QUOTA OFF';$('altitudeBtn').setAttribute('aria-pressed',String(altitudeColorMode));$('altitudeLegend').classList.toggle('visible',altitudeColorMode);drawSelectedTrail()});
 $('nightBtn').addEventListener('click',()=>{const enabled=!document.querySelector('main').classList.contains('night-mode');document.querySelector('main').classList.toggle('night-mode',enabled);$('nightBtn').classList.toggle('active',enabled);$('nightBtn').textContent=enabled?'◐ NOTTE ON':'◐ NOTTE OFF';$('nightBtn').setAttribute('aria-pressed',String(enabled))});
+
+function ctrLimitText(limit){
+ if(!limit)return 'N/D';
+ const value=Number(limit.value);
+ const unit=String(limit.unit??'').toUpperCase();
+ const datum=Number(limit.referenceDatum);
+ if(!Number.isFinite(value))return 'N/D';
+ let altitude=value;
+ if(unit==='M'||unit==='METERS'||unit==='METRES')altitude=Math.round(value*3.28084);
+ else if(unit==='FL')altitude=Math.round(value*100);
+ const amount=unit==='M'||unit==='METERS'||unit==='METRES'?Math.round(value)+' m':Math.round(altitude).toLocaleString('it-IT')+' ft';
+ const ref=datum===0?' SFC':datum===1?' AMSL':datum===2?' AGL':'';
+ return amount+ref;
+}
+async function setCtrEnabled(enabled){
+ const button=$('ctrBtn');
+ button.disabled=true;
+ if(enabled){
+  button.textContent='CTR…';
+  if(!ctrDataLoaded){
+   if(ctrLoading){button.disabled=false;return}
+   ctrLoading=true;
+   try{
+    const response=await fetch('https://storage.openaip.net/openaip-system-exports/it_asp.geojson',{headers:{'Accept':'application/geo+json, application/json'}});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    const data=await response.json();
+    const features=(data.features||[]).filter(feature=>{
+     const p=feature.properties||{};
+     const type=String(p.typeName||p.type||p.airspaceType||'').toUpperCase();
+     return type==='CTR'||type==='4'||p.type===4;
+    });
+    if(!features.length)throw new Error('Nessun CTR trovato nel dataset');
+    ctrLayer=L.geoJSON({type:'FeatureCollection',features},{
+     style:{color:'#ff6872',weight:2.2,opacity:.95,fillColor:'#ff6872',fillOpacity:.055,dashArray:'7 5'},
+     onEachFeature:(feature,layer)=>{
+      const p=feature.properties||{};
+      const name=escapeHtml(p.name||p.title||'CTR senza nome');
+      const klass=p.icaoClass??p.class??'N/D';
+      const lower=ctrLimitText(p.lowerLimit||p.lowerCeiling);
+      const upper=ctrLimitText(p.upperLimit||p.upperCeiling);
+      layer.bindTooltip(name,{sticky:true,direction:'top',className:'ctr-label'});
+      layer.bindPopup('<b>'+name+'</b><br>Tipo: CTR<br>Classe: '+escapeHtml(klass)+'<br>Limite inferiore: '+escapeHtml(lower)+'<br>Limite superiore: '+escapeHtml(upper)+'<hr><small>Dato OpenAIP non certificato. Verificare sempre l’AIP ENAV.</small>');
+     }
+    });
+    ctrDataLoaded=true;
+   }catch(error){
+    ctrLoading=false;button.disabled=false;button.textContent='CTR OFF';button.classList.remove('active');button.setAttribute('aria-pressed','false');
+    setNotice('CTR non caricabili: '+error.message,true);return;
+   }
+   ctrLoading=false;
+  }
+  if(ctrLayer&&!map.hasLayer(ctrLayer))ctrLayer.addTo(map);
+  button.classList.add('active');button.textContent='CTR ON';button.setAttribute('aria-pressed','true');
+  setNotice('CTR italiani attivi · dati OpenAIP indicativi, non ufficiali.');
+ }else{
+  if(ctrLayer&&map.hasLayer(ctrLayer))map.removeLayer(ctrLayer);
+  button.classList.remove('active');button.textContent='CTR OFF';button.setAttribute('aria-pressed','false');
+ }
+ button.disabled=false;
+}
+$('ctrBtn').addEventListener('click',()=>setCtrEnabled(!$('ctrBtn').classList.contains('active')));
+
 function setRadarEnabled(enabled){$('weatherToggle').checked=enabled;$('radarBtn').classList.toggle('active',enabled);$('radarBtn').textContent=enabled?'◉ RADAR ON':'◉ RADAR OFF';$('radarBtn').setAttribute('aria-pressed',String(enabled));if(!radarLayer){if(enabled)loadRadar();return}if(enabled)radarLayer.addTo(map);else map.removeLayer(radarLayer)}
 $('radarBtn').addEventListener('click',()=>setRadarEnabled(!$('weatherToggle').checked));
 $('refreshBtn').addEventListener('click',()=>{loadPlanes();if($('weatherToggle').checked)loadRadar();if($('lightningToggle').checked)loadLightning()});
