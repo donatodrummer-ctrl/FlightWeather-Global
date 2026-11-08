@@ -128,7 +128,7 @@ function drawSelectedTrail(){
   if(!last||Math.abs(last[0]-pos.lat)+Math.abs(last[1]-pos.lng)>0.000001)path.push([pos.lat,pos.lng]);
  }
  if(path.length>1){
-  L.polyline(path,{pane:'trailsPane',color:'#ffe45c',weight:3,opacity:1,dashArray:'6 5',lineCap:'round',lineJoin:'round',interactive:false,smoothFactor:1}).addTo(trailLayer);
+  L.polyline(path,{pane:'trailsPane',color:'#ff3030',weight:3,opacity:1,dashArray:'6 5',lineCap:'round',lineJoin:'round',interactive:false,smoothFactor:1}).addTo(trailLayer);
  }
 }
 function setPanelCompact(compact){const panel=document.querySelector('.panel');panel.classList.toggle('compact',compact);const button=$('panelToggle');if(button){button.textContent=compact?'⌃ Apri pannello':'⌄ Riduci pannello';button.setAttribute('aria-expanded',String(!compact))}}
