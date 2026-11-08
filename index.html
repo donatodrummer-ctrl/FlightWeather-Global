@@ -141,8 +141,12 @@ function showSelectedAircraft(a){
  const flight=String(a.flight||'').trim()||'Aeromobile';
  const airline=airlineForFlight(a.flight);
  const value=v=>escapeHtml(v??'n/d');
+ const route=a.route;
+ const from=route&&(route.from_iata||route.from_icao||route.from);
+ const to=route&&(route.to_iata||route.to_icao||route.to);
+ const routeLabel=from&&to?(String(from).toUpperCase()+' → '+String(to).toUpperCase()):'Non disponibile';
  box.innerHTML='<h2>'+value(flight)+'</h2>'+(airline?'<div class="sub">'+value(airline[1])+'</div>':'<div class="sub">Dati ADS-B · aereo selezionato</div>')+
-  '<div class="data"><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div></div>';
+  '<div class="data"><div style="grid-column:1/-1">Tratta<b>'+value(routeLabel)+'</b></div><div>Modello / tipo<b>'+value(a.t||a.desc||'n/d')+'</b></div><div>Quota<b>'+value(niceAlt(a.alt_baro??a.alt_geom))+'</b></div><div>Velocità<b>'+value(niceSpeed(a.gs))+'</b></div></div>';
  box.hidden=false;
 }
 function niceAlt(v){if(v==='ground')return'A terra';const n=Number(v);return Number.isFinite(n)?Math.round(n*0.3048).toLocaleString('it-IT')+' m':'n/d'}
@@ -221,13 +225,11 @@ async function loadPlanes(){
      }else aircraftMotions.delete(key);
     }
     marker.setIcon(planeIcon(a,key===pinnedAircraftKey));
-     if(marker.getPopup())marker.setPopupContent(aircraftPopup(a));
      if(pinnedAircraftKey===key)showSelectedAircraft(a);
    }else{
     marker=L.marker([a.lat,a.lon],{icon:planeIcon(a,key===pinnedAircraftKey),aircraftKey:key,bubblingMouseEvents:false});
     marker.addTo(planeLayer);
-    marker.bindPopup(aircraftPopup(a),{closeButton:true,autoPan:false});
-    marker.on('click',()=>{pinnedAircraftKey=key;updateSelectedMarkerPopups();updateAircraftIcons();showSelectedAircraft(a);drawSelectedTrail();marker.setPopupContent(aircraftPopup(a)).openPopup()});
+    marker.on('click',()=>{pinnedAircraftKey=key;updateAircraftIcons();showSelectedAircraft(a);drawSelectedTrail()});
     aircraftMarkers.set(key,marker);
    }
   });
