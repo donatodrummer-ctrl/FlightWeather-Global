@@ -134,6 +134,43 @@ function drawSelectedTrail(){
   L.polyline(path,{pane:'trailsPane',color:'#ff3030',weight:3,opacity:1,dashArray:'6 5',lineCap:'round',lineJoin:'round',interactive:false,smoothFactor:1}).addTo(trailLayer);
  }
 }
+const historicalTrailLoads=new Set();
+async function loadHistoricalTrail(a,key){
+ if(!flyItalyKey||!a.hex)return;
+ const today=new Date().toISOString().slice(0,10);
+ const loadKey=key+'|'+today;
+ if(historicalTrailLoads.has(loadKey))return;
+ historicalTrailLoads.add(loadKey);
+ try{
+  const url='https://api.flyitalyadsb.com/v2/history/'+encodeURIComponent(String(a.hex).toLowerCase())+'/'+today;
+  const res=await fetch(url,{headers:{Accept:'application/json','X-Api-Key':flyItalyKey},credentials:'omit',mode:'cors'});
+  if(!res.ok)throw new Error('Storico HTTP '+res.status);
+  const data=await res.json();
+  if(!Array.isArray(data.trace)||!data.trace.length)return;
+  const base=Number(data.timestamp);
+  let points=data.trace.map(p=>{
+   if(!Array.isArray(p)||!Number.isFinite(Number(p[1]))||!Number.isFinite(Number(p[2])))return null;
+   return {time:(base+Number(p[0]))*1000,lat:Number(p[1]),lon:Number(p[2]),alt:p[3]};
+  }).filter(Boolean).sort((x,y)=>x.time-y.time);
+  if(!points.length)return;
+  // Se l'aereo è atterrato e ripartito oggi, inizia dall'ultimo punto a terra
+  // precedente alla posizione attuale, così la linea segue il volo corrente.
+  let start=0;
+  for(let i=0;i<points.length;i++)if(points[i].alt==='ground')start=i;
+  points=points.slice(start);
+  const live=flightHistory.get(key)||[];
+  const merged=[...points,...live].sort((x,y)=>x.time-y.time);
+  const unique=[];
+  for(const p of merged){
+   const last=unique[unique.length-1];
+   if(!last||Math.abs(last.lat-p.lat)+Math.abs(last.lon-p.lon)>0.00001)unique.push(p);
+  }
+  flightHistory.set(key,unique.slice(-12000));
+  if(pinnedAircraftKey===key)drawSelectedTrail();
+ }catch(e){
+  console.warn('Storico traccia non disponibile:',e);
+ }
+}
 function setPanelCompact(compact){const panel=document.querySelector('.panel');panel.classList.toggle('compact',compact);const button=$('panelToggle');if(button){button.textContent=compact?'⌃ Apri pannello':'⌄ Riduci pannello';button.setAttribute('aria-expanded',String(!compact))}}
 function showSelectedAircraft(a){
  const box=$('selectedAircraftInfo');
@@ -205,7 +242,7 @@ async function loadPlanes(){
     let history=flightHistory.get(key)||[];
     const last=history[history.length-1];
     if(!last||Math.abs(last.lat-Number(a.lat))+Math.abs(last.lon-Number(a.lon))>0.000001)history.push({lat:Number(a.lat),lon:Number(a.lon),time:now});
-    history=history.filter(p=>now-p.time<20*60*1000).slice(-600);
+    history=history.slice(-12000);
     flightHistory.set(key,history);
    }
 
@@ -229,7 +266,7 @@ async function loadPlanes(){
    }else{
     marker=L.marker([a.lat,a.lon],{icon:planeIcon(a,key===pinnedAircraftKey),aircraftKey:key,bubblingMouseEvents:false});
     marker.addTo(planeLayer);
-    marker.on('click',()=>{pinnedAircraftKey=key;updateAircraftIcons();showSelectedAircraft(a);drawSelectedTrail()});
+    marker.on('click',()=>{pinnedAircraftKey=key;updateAircraftIcons();showSelectedAircraft(a);drawSelectedTrail();loadHistoricalTrail(a,key)});
     aircraftMarkers.set(key,marker);
    }
   });
