@@ -71,7 +71,8 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const map=L.map('map',{worldCopyJump:true}).setView([45.7,9.7],5);
+const map=L.map('map',{worldCopyJump:true,doubleClickZoom:true,tap:true}).setView([45.7,9.7],5);
+map.doubleClickZoom.enable();
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,className:'basemap-dim',attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
 map.createPane('lightningPane');map.getPane('lightningPane').style.zIndex='420';map.getPane('lightningPane').style.pointerEvents='none';
