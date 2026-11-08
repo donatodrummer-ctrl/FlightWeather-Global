@@ -184,11 +184,12 @@ async function loadHistoricalTrail(a,key){
   if(!points.length)return;
   // Cerca l'ultimo passaggio terra->aria: è il decollo più recente,
   // anche se il volo è iniziato il giorno UTC precedente.
-  let startIndex=-1;
-  for(let i=0;i<points.length-1;i++){
-   const onGround=points[i].alt==='ground';
-   const nextIsAirborne=points.slice(i+1).some(p=>p.alt!=='ground'&&p.alt!==null&&p.alt!==undefined&&Number.isFinite(Number(p.alt)));
-   if(onGround&&nextIsAirborne)startIndex=i;
+  let startIndex=-1,airborneAfter=false;
+  for(let i=points.length-1;i>=0;i--){
+   const p=points[i];
+   const isAirborne=p.alt!=='ground'&&p.alt!==null&&p.alt!==undefined&&Number.isFinite(Number(p.alt));
+   if(isAirborne)airborneAfter=true;
+   else if(p.alt==='ground'&&airborneAfter){startIndex=i;break}
   }
   if(startIndex>=0){
    points=points.slice(startIndex);
