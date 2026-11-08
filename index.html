@@ -117,6 +117,7 @@ let pinnedAircraftKey=null;
 const multiTrackKeys=new Set();
 const multiTrackColors=['#42d6ff','#ffad42','#c084fc','#4ade80','#fb7185','#facc15','#60a5fa','#f97316','#2dd4bf','#e879f9'];
 const proximityAlertPairs=new Set();
+const convergenceAlertPairs=new Set();
 const PROXIMITY_ALERT_KM=4,PROXIMITY_RESET_KM=5;
 let followSelectedAircraft=false;
 let lastFollowCenter=0;
@@ -239,7 +240,7 @@ function planeIcon(a,selected=false){
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
 function playAlarmTone(kind='proximity'){
  if(!alarmAudioEnabled||!alarmAudioContext)return;
- try{const ctx=alarmAudioContext,now=ctx.currentTime,emergency=kind==='emergency';const count=emergency?3:2;for(let i=0;i<count;i++){const osc=ctx.createOscillator(),gain=ctx.createGain(),start=now+i*(emergency?.22:.28);osc.type='sine';osc.frequency.value=emergency?880:660;gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.16,start+.025);gain.gain.exponentialRampToValueAtTime(.0001,start+(emergency?.16:.18));osc.connect(gain);gain.connect(ctx.destination);osc.start(start);osc.stop(start+(emergency?.18:.2));}}catch(e){console.warn('Audio allarmi non disponibile',e)}
+ try{const ctx=alarmAudioContext,now=ctx.currentTime,emergency=kind==='emergency',convergence=kind==='convergence';const count=emergency?3:convergence?3:2,frequency=emergency?880:convergence?520:660,spacing=emergency?.22:convergence?.34:.28,duration=convergence?.24:emergency?.16:.18;for(let i=0;i<count;i++){const osc=ctx.createOscillator(),gain=ctx.createGain(),start=now+i*spacing;osc.type='sine';osc.frequency.value=frequency;gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.16,start+.025);gain.gain.exponentialRampToValueAtTime(.0001,start+duration);osc.connect(gain);gain.connect(ctx.destination);osc.start(start);osc.stop(start+duration+.02);}}catch(e){console.warn('Audio allarmi non disponibile',e)}
 }
 function updateAlarmAudioButton(){const b=$('alarmAudioBtn');if(!b)return;b.textContent=alarmAudioEnabled?'🔊 AUDIO ON':'🔇 AUDIO OFF';b.style.borderColor=alarmAudioEnabled?'#4ade80':'#536579';b.style.background=alarmAudioEnabled?'#174b3d':'#263548';b.setAttribute('aria-pressed',String(alarmAudioEnabled));}
 function setAlarmAudioEnabled(enabled){alarmAudioEnabled=enabled;if(enabled){const AC=window.AudioContext||window.webkitAudioContext;if(!AC){alarmAudioEnabled=false;setNotice('Audio non supportato da questo browser.',true)}else{if(!alarmAudioContext)alarmAudioContext=new AC();if(alarmAudioContext.state==='suspended')alarmAudioContext.resume();playAlarmTone('proximity');}}updateAlarmAudioButton();}
@@ -441,6 +442,24 @@ function drawMultiTrack(){
 }
 function altitudeFeet(a){const raw=a&&(a.alt_baro??a.alt_geom);if(raw===null||raw===undefined||raw===''||raw==='ground')return null;const n=Number(raw);return Number.isFinite(n)?n:null}
 function verticalSeparation(a,b){const x=altitudeFeet(a),y=altitudeFeet(b);return x===null||y===null?null:Math.round(Math.abs(x-y)*0.3048)}
+function predictConvergence(a,b){
+ if(!a||!b)return null;
+ const values=[a.lat,a.lon,b.lat,b.lon,a.gs,b.gs,a.track,b.track];
+ if(values.some(v=>v===null||v===undefined||v===''||!Number.isFinite(Number(v))))return null;
+ const lat1=Number(a.lat),lat2=Number(b.lat),lon1=Number(a.lon),lon2=Number(b.lon),meanLat=(lat1+lat2)/2,cos=Math.cos(meanLat*Math.PI/180);
+ const rx=(lon2-lon1)*111320*cos,ry=(lat2-lat1)*111320;
+ const speedA=Number(a.gs)*0.514444,speedB=Number(b.gs)*0.514444,trackA=Number(a.track)*Math.PI/180,trackB=Number(b.track)*Math.PI/180;
+ const vx=speedB*Math.sin(trackB)-speedA*Math.sin(trackA),vy=speedB*Math.cos(trackB)-speedA*Math.cos(trackA),v2=vx*vx+vy*vy;
+ if(v2<1)return null;
+ const seconds=-(rx*vx+ry*vy)/v2;
+ if(seconds<30||seconds>300)return null;
+ const distance=Math.hypot(rx+vx*seconds,ry+vy*seconds)/1000;
+ if(distance>4)return null;
+ const altA=altitudeFeet(a),altB=altitudeFeet(b),rateA=Number(a.baro_rate??a.geom_rate),rateB=Number(b.baro_rate??b.geom_rate);
+ let vertical=null;
+ if(altA!==null&&altB!==null&&Number.isFinite(rateA)&&Number.isFinite(rateB))vertical=Math.abs((altB-altA)*0.3048+(rateB-rateA)*0.3048/60*seconds);
+ return {seconds,distance,vertical,qualified:vertical!==null&&vertical<=300};
+}
 function detectHoldingPattern(key){
  const history=(flightHistory.get(key)||[]).filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon))&&Number.isFinite(Number(p.time)));
  if(history.length<10)return false;
@@ -481,37 +500,47 @@ function renderMultiTrackPanel(){
   const holding=detectHoldingPattern(key),eta=a?landingEstimate(a):null;tracked.push({key,label,color,destination:String(destination).toUpperCase(),altitude,speed,lat,lon,a,holding,eta});
  }
  const rows=tracked.map(item=>'<div class="multi-track-row multi-track-data-row"><span class="multi-track-dot" style="background:'+item.color+'"></span><span class="multi-track-name"><b>'+escapeHtml(item.label)+'</b><small>Qta '+escapeHtml(item.altitude)+' · '+escapeHtml(item.speed)+'</small><small>Dest. '+escapeHtml(item.destination)+'</small>'+(item.holding?'<small style="color:#ffca66;font-weight:800">◌ POSSIBILE CIRCUITO D’ATTESA</small>':'')+(item.eta?'<small style="color:#8fe3a2">Atterraggio stimato: '+item.eta.minutes+' min · '+item.eta.distance.toFixed(1).replace('.',',')+' km</small>':'')+'</span><button class="multi-track-remove" type="button" data-track-remove="'+escapeHtml(item.key)+'" aria-label="Rimuovi '+escapeHtml(item.label)+'">✕</button></div>');
- const pairs=[],closePairs=[];
- const currentPairKeys=new Set();
+ const pairs=[],closePairs=[],convergencePairs=[];
+ const currentPairKeys=new Set(),currentConvergenceKeys=new Set();
  for(let i=0;i<tracked.length;i++){
   for(let j=i+1;j<tracked.length;j++){
    const first=tracked[i],second=tracked[j];
    const pairKey=[first.key,second.key].sort().join('|');
+   currentPairKeys.add(pairKey);
    let distance='N/D',distanceKm=null;
    if(Number.isFinite(first.lat)&&Number.isFinite(first.lon)&&Number.isFinite(second.lat)&&Number.isFinite(second.lon)){
     distanceKm=map.distance([first.lat,first.lon],[second.lat,second.lon])/1000;
     distance=distanceKm.toFixed(1).replace('.',',')+' km';
    }
-   const vertical=verticalSeparation(first.a,second.a);pairs.push('<div class="multi-track-pair"><span>'+escapeHtml(first.label)+' ↔ '+escapeHtml(second.label)+'</span><b>'+distance+(vertical===null?'':'<small style="display:block;color:'+(vertical<300?'#ff7777':'#a9bfd2')+';font-size:8px;text-align:right">Δ quota '+vertical.toLocaleString('it-IT')+' m</small>')+'</b></div>');
+   const vertical=verticalSeparation(first.a,second.a),prediction=predictConvergence(first.a,second.a);
+   const predictionHtml=prediction?'<small style="display:block;color:'+(prediction.qualified?'#ff7777':'#ffca66')+';font-size:8px;text-align:right">CPA '+Math.round(prediction.seconds/60)+' min · '+prediction.distance.toFixed(1).replace('.',',')+' km'+(prediction.vertical===null?' · Δ quota n/d':' · Δ quota prevista '+Math.round(prediction.vertical)+' m')+'</small>':'';
+   pairs.push('<div class="multi-track-pair"><span>'+escapeHtml(first.label)+' ↔ '+escapeHtml(second.label)+'</span><b>'+distance+(vertical===null?'':'<small style="display:block;color:'+(vertical<300?'#ff7777':'#a9bfd2')+';font-size:8px;text-align:right">Δ quota '+vertical.toLocaleString('it-IT')+' m</small>')+predictionHtml+'</b></div>');
    if(distanceKm!==null&&distanceKm<=PROXIMITY_ALERT_KM){
-    currentPairKeys.add(pairKey);
     closePairs.push('<div class="multi-track-pair proximity-pair"><span>⚠ '+escapeHtml(first.label)+' ↔ '+escapeHtml(second.label)+'</span><b>'+distance+'</b></div>');
     if(!proximityAlertPairs.has(pairKey)){setNotice('Attenzione: '+first.label+' e '+second.label+' sono a '+distance+' di distanza.',true);playAlarmTone('proximity');}
     proximityAlertPairs.add(pairKey);
    }else if(distanceKm!==null&&distanceKm>PROXIMITY_RESET_KM){
     proximityAlertPairs.delete(pairKey);
    }
+   if(prediction&&prediction.qualified&&distanceKm!==null&&distanceKm>PROXIMITY_ALERT_KM){
+    currentConvergenceKeys.add(pairKey);
+    convergencePairs.push('<div class="multi-track-pair proximity-pair"><span>↘ '+escapeHtml(first.label)+' ↔ '+escapeHtml(second.label)+'</span><b>CPA '+Math.round(prediction.seconds/60)+' min · '+prediction.distance.toFixed(1).replace('.',',')+' km</b></div>');
+    if(!convergenceAlertPairs.has(pairKey)){setNotice('Possibile convergenza: '+first.label+' e '+second.label+'. Tra circa '+Math.round(prediction.seconds/60)+' min, distanza prevista '+prediction.distance.toFixed(1).replace('.',',')+' km e separazione verticale '+Math.round(prediction.vertical)+' m.',true);playAlarmTone('convergence');}
+    convergenceAlertPairs.add(pairKey);
+   }else convergenceAlertPairs.delete(pairKey);
   }
  }
+ for(const pairKey of [...convergenceAlertPairs])if(!currentPairKeys.has(pairKey))convergenceAlertPairs.delete(pairKey);
  const distanceBlock=pairs.length?'<div class="multi-track-distances"><div class="multi-track-distance-title">DISTANZA TRA AEREI</div>'+pairs.join('')+'</div>':'<div class="multi-track-hint">Aggiungi un altro aereo per confrontare le distanze.</div>';
  const proximityBlock=closePairs.length?'<div class="multi-track-proximity"><b>⚠ PROSSIMITÀ · SOGLIA '+PROXIMITY_ALERT_KM+' km</b>'+closePairs.join('')+'</div>':'';
- panel.innerHTML='<div class="multi-track-title"><span>◉ MULTI-TRACKING · '+multiTrackKeys.size+'/10</span><span>LIVE</span></div>'+proximityBlock+rows.join('')+distanceBlock+'<button class="multi-track-fit" type="button" data-track-fit="1">⌖ INQUADRA TUTTI</button>';
+ const convergenceBlock=convergencePairs.length?'<div class="multi-track-proximity" style="border-color:#ffca66;background:#493819"><b>↘ POSSIBILE CONVERGENZA · PREVISIONE 30–300 s</b>'+convergencePairs.join('')+'</div>':'';
+ panel.innerHTML='<div class="multi-track-title"><span>◉ MULTI-TRACKING · '+multiTrackKeys.size+'/10</span><span>LIVE</span></div>'+proximityBlock+convergenceBlock+rows.join('')+distanceBlock+'<button class="multi-track-fit" type="button" data-track-fit="1">⌖ INQUADRA TUTTI</button>';
 }
 function toggleMultiTrack(key){
  if(!key)return;
  if(multiTrackKeys.has(key)){
   multiTrackKeys.delete(key);
-  for(const pairKey of proximityAlertPairs)if(pairKey.split('|').includes(key))proximityAlertPairs.delete(pairKey);
+  for(const pairKey of proximityAlertPairs)if(pairKey.split('|').includes(key))proximityAlertPairs.delete(pairKey);for(const pairKey of convergenceAlertPairs)if(pairKey.split('|').includes(key))convergenceAlertPairs.delete(pairKey);
  }else{
   if(multiTrackKeys.size>=10){setNotice('Puoi seguire al massimo 10 aerei contemporaneamente.',true);return}
   multiTrackKeys.add(key);
@@ -537,7 +566,7 @@ function fitMultiTrack(){
 }
 $('multiTrackPanel').addEventListener('click',event=>{
  const remove=event.target.closest('[data-track-remove]');
- if(remove){multiTrackKeys.delete(remove.getAttribute('data-track-remove'));drawMultiTrack();return}
+ if(remove){const key=remove.getAttribute('data-track-remove');multiTrackKeys.delete(key);for(const pairKey of [...convergenceAlertPairs])if(pairKey.split('|').includes(key))convergenceAlertPairs.delete(pairKey);drawMultiTrack();return}
  if(event.target.closest('[data-track-fit]'))fitMultiTrack();
 });
 
