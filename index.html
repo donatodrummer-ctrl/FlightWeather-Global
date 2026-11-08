@@ -285,7 +285,7 @@ async function loadPlanes(){
    }else{
     marker=L.marker([a.lat,a.lon],{icon:planeIcon(a,key===pinnedAircraftKey),aircraftKey:key,bubblingMouseEvents:false});
     marker.addTo(planeLayer);
-    marker.on('click',()=>{pinnedAircraftKey=key;followSelectedAircraft=true;lastFollowCenter=0;updateFollowButton();updateAircraftIcons();showSelectedAircraft(a);drawSelectedTrail();map.flyTo(marker.getLatLng(),Math.max(map.getZoom(),7),{animate:true,duration:.45});loadHistoricalTrail(a,key)});
+    marker.on('click',()=>{pinnedAircraftKey=key;followSelectedAircraft=false;lastFollowCenter=0;updateFollowButton();updateAircraftIcons();showSelectedAircraft(a);drawSelectedTrail();map.flyTo(marker.getLatLng(),Math.max(map.getZoom(),7),{animate:true,duration:.45});loadHistoricalTrail(a,key)});
     aircraftMarkers.set(key,marker);
    }
   });
