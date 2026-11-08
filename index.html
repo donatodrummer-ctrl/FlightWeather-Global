@@ -598,6 +598,24 @@ function airportPopup(p,type){
  const category=p.type==='small_airport'?'Piccolo aeroporto / campo di volo':p.type==='medium_airport'?'Aeroporto medio':p.type==='large_airport'?'Aeroporto principale':p.type==='heliport'?'Eliporto':p.type==='seaplane_base'?'Base per idrovolanti':escapeHtml(p.type||'N/D');
  return '<div style="min-width:175px"><b style="font-size:14px">'+name+'</b><br><span style="color:#ffd43b;font-weight:700">'+type+'</span><hr style="border:0;border-top:1px solid #40536a;margin:7px 0">'+(place?'<div><b>Località:</b> '+place+'</div>':'')+'<div><b>Categoria:</b> '+category+'</div>'+(codes?'<div><b>Codici:</b> '+escapeHtml(codes)+'</div>':'')+'<div style="margin-top:7px;color:#9fb1c6;font-size:10px">Fonte: OurAirports · dati informativi, non aeronautici ufficiali</div></div>';
 }
+function bindAirportLabelInfo(marker,p,type){
+ const label=[p.icao_code,p.iata_code].filter(Boolean).join(' - ');
+ if(!label)return;
+ marker.bindTooltip(escapeHtml(label),{permanent:true,direction:'right',offset:[6,0],className:'airport-icao-label',opacity:1,interactive:true});
+ marker.on('tooltipopen',function(event){
+  const el=event.tooltip.getElement();
+  if(!el||el.dataset.infoClickBound)return;
+  el.dataset.infoClickBound='1';
+  el.style.cursor='pointer';
+  L.DomEvent.on(el,'click',function(e){
+   L.DomEvent.stop(e);
+   L.popup({closeButton:true,autoPan:true,maxWidth:260})
+    .setLatLng(marker.getLatLng())
+    .setContent(airportPopup(p,type))
+    .openOn(map);
+  });
+ });
+}
 function refreshAirportLayers(){
  const zoom=map.getZoom(),bounds=map.getBounds();
  airportLayer.clearLayers();airfieldLayer.clearLayers();
@@ -619,9 +637,8 @@ function refreshAirportLayers(){
    airfieldCount++;
   }else{
    if(!airportsEnabled||airportCount>=maxPoints)continue;
-   const marker=L.circleMarker([lat,lon],{radius:airportRadius,color:'#ffdadd',weight:1,opacity:1,fillColor:'#ff3b45',fillOpacity:.98,bubblingMouseEvents:false}).bindPopup(airportPopup(p,'Aeroporto'),{closeButton:true,autoPan:true,maxWidth:260});
-   marker.on('click',function(){this.openPopup()});
-   if(p.icao_code)marker.bindTooltip(escapeHtml([p.icao_code,p.iata_code].filter(Boolean).join(' - ')),{permanent:true,direction:'right',offset:[6,0],className:'airport-icao-label',opacity:1});
+   const marker=L.circleMarker([lat,lon],{radius:airportRadius,color:'#ffdadd',weight:1,opacity:1,fillColor:'#ff3b45',fillOpacity:.98,bubblingMouseEvents:false});
+   bindAirportLabelInfo(marker,p,'Aeroporto');
    marker.addTo(airportLayer);
    airportCount++;
   }
