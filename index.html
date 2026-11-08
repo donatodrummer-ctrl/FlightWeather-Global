@@ -73,6 +73,19 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 <script>
 const map=L.map('map',{worldCopyJump:true,doubleClickZoom:true,tap:true}).setView([45.7,9.7],5);
 map.doubleClickZoom.enable();
+let lastMapTap=0,lastMapTapPoint=null;
+map.getContainer().addEventListener('touchend',function(e){
+ if(!e.changedTouches||e.changedTouches.length!==1)return;
+ const target=e.target;
+ if(target.closest('button,input,select,textarea,a,.leaflet-control,.leaflet-popup')){lastMapTap=0;lastMapTapPoint=null;return;}
+ const t=e.changedTouches[0],now=Date.now(),point=L.point(t.clientX,t.clientY);
+ if(lastMapTap&&now-lastMapTap<380&&lastMapTapPoint&&point.distanceTo(lastMapTapPoint)<35){
+  e.preventDefault();
+  const rect=map.getContainer().getBoundingClientRect();
+  map.setZoomAround(L.point(t.clientX-rect.left,t.clientY-rect.top),map.getZoom()+1);
+  lastMapTap=0;lastMapTapPoint=null;
+ }else{lastMapTap=now;lastMapTapPoint=point;}
+},{passive:false});
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,className:'basemap-dim',attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
 map.createPane('lightningPane');map.getPane('lightningPane').style.zIndex='420';map.getPane('lightningPane').style.pointerEvents='none';
