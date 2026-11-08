@@ -31,7 +31,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <div class="toggles">
 <label class="toggle"><input id="planesToggle" type="checkbox" checked> Traffico aereo live</label>
 <label class="toggle"><input id="weatherToggle" type="checkbox"> Radar precipitazioni</label>
-<label class="toggle"><input id="aeroToggle" type="checkbox"> Aeroporti, piste e radioassistenze</label>
+<label class="toggle"><input id="aeroToggle" type="checkbox"> Frequenze radio aeronautiche</label>
 </div>
 <div class="stats"><div><b id="planeCount">—</b>Aerei visibili</div><div><b id="radarTime">—</b>Ultimo radar</div></div>
 <div class="notice" id="notice">Apri la mappa su una zona e attiva il traffico aereo. Gli aerei vengono caricati nell'area attorno al centro della vista.</div>
@@ -178,62 +178,80 @@ function aeroIcon(kind){
  const color=kind==='airport'?'#087fbd':kind==='nav'?'#7b3fc6':'#087fbd';
  return L.divIcon({className:'',html:'<div style="width:24px;height:24px;border:1.5px solid '+color+';border-radius:50%;background:#fff;color:'+color+';font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 5px #0008">'+symbol+'</div>',iconSize:[24,24],iconAnchor:[12,12]});
 }
+let radioFrequencyDataPromise=null;
+function parseCSV(text){
+ const rows=[];let row=[],field='',quoted=false;
+ for(let i=0;i<text.length;i++){
+  const ch=text[i],next=text[i+1];
+  if(quoted){if(ch==='"'&&next==='"'){field+='"';i++}else if(ch==='"')quoted=false;else field+=ch}
+  else if(ch==='"')quoted=true;
+  else if(ch===','){row.push(field);field=''}
+  else if(ch==='\n'){row.push(field);rows.push(row);row=[];field=''}
+  else if(ch!=='\r')field+=ch;
+ }
+ if(field.length||row.length){row.push(field);rows.push(row)}
+ if(!rows.length)return[];
+ const headers=rows.shift().map(x=>x.trim());
+ return rows.filter(r=>r.some(v=>v.trim())).map(r=>Object.fromEntries(headers.map((h,i)=>[h,(r[i]||'').trim()])));
+}
+async function getRadioFrequencyData(){
+ if(!radioFrequencyDataPromise){
+  radioFrequencyDataPromise=(async()=>{
+   const base='https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/';
+   const urls=['airports.csv','airport-frequencies.csv','navaids.csv'];
+   const responses=await Promise.all(urls.map(async file=>{
+    const response=await fetch(base+file,{cache:'force-cache'});
+    if(!response.ok)throw new Error('Archivio frequenze non raggiungibile ('+file+', HTTP '+response.status+')');
+    return parseCSV(await response.text());
+   }));
+   const [airports,frequencies,navaids]=responses;
+   const airportByIdent=new Map(airports.map(a=>[a.ident,a]));
+   return {frequencies,navaids,airportByIdent};
+  })().catch(error=>{radioFrequencyDataPromise=null;throw error});
+ }
+ return radioFrequencyDataPromise;
+}
+function radioMarker(lat,lon,title,kind,frequency,extra){
+ const color=kind==='nav'?'#7b3fc6':'#087fbd';
+ const icon=L.divIcon({className:'',html:'<div style="width:25px;height:25px;border:2px solid '+color+';border-radius:50%;background:#fff;color:'+color+';font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 5px #0008">'+(kind==='nav'?'◉':'R')+'</div>',iconSize:[25,25],iconAnchor:[12,12]});
+ const marker=L.marker([lat,lon],{icon});
+ marker.bindPopup('<div style="min-width:190px"><b>'+escapeHtml(title)+'</b><br>'+escapeHtml(extra)+'<br><span style="color:#42c8e8;font-weight:800;font-size:16px"> '+escapeHtml(frequency)+'</span></div>');
+ marker.bindTooltip(escapeHtml(frequency),{permanent:true,direction:'right',offset:[10,0],className:'aero-frequency-label'});
+ marker.addTo(aeronauticalLayer);
+}
 async function loadAeronautical(){
- if(!$('aeroToggle').checked){if(aeronauticalRequest)aeronauticalRequest.abort();aeronauticalLayer.clearLayers();lastAeroBounds='';return}
- if(map.getZoom()<6){if(aeronauticalRequest)aeronauticalRequest.abort();aeronauticalLayer.clearLayers();lastAeroBounds='';setNotice('Per mostrare aeroporti, piste e radioassistenze, ingrandisci la mappa almeno al livello 6.');return}
- const b=map.getBounds(),bbox=[b.getSouth(),b.getWest(),b.getNorth(),b.getEast()].map(v=>v.toFixed(4)).join(',');
+ if(!$('aeroToggle').checked){aeronauticalLayer.clearLayers();lastAeroBounds='';return}
+ if(map.getZoom()<5){aeronauticalLayer.clearLayers();lastAeroBounds='';setNotice('Ingrandisci la mappa almeno al livello 5 per visualizzare le frequenze radio.');return}
+ const b=map.getBounds(),bbox=[b.getSouth(),b.getWest(),b.getNorth(),b.getEast()].map(v=>v.toFixed(3)).join(',');
  if(bbox===lastAeroBounds&&aeronauticalLayer.getLayers().length)return;
  lastAeroBounds=bbox;
- if(aeronauticalRequest)aeronauticalRequest.abort();
- aeronauticalRequest=new AbortController();
- setNotice('Caricamento dati aeronautici OpenStreetMap…');
- const query='[out:json][timeout:18];(nwr["aeroway"="navigationaid"]('+bbox+');nwr["navigationaid"]('+bbox+'););out center tags;';
+ aeronauticalLayer.clearLayers();
+ setNotice('Caricamento archivio frequenze radio aeronautiche…');
  try{
-  const endpoints=[
-   'https://overpass-api.de/api/interpreter',
-   'https://overpass.kumi.systems/api/interpreter',
-   'https://overpass.private.coffee/api/interpreter'
-  ];
-  let data=null,lastError='nessun server disponibile';
-  for(const endpoint of endpoints){
-   const attemptController=new AbortController();
-   const abortAttempt=()=>attemptController.abort();
-   aeronauticalRequest.signal.addEventListener('abort',abortAttempt,{once:true});
-   const timeoutId=setTimeout(()=>attemptController.abort(),12000);
-   try{
-    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:'data='+encodeURIComponent(query),signal:attemptController.signal});
-    if(!response.ok)throw new Error('HTTP '+response.status);
-    const payload=await response.json();
-    if(!payload||!Array.isArray(payload.elements))throw new Error('Risposta cartografica non valida');
-    data=payload;break;
-   }catch(error){
-    if(aeronauticalRequest.signal.aborted)throw error;
-    lastError=error.name==='AbortError'?'timeout dopo 12 secondi':(error.message||'errore di rete');
-   }finally{
-    clearTimeout(timeoutId);
-    aeronauticalRequest.signal.removeEventListener('abort',abortAttempt);
-   }
-  }
-  if(!data)throw new Error('Server OpenStreetMap non raggiungibili ('+lastError+')');
-  aeronauticalLayer.clearLayers();
-  let navaids=0;
-  (data.elements||[]).forEach(el=>{
-   const tags=el.tags||{},name=tags.name||tags.ref||tags.ident||'Radioassistenza';
-   const center=el.type==='node'?{lat:el.lat,lon:el.lon}:el.center||(el.lat&&el.lon?{lat:el.lat,lon:el.lon}:null);
-   if(!center)return;
-   const aid=tags.navigationaid||tags.aviation||'Radioassistenza';
-   const frequency=tags.frequency||tags.freq||tags.frequency_mhz||tags.frequency_khz||tags.vhf_frequency||tags.uhf_frequency||tags['frequency:vhf']||tags['frequency:uhf']||'';
-   const marker=L.marker([center.lat,center.lon],{icon:aeroIcon('nav')});
-   const frequencyText=frequency?String(frequency):'Non pubblicata su OpenStreetMap';
-   marker.bindPopup('<b>'+escapeHtml(name)+'</b><br>Radioassistenza: '+escapeHtml(aid)+'<br><b>Frequenza radio: '+escapeHtml(frequencyText)+'</b>'+(tags.ref?'<br>Identificativo: '+escapeHtml(tags.ref):''));
-   if(frequency)marker.bindTooltip(escapeHtml(frequency),{permanent:true,direction:'right',offset:[10,0],className:'aero-frequency-label'});
-   marker.addTo(aeronauticalLayer);navaids++;
+  const {frequencies,navaids,airportByIdent}=await getRadioFrequencyData();
+  if(!$('aeroToggle').checked)return;
+  const bounds=map.getBounds();let count=0;
+  frequencies.forEach(f=>{
+   const airport=airportByIdent.get(f.airport_ident);
+   if(!airport)return;
+   const lat=Number(airport.latitude_deg),lon=Number(airport.longitude_deg),mhz=Number(f.frequency_mhz);
+   if(!Number.isFinite(lat)||!Number.isFinite(lon)||!Number.isFinite(mhz)||!bounds.contains([lat,lon]))return;
+   const label=(f.description||f.type||'Frequenza aeroporto')+' · '+f.airport_ident;
+   radioMarker(lat,lon,label,'airport',mhz.toFixed(3)+' MHz','Frequenza aeroportuale · '+(f.type||'Servizio'));
+   count++;
   });
-  setNotice(navaids?'Caricate '+navaids+' radioassistenze OpenStreetMap. Le frequenze sono mostrate se presenti nei dati.':'Nessuna radioassistenza censita in quest’area su OpenStreetMap.');
+  navaids.forEach(n=>{
+   const lat=Number(n.latitude_deg),lon=Number(n.longitude_deg),khz=Number(n.frequency_khz);
+   if(!Number.isFinite(lat)||!Number.isFinite(lon)||!Number.isFinite(khz)||!bounds.contains([lat,lon]))return;
+   const type=n.type||'Radioassistenza';
+   const frequency=(khz>=1000?(khz/1000).toFixed(3)+' MHz':khz.toFixed(0)+' kHz');
+   radioMarker(lat,lon,(n.name||n.ident||type)+' · '+(n.ident||''),'nav',frequency,'Radioassistenza '+type);
+   count++;
+  });
+  setNotice(count?'Visualizzate '+count+' frequenze radio nell’area. Blu: servizi aeroportuali · viola: VOR, NDB e altre radioassistenze.':'Nessuna frequenza radio registrata nell’area visibile. Prova ad allargare la mappa.');
  }catch(e){
-  if(e.name==='AbortError')return;
   lastAeroBounds='';
-  setNotice('Dati aeronautici non disponibili: '+e.message+'. Riprova tra poco.',true);
+  setNotice('Archivio frequenze non disponibile: '+e.message+'. Controlla la connessione e riprova.',true);
  }
 }
 async function loadRadar(){
