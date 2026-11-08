@@ -15,7 +15,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .stats{display:flex;gap:14px;border-top:1px solid var(--line);margin-top:11px;padding-top:10px;color:var(--muted);font-size:12px}.stats b{color:var(--text);font-size:15px;display:block}
 .notice{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.4}.notice.error{color:#ffb4a9}
 .refresh{position:absolute;right:12px;top:12px;z-index:450;background:#101923ed;border:1px solid #526174;border-radius:6px;padding:10px 12px;color:var(--text);font-weight:650}
-.locate{position:absolute;right:12px;top:62px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:6px;padding:10px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.locate:disabled{opacity:.6}.radar-button{position:absolute;right:12px;top:112px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #42b8ff;border-radius:6px;padding:9px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.radar-button.active{background:#07517a;border-color:#8bd7ff;color:#fff}.follow{position:relative;display:block;width:auto;min-width:0;margin:6px 0 0 auto;pointer-events:auto;touch-action:manipulation;background:#101923;border:1px solid #ff4545;border-radius:5px;padding:4px 7px;color:#fff;font-size:10px;line-height:1.2;font-weight:700}.follow.active{background:#7d1717;border-color:#ff7777}
+.locate{position:absolute;right:12px;top:62px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:6px;padding:10px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.locate:disabled{opacity:.6}.radar-button{position:absolute;right:12px;top:112px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #42b8ff;border-radius:6px;padding:9px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.radar-button.active{background:#07517a;border-color:#8bd7ff;color:#fff}.altitude-button{position:absolute;right:12px;top:162px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #a879ff;border-radius:6px;padding:9px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0008}.altitude-button.active{background:#4b2878;border-color:#d4b7ff;color:#fff}.follow{position:relative;display:block;width:auto;min-width:0;margin:6px 0 0 auto;pointer-events:auto;touch-action:manipulation;background:#101923;border:1px solid #ff4545;border-radius:5px;padding:4px 7px;color:#fff;font-size:10px;line-height:1.2;font-weight:700}.follow.active{background:#7d1717;border-color:#ff7777}
 .aircraft-icon{background:transparent;border:0;color:#d4e34a;text-shadow:0 1px 5px #000;font-size:22px;line-height:24px;display:flex;align-items:center;justify-content:center}.aircraft-icon span{display:block;transform-origin:50% 50%;}
 .radar-enhanced{filter:contrast(1.16) saturate(1.12)}
 .altitude-legend{position:absolute;right:12px;bottom:calc(18px + 34dvh);z-index:460;display:none;padding:8px 10px;border:1px solid #536579;border-radius:8px;background:#101923ed;color:#eef4fb;font-size:10px;line-height:1.65;box-shadow:0 4px 14px #0009;pointer-events:none;backdrop-filter:blur(8px)}
@@ -39,7 +39,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <label class="toggle"><input id="planesToggle" type="checkbox" checked> Traffico aereo live</label>
 <label class="toggle"><input id="weatherToggle" type="checkbox"> Radar precipitazioni</label>
 <label class="toggle"><input id="lightningToggle" type="checkbox"> Fulminazioni</label>
-<label class="toggle"><input id="altitudeToggle" type="checkbox"> Colori per quota</label>
+
 
 </div>
 <div class="searchbox" style="margin-top:9px"><input id="apiKeyInput" type="password" autocomplete="off" placeholder="Chiave API FlyItalyADSB"><button id="saveApiKey" type="button">Salva</button></div>
@@ -51,6 +51,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <button class="refresh" id="refreshBtn">↻ Aggiorna</button>
 <button class="locate" id="locateBtn" title="Mostra la mia posizione GPS" aria-label="Mostra la mia posizione GPS">◎ GPS</button>
 <button class="radar-button" id="radarBtn" type="button" aria-pressed="false">◉ RADAR OFF</button>
+<button class="altitude-button" id="altitudeBtn" type="button" aria-pressed="false">◈ QUOTA OFF</button>
 <div id="altitudeLegend" class="altitude-legend" aria-label="Legenda colori quota">
  <div class="legend-title">Quota scia</div>
  <div class="legend-row"><span class="swatch" style="background:#42d6ff"></span>Sotto 3.000 m</div>
@@ -487,7 +488,7 @@ $('panelToggle').addEventListener('click',()=>setPanelCompact(!document.querySel
 $('planesToggle').addEventListener('change',loadPlanes);
 $('weatherToggle').addEventListener('change',e=>setRadarEnabled(e.target.checked));
 $('lightningToggle').addEventListener('change',e=>setLightningEnabled(e.target.checked));
-$('altitudeToggle').addEventListener('change',e=>{altitudeColorMode=e.target.checked;$('altitudeLegend').classList.toggle('visible',altitudeColorMode);drawSelectedTrail()});
+$('altitudeBtn').addEventListener('click',()=>{altitudeColorMode=!altitudeColorMode;$('altitudeBtn').classList.toggle('active',altitudeColorMode);$('altitudeBtn').textContent=altitudeColorMode?'◈ QUOTA ON':'◈ QUOTA OFF';$('altitudeBtn').setAttribute('aria-pressed',String(altitudeColorMode));$('altitudeLegend').classList.toggle('visible',altitudeColorMode);drawSelectedTrail()});
 function setRadarEnabled(enabled){$('weatherToggle').checked=enabled;$('radarBtn').classList.toggle('active',enabled);$('radarBtn').textContent=enabled?'◉ RADAR ON':'◉ RADAR OFF';$('radarBtn').setAttribute('aria-pressed',String(enabled));if(!radarLayer){if(enabled)loadRadar();return}if(enabled)radarLayer.addTo(map);else map.removeLayer(radarLayer)}
 $('radarBtn').addEventListener('click',()=>setRadarEnabled(!$('weatherToggle').checked));
 $('refreshBtn').addEventListener('click',()=>{loadPlanes();if($('weatherToggle').checked)loadRadar();if($('lightningToggle').checked)loadLightning()});
