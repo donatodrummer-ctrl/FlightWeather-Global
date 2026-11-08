@@ -196,7 +196,7 @@ function parseCSV(text){
  const headers=rows.shift().map(x=>x.trim());
  return rows.filter(r=>r.some(v=>v.trim())).map(r=>Object.fromEntries(headers.map((h,i)=>[h,(r[i]||'').trim()])));
 }
-async function getRadioFrequencyData(){
+/* Archivio radio: struttura pronta per dati ufficiali AIP ENAV verificati.\n   Finché il dataset ENAV non viene importato, viene usato OurAirports come riferimento preliminare;\n   non è una fonte ufficiale né garantisce copertura o aggiornamento completi. */\nconst officialItalyRadioFrequencies=[]; // Formato previsto: {airport_ident,type,description,frequency_mhz,source,validity}\nasync function getRadioFrequencyData(){
  if(!radioFrequencyDataPromise){
   radioFrequencyDataPromise=(async()=>{
    const base='https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/';
@@ -250,7 +250,7 @@ async function loadAeronautical(){
   let count=0;
   grouped.forEach(group=>{group.items.sort((a,b)=>String(a.type).localeCompare(String(b.type)));radioAirportMarker(group.lat,group.lon,group.airport,group.items);count+=group.items.length});
   const airports=grouped.size;
-  setNotice(count?'Caricate '+count+' frequenze su '+airports+' aeroporti. Tocca il simbolo blu per vedere l’elenco completo: TWR, GND, ATIS, APP, DEP, AFIS e gli altri servizi disponibili. VOR e NDB esclusi.':'Nessuna frequenza registrata nell’area visibile nell’archivio. Prova ad allargare la mappa.');
+  setNotice(count?'Caricate '+count+' frequenze su '+airports+' aeroporti. Tocca il simbolo blu per vedere TWR, GND, ATIS, APP, DEP e AFIS quando disponibili. Fonte attuale: archivio preliminare OurAirports, da verificare; non sostituisce l’AIP ENAV.':'Nessuna frequenza registrata nell’area visibile nell’archivio. Prova ad allargare la mappa.');
  }catch(e){
   lastAeroBounds='';
   setNotice('Archivio frequenze non disponibile: '+e.message+'. Controlla la connessione e riprova.',true);
