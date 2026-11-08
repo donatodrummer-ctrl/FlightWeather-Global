@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="it">
 <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -835,16 +838,20 @@ async function setAirportLayerEnabled(kind,enabled){
  }catch(error){setNotice('Dati aeroporti non disponibili: '+error.message,true);$('topStatus').textContent='Dati aeroporti non disponibili'}
  finally{button.disabled=false}
 }
-// Avvio pulito: aeroporti e campi di volo sempre disattivati all'apertura.
+// Avvio forzato OFF: nessun layer o marker aeroportuale viene mantenuto all'apertura.
 airportsEnabled=false;airfieldsEnabled=false;
-map.removeLayer(airportLayer);map.removeLayer(airfieldLayer);
+airportLayer.clearLayers();airfieldLayer.clearLayers();
+airportLayer.remove();airfieldLayer.remove();
 $('airportBtn').classList.remove('active');$('airportBtn').setAttribute('aria-pressed','false');$('airportBtn').textContent='● AEROPORTI OFF';
 $('airfieldBtn').classList.remove('active');$('airfieldBtn').setAttribute('aria-pressed','false');$('airfieldBtn').textContent='● CAMPI OFF';
 $('airportBtn').addEventListener('click',()=>setAirportLayerEnabled('airport',!airportsEnabled));
 $('airfieldBtn').addEventListener('click',()=>setAirportLayerEnabled('airfield',!airfieldsEnabled));
-// Protezione: nessun layer aeroporti può comparire se il relativo interruttore è OFF.
-map.on('layeradd',event=>{if(event.layer===airportLayer&&!airportsEnabled)map.removeLayer(airportLayer);if(event.layer===airfieldLayer&&!airfieldsEnabled)map.removeLayer(airfieldLayer)});
-map.removeLayer(airportLayer);map.removeLayer(airfieldLayer);
+// Blocco di sicurezza: se un altro aggiornamento prova ad aggiungere i layer mentre sono OFF, vengono rimossi.
+map.on('layeradd',event=>{
+ if(event.layer===airportLayer&&!airportsEnabled){airportLayer.clearLayers();airportLayer.remove()}
+ if(event.layer===airfieldLayer&&!airfieldsEnabled){airfieldLayer.clearLayers();airfieldLayer.remove()}
+});
+airportLayer.remove();airfieldLayer.remove();
 
 
 function setRadarEnabled(enabled){$('weatherToggle').checked=enabled;$('radarBtn').classList.toggle('active',enabled);$('radarBtn').textContent=enabled?'◉ RADAR ON':'◉ RADAR OFF';$('radarBtn').setAttribute('aria-pressed',String(enabled));if(!radarLayer){if(enabled)loadRadar();return}if(enabled)radarLayer.addTo(map);else map.removeLayer(radarLayer)}
