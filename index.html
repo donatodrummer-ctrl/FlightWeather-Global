@@ -296,6 +296,7 @@ $('locateBtn').addEventListener('click',()=>{
  },{enableHighAccuracy:true,timeout:15000,maximumAge:10000});
 });
 
+map.on('click',()=>{pinnedAircraftKey=null;showSelectedAircraft(null);drawSelectedTrail()});
 let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes()},700)});
 loadRadar();loadPlanes();
 setInterval(()=>{if($('planesToggle').checked)loadPlanes()},2000);
