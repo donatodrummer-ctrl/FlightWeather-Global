@@ -195,11 +195,17 @@ async function loadHistoricalTrail(a,key){
   if(startIndex>=0){
    points=points.slice(startIndex);
   }else{
-   // Se lo storico non contiene il punto a terra, usa solo la parte
-   // aerea disponibile: non inventa il punto esatto di decollo.
-   const firstAirborne=points.findIndex(p=>isAirborne(p.alt));
-   if(firstAirborne<0)return;
-   points=points.slice(firstAirborne);
+   // Se il provider non registra il punto a terra, evita di unire voli
+   // precedenti: riparti dall'ultimo segmento continuo di rilevamenti.
+   let firstAirborne=points.findIndex(p=>isAirborne(p.alt));
+   if(firstAirborne<0){historicalTrailLoads.delete(loadKey);return}
+   let latestStart=firstAirborne;
+   for(let i=firstAirborne+1;i<points.length;i++){
+    if(!isAirborne(points[i].alt))continue;
+    const previous=points[i-1];
+    if(points[i].time-previous.time>30*60*1000)latestStart=i;
+   }
+   points=points.slice(latestStart);
   }
   // Il punto iniziale è l'ultimo decollo individuato nello storico.
   // Esclude dalla scia anche eventuali punti live registrati prima di quel decollo.
