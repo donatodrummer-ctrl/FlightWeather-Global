@@ -15,6 +15,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .stats{display:flex;gap:14px;border-top:1px solid var(--line);margin-top:11px;padding-top:10px;color:var(--muted);font-size:12px}.stats b{color:var(--text);font-size:15px;display:block}
 .notice{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.4}.notice.error{color:#ffb4a9}
 .refresh{position:absolute;right:12px;top:12px;z-index:450;background:#0b1727ee;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-weight:650}
+.locate{position:absolute;right:12px;top:62px;z-index:450;background:#0b1727ee;border:1px solid #42c8e8;border-radius:10px;padding:10px 12px;color:#eaf2fb;font-weight:750;box-shadow:0 3px 12px #0005}.locate:disabled{opacity:.6}
 .aircraft-icon{background:transparent;border:0;color:#51d5f2;text-shadow:0 1px 5px #001;font-size:22px;line-height:24px;display:flex;align-items:center;justify-content:center}.aircraft-icon span{display:block;transform-origin:50% 50%;}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0b1727!important;color:#f4f8ff!important;border:1px solid #42c8e8;box-shadow:0 8px 28px #000b!important}.leaflet-popup-content{margin:12px 14px!important;color:#f4f8ff!important;font-size:13px;line-height:1.45}.leaflet-popup-close-button{color:#fff!important;font-size:22px!important}.leaflet-control-attribution{font-size:9px!important}.aero-frequency-label{background:#fff!important;border:1px solid #7b3fc6!important;border-radius:4px!important;color:#39205e!important;font-size:10px!important;font-weight:800!important;padding:2px 4px!important;box-shadow:0 1px 4px #0005!important}
 .panel.compact{top:auto!important;bottom:8px!important;left:8px!important;width:min(210px,calc(100vw - 16px))!important;padding:7px 10px!important;transition:all .22s ease}.panel.compact h1,.panel.compact .searchbox,.panel.compact .searchresults,.panel.compact .toggles,.panel.compact .notice{display:none!important}.panel.compact .stats{border:0;margin:0;padding:0;gap:18px}.panel.compact .stats b{font-size:13px;display:inline;margin-right:4px}.panel.compact .stats div{font-size:10px;white-space:nowrap}
@@ -37,6 +38,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 <div class="notice" id="notice">Apri la mappa su una zona e attiva il traffico aereo. Gli aerei vengono caricati nell'area attorno al centro della vista.</div>
 </section>
 <button class="refresh" id="refreshBtn">↻ Aggiorna</button>
+<button class="locate" id="locateBtn" title="Mostra la mia posizione GPS" aria-label="Mostra la mia posizione GPS">◎ GPS</button>
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -271,6 +273,28 @@ $('planesToggle').addEventListener('change',loadPlanes);
 $('weatherToggle').addEventListener('change',e=>{if(!radarLayer){loadRadar();return}if(e.target.checked)radarLayer.addTo(map);else map.removeLayer(radarLayer)});
 $('aeroToggle').addEventListener('change',()=>{lastAeroBounds='';loadAeronautical()});
 $('refreshBtn').addEventListener('click',()=>{loadPlanes();if($('weatherToggle').checked)loadRadar()});
+let gpsMarker=null,gpsAccuracy=null;
+$('locateBtn').addEventListener('click',()=>{
+ if(!navigator.geolocation){setNotice('La geolocalizzazione non è supportata da questo browser.',true);return}
+ const button=$('locateBtn');button.disabled=true;button.textContent='◎ Ricerca…';
+ navigator.geolocation.getCurrentPosition(position=>{
+  const lat=position.coords.latitude,lon=position.coords.longitude,accuracy=position.coords.accuracy;
+  if(gpsMarker)map.removeLayer(gpsMarker);
+  if(gpsAccuracy)map.removeLayer(gpsAccuracy);
+  gpsAccuracy=L.circle([lat,lon],{radius:accuracy,color:'#1689ff',weight:1.5,fillColor:'#1689ff',fillOpacity:.12}).addTo(map);
+  const gpsIcon=L.divIcon({className:'',html:'<div style="width:20px;height:20px;border:3px solid white;border-radius:50%;background:#1689ff;box-shadow:0 0 0 7px #1689ff44,0 1px 6px #0009"></div>',iconSize:[20,20],iconAnchor:[10,10]});
+  gpsMarker=L.marker([lat,lon],{icon:gpsIcon,zIndexOffset:1000}).addTo(map).bindPopup('<b>La tua posizione GPS</b><br>Precisione stimata: '+Math.round(accuracy)+' m');
+  map.setView([lat,lon],Math.max(map.getZoom(),12));
+  gpsMarker.openPopup();
+  setNotice('Posizione GPS individuata. Precisione stimata: circa '+Math.round(accuracy)+' metri.');
+  button.disabled=false;button.textContent='◎ GPS';
+ },error=>{
+  const messages={1:'Permesso di posizione negato. Consenti la posizione nelle impostazioni del browser.',2:'Posizione GPS non disponibile. Controlla GPS e connessione.',3:'Ricerca posizione scaduta. Riprova.'};
+  setNotice(messages[error.code]||'Impossibile ottenere la posizione GPS.',true);
+  button.disabled=false;button.textContent='◎ GPS';
+ },{enableHighAccuracy:true,timeout:15000,maximumAge:10000});
+});
+
 let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes();clearTimeout(aeronauticalTimer);if($('aeroToggle').checked)aeronauticalTimer=setTimeout(loadAeronautical,900)},700)});
 loadRadar();loadPlanes();
 setInterval(()=>{if($('planesToggle').checked)loadPlanes()},30000);
