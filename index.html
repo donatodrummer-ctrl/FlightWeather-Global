@@ -179,8 +179,8 @@ function aeroIcon(kind){
  return L.divIcon({className:'',html:'<div style="width:24px;height:24px;border:1.5px solid '+color+';border-radius:50%;background:#fff;color:'+color+';font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 5px #0008">'+symbol+'</div>',iconSize:[24,24],iconAnchor:[12,12]});
 }
 async function loadAeronautical(){
- if(!$('aeroToggle').checked){aeronauticalLayer.clearLayers();lastAeroBounds='';return}
- if(map.getZoom()<6){setNotice('Per mostrare aeroporti, piste e radioassistenze, ingrandisci la mappa almeno al livello 6.');return}
+ if(!$('aeroToggle').checked){if(aeronauticalRequest)aeronauticalRequest.abort();aeronauticalLayer.clearLayers();lastAeroBounds='';return}
+ if(map.getZoom()<6){if(aeronauticalRequest)aeronauticalRequest.abort();aeronauticalLayer.clearLayers();lastAeroBounds='';setNotice('Per mostrare aeroporti, piste e radioassistenze, ingrandisci la mappa almeno al livello 6.');return}
  const b=map.getBounds(),bbox=[b.getSouth(),b.getWest(),b.getNorth(),b.getEast()].map(v=>v.toFixed(4)).join(',');
  if(bbox===lastAeroBounds&&aeronauticalLayer.getLayers().length)return;
  lastAeroBounds=bbox;
