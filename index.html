@@ -53,6 +53,22 @@ let aeronauticalRequest=null,aeronauticalTimer=null,lastAeroBounds='';
 const flightHistory=new Map();
 let aircraftCache=[];
 let pinnedAircraftKey=null;
+// Animazione interpolata: aggiorna la posizione grafica ogni secondo
+// tra due rilevamenti ADS-B ricevuti dal server.
+const aircraftMarkers=new Map();
+const aircraftMotions=new Map();
+setInterval(()=>{
+ const now=Date.now();
+ for(const [key,motion] of aircraftMotions){
+  const marker=aircraftMarkers.get(key);
+  if(!marker){aircraftMotions.delete(key);continue}
+  const progress=Math.min(1,(now-motion.start)/motion.duration);
+  const lat=motion.from.lat+(motion.to.lat-motion.from.lat)*progress;
+  const lon=motion.from.lng+(motion.to.lng-motion.from.lng)*progress;
+  marker.setLatLng([lat,lon]);
+  if(progress>=1)aircraftMotions.delete(key);
+ }
+},1000);
 const $=id=>document.getElementById(id);
 function planeIcon(a){
  const angle=Number.isFinite(Number(a.track))?Number(a.track):0;
@@ -139,11 +155,11 @@ async function loadPlanes(){
   if(!aircraft.length&&lastError)throw new Error('Servizio ADS-B tramite proxy non disponibile: '+lastError.message);
 
   aircraftCache=aircraft;
-  let reopenKey=null;planeLayer.eachLayer(marker=>{if(marker.isPopupOpen()&&marker.options.aircraftKey)reopenKey=marker.options.aircraftKey});
-  planeLayer.clearLayers();
   const now=Date.now();
+  const activeKeys=new Set();
   aircraft.forEach(a=>{
-   const key=String(a.hex||a.flight||'').trim();
+   const key=String(a.hex||a.flight||('pos-'+a.lat+'-'+a.lon)).trim();
+   activeKeys.add(key);
    if(key){
     let history=flightHistory.get(key)||[];
     const last=history[history.length-1];
@@ -151,13 +167,38 @@ async function loadPlanes(){
     history=history.filter(p=>now-p.time<20*60*1000).slice(-40);
     flightHistory.set(key,history);
    }
-   const marker=L.marker([a.lat,a.lon],{icon:planeIcon(a),aircraftKey:key});
-   marker.bindPopup(aircraftPopup(a),{maxWidth:320,closeButton:true,autoPan:true});
-   marker.addTo(planeLayer);
-   marker.on('popupopen',()=>{pinnedAircraftKey=key;setPanelCompact(true)});
-   marker.on('popupclose',()=>{if(pinnedAircraftKey===key){pinnedAircraftKey=null;setPanelCompact(false)}});
-   if(reopenKey&&key===reopenKey){marker.openPopup();pinnedAircraftKey=key;}
+
+   let marker=aircraftMarkers.get(key);
+   if(marker){
+    const current=marker.getLatLng();
+    const target={lat:Number(a.lat),lng:Number(a.lon)};
+    const distance=Math.abs(current.lat-target.lat)+Math.abs(current.lng-target.lng);
+    if(distance>0.000001){
+     aircraftMotions.set(key,{from:{lat:current.lat,lng:current.lng},to:target,start:now,duration:28000});
+    }else{
+     aircraftMotions.delete(key);
+    }
+    marker.setIcon(planeIcon(a));
+    marker.setPopupContent(aircraftPopup(a));
+   }else{
+    marker=L.marker([a.lat,a.lon],{icon:planeIcon(a),aircraftKey:key});
+    marker.bindPopup(aircraftPopup(a),{maxWidth:320,closeButton:true,autoPan:true});
+    marker.addTo(planeLayer);
+    marker.on('popupopen',()=>{pinnedAircraftKey=key;setPanelCompact(true)});
+    marker.on('popupclose',()=>{if(pinnedAircraftKey===key){pinnedAircraftKey=null;setPanelCompact(false)}});
+    aircraftMarkers.set(key,marker);
+   }
   });
+
+  // Rimuove gli aeromobili non più presenti nell'ultimo rilevamento.
+  for(const [key,marker] of aircraftMarkers){
+   if(!activeKeys.has(key)){
+    aircraftMotions.delete(key);
+    planeLayer.removeLayer(marker);
+    aircraftMarkers.delete(key);
+    if(pinnedAircraftKey===key)pinnedAircraftKey=null;
+   }
+  }
   for(const [key,history] of flightHistory){if(!history.length||now-history[history.length-1].time>20*60*1000)flightHistory.delete(key)}
   trailLayer.clearLayers();
   flightHistory.forEach(history=>{if(history.length>1){const path=history.map(p=>[p.lat,p.lon]);L.polyline(path,{pane:'trailsPane',color:'#48eaff',weight:3,opacity:.95,dashArray:'1 6',lineCap:'round',lineJoin:'round',interactive:false}).addTo(trailLayer)}});
