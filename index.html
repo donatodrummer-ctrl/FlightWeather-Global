@@ -581,11 +581,14 @@ async function loadAirportData(){
  if(airportData)return airportData;
  if(!airportLoadPromise){
   airportLoadPromise=(async()=>{
-   const response=await fetch('./data/airports.geojson?'+Date.now(),{cache:'no-store',headers:{'Accept':'application/geo+json, application/json'}});
-   if(!response.ok)throw new Error('Archivio aeroporti non pronto (HTTP '+response.status+')');
-   const data=await response.json();
-   if(!data||!Array.isArray(data.features))throw new Error('Archivio aeroporti non valido');
-   airportData=data.features;return airportData;
+   let response,data;
+   if(typeof DecompressionStream==='function'){
+    response=await fetch('./data/airports.json.gz?'+Date.now(),{cache:'no-store'});
+    if(response.ok){const stream=response.body.pipeThrough(new DecompressionStream('gzip'));data=JSON.parse(await new Response(stream).text());}
+   }
+   if(!data){response=await fetch('./data/airports.json?'+Date.now(),{cache:'no-store'});if(!response.ok)throw new Error('Archivio aeroporti non pronto (HTTP '+response.status+')');data=await response.json();}
+   if(!Array.isArray(data))throw new Error('Archivio aeroporti non valido');
+   airportData=data;return airportData;
   })().catch(error=>{airportLoadPromise=null;throw error});
  }
  return airportLoadPromise;
@@ -603,11 +606,9 @@ function refreshAirportLayers(){
  if(!airportData)return;
  const maxPoints=1800;let airportCount=0,airfieldCount=0;
  for(const feature of airportData){
-  const c=feature.geometry&&feature.geometry.coordinates;
-  if(!c||c.length<2)continue;
-  const lon=Number(c[0]),lat=Number(c[1]);
+  const lon=Number(feature[0]),lat=Number(feature[1]);
   if(!Number.isFinite(lat)||!Number.isFinite(lon)||!bounds.contains([lat,lon]))continue;
-  const p=feature.properties||{};
+  const p={type:feature[2],name:feature[3],iso_country:feature[4],municipality:feature[5],icao_code:feature[6],iata_code:feature[7]};
   if(p.type==='small_airport'){
    if(!airfieldsEnabled||airfieldCount>=maxPoints)continue;
    L.circleMarker([lat,lon],{radius:3.7,color:'#fff0a6',weight:1,opacity:.95,fillColor:'#ffd43b',fillOpacity:.95}).bindPopup(airportPopup(p,'Campo di volo')).addTo(airfieldLayer);
