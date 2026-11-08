@@ -94,7 +94,7 @@ function airlineForFlight(flight){
 function aircraftPopup(a){
  const row=(label,value)=>'<div style="display:flex;justify-content:space-between;gap:14px;padding:4px 0;border-bottom:1px solid #34465b"><span style="color:#9fb1c6">'+label+'</span><b style="text-align:right">'+escapeHtml(value??'n/d')+'</b></div>';
  const flight=String(a.flight||'').trim();
- const title=flight||a.hex||'Aeromobile';
+ const title=flight||'Aeromobile';
  const airline=airlineForFlight(flight);
  const airlineHeader=airline?'<div style="display:flex;align-items:center;gap:9px;padding:7px 0 9px;margin-bottom:5px;border-bottom:1px solid #34465b"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(airline[2])+'&sz=128" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:7px;background:#fff;padding:3px" onerror="this.style.display=\'none\'"><div><div style="font-weight:750;font-size:14px">'+escapeHtml(airline[1])+'</div><div style="font-size:10px;color:#9fb1c6">Compagnia identificata dal nominativo</div></div></div>':'';
  const rows=[
