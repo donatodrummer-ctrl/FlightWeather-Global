@@ -18,7 +18,7 @@ jobs:
         run: |
           mkdir -p data
           curl --fail --location --silent --show-error \
-            'https://storage.googleapis.com/29f98e10-a489-4c82-ae5e-489dbcd4912f/it_asp.geojson' \
+            'https://storage.googleapis.com/29f98e10-a489-4c82-ae5e-489dbcd4912f/it.asp.geojson' \
             -o data/ctr-it.geojson
           python - <<'PY'
           import json
