@@ -122,10 +122,24 @@ async function loadPlanes(){
  const c=map.getCenter(),radius=Math.min(250,Math.max(30,Math.round(map.getBounds().getNorthEast().distanceTo(map.getBounds().getSouthWest())/1852/2)));
  $('topStatus').textContent='Aggiornamento traffico…';
  try{
-  const url='https://opendata.adsb.fi/api/v3/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius;
-  const res=await fetch(url,{headers:{Accept:'application/json'}});
-  if(!res.ok)throw new Error('Servizio ADS-B: HTTP '+res.status);
-  const data=await res.json(),aircraft=(data.ac||data.aircraft||[]).map(a=>({...a,seen:a.seen??a.seen_pos})).filter(a=>Number.isFinite(Number(a.lat))&&Number.isFinite(Number(a.lon)));
+  const endpoints=[
+   'https://opendata.adsb.fi/api/v3/lat/'+c.lat.toFixed(4)+'/lon/'+c.lng.toFixed(4)+'/dist/'+radius,
+   'https://api.adsb.lol/v2/point/'+c.lat.toFixed(4)+'/'+c.lng.toFixed(4)+'/'+radius
+  ];
+  let aircraft=[],lastError=null,source='';
+  for(const url of endpoints){
+   try{
+    const res=await fetch(url,{headers:{Accept:'application/json'}});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const list=data.ac||data.aircraft||[];
+    const parsed=list.map(a=>({...a,seen:a.seen??a.seen_pos})).filter(a=>Number.isFinite(Number(a.lat))&&Number.isFinite(Number(a.lon)));
+    if(parsed.length){aircraft=parsed;source=url.includes('adsb.fi')?'adsb.fi':'adsb.lol';break;}
+    lastError=new Error('Nessun dato ricevuto dal servizio');
+   }catch(err){lastError=err;}
+  }
+  if(!aircraft.length&&lastError)throw new Error('Fonti ADS-B non disponibili: '+lastError.message);
+
   aircraftCache=aircraft;
   let reopenKey=null;planeLayer.eachLayer(marker=>{if(marker.isPopupOpen()&&marker.options.aircraftKey)reopenKey=marker.options.aircraftKey});
   planeLayer.clearLayers();
@@ -150,7 +164,7 @@ async function loadPlanes(){
   trailLayer.clearLayers();
   flightHistory.forEach(history=>{if(history.length>1){const path=history.map(p=>[p.lat,p.lon]);L.polyline(path,{pane:'trailsPane',color:'#48eaff',weight:3,opacity:.95,dashArray:'1 6',lineCap:'round',lineJoin:'round',interactive:false}).addTo(trailLayer)}});
   $('planeCount').textContent=aircraft.length.toLocaleString('it-IT');
-  $('topStatus').textContent='Traffico aggiornato · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  $('topStatus').textContent='Traffico aggiornato · '+source+' · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   setNotice(aircraft.length?'Ricevuti '+aircraft.length+' aeromobili entro circa '+Math.round(radius*1.852)+' km dal centro della mappa.':'Nessun aeromobile rilevato in quest’area. Prova a spostare o ingrandire la mappa.');
  }catch(e){$('topStatus').textContent='Traffico non disponibile';setNotice(e.message+' — Se il problema continua, riprova tra poco.',true)}
 }
