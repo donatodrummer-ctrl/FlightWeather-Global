@@ -594,7 +594,8 @@ function airportPopup(p,type){
  const name=escapeHtml(p.name||'Senza nome');
  const place=[p.municipality,p.iso_country].filter(Boolean).map(escapeHtml).join(', ');
  const codes=[p.icao_code?'ICAO '+escapeHtml(p.icao_code):'',p.iata_code?'IATA '+escapeHtml(p.iata_code):''].filter(Boolean).join(' · ');
- return '<b>'+name+'</b><br>'+type+(place?'<br>'+place:'')+(codes?'<br><small>'+codes+'</small>':'')+'<br><small>Fonte: OurAirports · dati informativi</small>';
+ const category=p.type==='small_airport'?'Piccolo aeroporto / campo di volo':p.type==='medium_airport'?'Aeroporto medio':p.type==='large_airport'?'Aeroporto principale':p.type==='heliport'?'Eliporto':p.type==='seaplane_base'?'Base per idrovolanti':escapeHtml(p.type||'N/D');
+ return '<div style="min-width:175px"><b style="font-size:14px">'+name+'</b><br><span style="color:#ffd43b;font-weight:700">'+type+'</span><hr style="border:0;border-top:1px solid #40536a;margin:7px 0">'+(place?'<div><b>Località:</b> '+place+'</div>':'')+'<div><b>Categoria:</b> '+category+'</div>'+(codes?'<div><b>Codici:</b> '+escapeHtml(codes)+'</div>':'')+'<div style="margin-top:7px;color:#9fb1c6;font-size:10px">Fonte: OurAirports · dati informativi, non aeronautici ufficiali</div></div>';
 }
 function refreshAirportLayers(){
  const zoom=map.getZoom(),bounds=map.getBounds();
@@ -608,11 +609,11 @@ function refreshAirportLayers(){
   const p={type:feature[2],name:feature[3],iso_country:feature[4],municipality:feature[5],icao_code:feature[6],iata_code:feature[7]};
   if(p.type==='small_airport'){
    if(!airfieldsEnabled||airfieldCount>=maxPoints)continue;
-   L.circleMarker([lat,lon],{radius:3.7,color:'#fff0a6',weight:1,opacity:.95,fillColor:'#ffd43b',fillOpacity:.95}).bindPopup(airportPopup(p,'Campo di volo')).addTo(airfieldLayer);
+   L.circleMarker([lat,lon],{radius:3.7,color:'#fff0a6',weight:1,opacity:.95,fillColor:'#ffd43b',fillOpacity:.95,bubblingMouseEvents:false}).bindPopup(airportPopup(p,'Campo di volo'),{closeButton:true,autoPan:true,maxWidth:260}).addTo(airfieldLayer);
    airfieldCount++;
   }else{
    if(!airportsEnabled||airportCount>=maxPoints)continue;
-   L.circleMarker([lat,lon],{radius:4.2,color:'#ffdadd',weight:1,opacity:1,fillColor:'#ff3b45',fillOpacity:.98}).bindPopup(airportPopup(p,'Aeroporto')).addTo(airportLayer);
+   L.circleMarker([lat,lon],{radius:4.2,color:'#ffdadd',weight:1,opacity:1,fillColor:'#ff3b45',fillOpacity:.98,bubblingMouseEvents:false}).bindPopup(airportPopup(p,'Aeroporto'),{closeButton:true,autoPan:true,maxWidth:260}).addTo(airportLayer);
    airportCount++;
   }
  }
