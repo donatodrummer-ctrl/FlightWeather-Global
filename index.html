@@ -1160,11 +1160,11 @@ function airportPopup(p,type){
  const place=[p.municipality,p.iso_country].filter(Boolean).map(escapeHtml).join(', ');
  const codes=[p.icao_code?'ICAO '+escapeHtml(p.icao_code):'',p.iata_code?'IATA '+escapeHtml(p.iata_code):''].filter(Boolean).join(' · ');
  const icao=String(p.icao_code||'').toUpperCase();
- const weatherLink=/^[A-Z0-9]{4}$/.test(icao)?'<div style="margin-top:7px"><a href="https://aviationweather.gov/data/metar/?id='+icao+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#17364a;border:1px solid #58c9ff;border-radius:5px;padding:5px 7px;color:#d8f5ff;text-decoration:none;font-weight:750">☁ METAR / TAF ufficiali · '+icao+'</a></div>':'';
+ const weatherLink='';
  const weatherBox=/^[A-Z0-9]{4}$/.test(icao)?'<div id="airportWx-'+icao+'" style="margin-top:8px;padding:7px;border:1px solid #39728a;border-radius:6px;background:#0a2635;color:#cdefff;font-size:10px">☁ METAR / TAF: caricamento…</div>':'';
  const frequencyBox='<div id="airportFreq-'+(icao||'none')+'" style="margin-top:8px;padding:7px;border:1px solid #b18b42;border-radius:6px;background:#2b2415;color:#ffedc2;font-size:10px"><b>📻 FREQUENZE RADIO</b><br>Caricamento archivio…</div>';
  const category=p.type==='small_airport'?'Piccolo aeroporto / campo di volo':p.type==='medium_airport'?'Aeroporto medio':p.type==='large_airport'?'Aeroporto principale':p.type==='heliport'?'Eliporto':p.type==='seaplane_base'?'Base per idrovolanti':escapeHtml(p.type||'N/D');
- return '<div style="min-width:125px;max-width:185px;font-size:11px;line-height:1.3"><b style="font-size:12px">'+name+'</b><br><span style="color:#ffd43b;font-weight:700">'+type+'</span><hr style="border:0;border-top:1px solid #40536a;margin:5px 0">'+(place?'<div><b>Località:</b> '+place+'</div>':'')+'<div><b>Categoria:</b> '+category+'</div>'+(codes?'<div><b>Codici:</b> '+escapeHtml(codes)+'</div>':'')+frequencyBox+weatherBox+weatherLink+'<div style="margin-top:5px;color:#9fb1c6;font-size:9px">Fonte anagrafica: OurAirports · dati informativi, non aeronautici ufficiali</div></div>';
+ return '<div style="min-width:125px;max-width:185px;font-size:11px;line-height:1.3"><b style="font-size:12px">'+name+'</b><br><span style="color:#ffd43b;font-weight:700">'+type+'</span><hr style="border:0;border-top:1px solid #40536a;margin:5px 0">'+(place?'<div><b>Località:</b> '+place+'</div>':'')+'<div><b>Categoria:</b> '+category+'</div>'+(codes?'<div><b>Codici:</b> '+escapeHtml(codes)+'</div>':'')+frequencyBox+weatherBox+'<div style="margin-top:5px;color:#9fb1c6;font-size:9px">Fonte anagrafica: OurAirports · dati informativi, non aeronautici ufficiali</div></div>';
 }
 let frequencyArchive=null,frequencyArchivePromise=null;
 async function loadFrequencyArchive(){
@@ -1208,7 +1208,7 @@ async function loadAirportWeather(p,popup){
   const metarText=metar?.rawOb||'METAR non disponibile',tafText=taf?.rawTAF||'TAF non disponibile';
   const wind=metar&&metar.wdir!=null?(metar.wdir==='VRB'?'Variabile':metar.wdir+'°')+' / '+(metar.wspd??'n/d')+' kt':'';
   el.innerHTML='<b>METAR</b><br>'+escapeHtml(metarText)+'<br><b>TAF</b><br>'+escapeHtml(tafText)+(wind?'<br><b>Vento:</b> '+escapeHtml(wind):'');
- }catch(error){el.dataset.loaded='0';el.textContent='METAR/TAF live non disponibili. Usa il collegamento ufficiale qui sotto.'}
+ }catch(error){el.dataset.loaded='0';el.textContent='METAR/TAF live non disponibili.'}
 }
 function bindAirportLabelInfo(marker,p,type){
  const label=[p.icao_code,p.iata_code].filter(Boolean).join(' - ');
