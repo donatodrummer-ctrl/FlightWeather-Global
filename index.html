@@ -79,6 +79,31 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
 .tower-empty{padding:10px;color:#a9bfd2;font-size:10px}
 @media(max-width:600px){header{padding:0 8px}.brand{font-size:13px}.status{display:none}.header-tool{padding:6px 7px;font-size:9px}.flight-weather-panel,.tower-panel{top:8px;left:8px;width:min(275px,calc(100vw - 16px));max-height:45dvh}}
 
+
+/* Pannello laterale richiudibile dei controlli mappa */
+.right-controls{position:absolute;right:12px;top:12px;z-index:1100;width:min(190px,calc(100vw - 24px));pointer-events:auto}
+.right-controls-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:10px 12px;border:1px solid #58c9ff;border-radius:7px;background:#101923ed;color:#eaf2fb;font-size:11px;font-weight:850;box-shadow:0 3px 12px #0008;touch-action:manipulation}
+.right-controls.open .right-controls-toggle{border-color:#8be0ff;background:#123044}
+.right-controls-body{display:flex;flex-direction:column;gap:5px;margin-top:6px;padding:7px;border:1px solid #526579;border-radius:8px;background:#101923f5;box-shadow:0 8px 24px #000b;max-height:calc(100dvh - 110px);overflow-y:auto;overscroll-behavior:contain}
+.right-controls-body[hidden]{display:none!important}
+.right-controls-body>button{position:static!important;inset:auto!important;display:block;width:100%;min-height:31px;padding:7px 9px!important;text-align:left;font-size:10px!important;box-sizing:border-box}
+.right-controls-body .alarm-panel{position:static!important;inset:auto!important;width:auto!important;max-width:none!important;max-height:28dvh;margin-top:3px;box-sizing:border-box}
+.right-controls-body .alarm-panel[hidden]{display:none!important}
+.right-controls-body .refresh{order:0}
+.right-controls-body .radar-button{order:1}
+.right-controls-body .altitude-button{order:2}
+.right-controls-body .traffic-button{order:3}
+.right-controls-body .night-button{order:4}
+.right-controls-body .ctr-button{order:5}
+.right-controls-body .airport-button{order:6}
+.right-controls-body .airfield-button{order:7}
+.right-controls-body .wind-button{order:8}
+.right-controls-body .descent-button{order:9}
+.right-controls-body .convergence-button{order:10}
+.right-controls-body .arrivals-button{order:11}
+.right-controls-body .alarm-button{order:12}
+@media(max-width:600px){.right-controls{right:8px;top:8px;width:min(178px,calc(100vw - 16px))}.right-controls-body{max-height:calc(100dvh - 100px)}}
+
 </style></head>
 <body>
 <header><div class="brand">✈ <span>FlightWeather</span> Global</div><div class="header-actions"><div class="status" id="topStatus">Mappa radar in inizializzazione…</div><button class="header-tool" id="flightWeatherBtn" type="button" aria-pressed="false">☁ METEO VOLO</button><button class="header-tool tower" id="towerModeBtn" type="button" aria-pressed="false">▦ TORRE</button></div></header>
@@ -106,8 +131,11 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
 <div class="notice" id="notice">Apri la mappa su una zona e attiva il traffico aereo. Gli aerei vengono caricati nell'area attorno al centro della vista.</div>
 <div style="font-size:10px;color:#8fa4bb;margin-top:7px">Dati traffico ADS-B: <a href="https://flyitalyadsb.com/dati/api/" target="_blank" rel="noopener noreferrer" style="color:#ffd43b">FlyItalyADSB</a></div>
 </section>
-<button class="refresh" id="refreshBtn">↻ Aggiorna</button>
 <button class="locate" id="locateBtn" title="Mostra la mia posizione GPS" aria-label="Mostra la mia posizione GPS">◎ GPS</button>
+<section class="right-controls" id="rightControls" aria-label="Controlli rapidi mappa">
+ <button class="right-controls-toggle" id="rightControlsToggle" type="button" aria-expanded="false" aria-controls="rightControlsBody">☰ CONTROLLI <span id="rightControlsChevron">▾</span></button>
+ <div class="right-controls-body" id="rightControlsBody" hidden><button class="refresh" id="refreshBtn">↻ Aggiorna</button>
+
 <button class="radar-button" id="radarBtn" type="button" aria-pressed="false">◉ RADAR OFF</button>
 <button class="altitude-button" id="altitudeBtn" type="button" aria-pressed="false">◈ QUOTA OFF</button>
 <button class="traffic-button" id="trafficBtn" type="button" aria-pressed="false">✈ TRAFFICO OFF</button>
@@ -121,6 +149,8 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
  <button class="arrivals-button" id="arrivalsBtn" type="button" aria-pressed="false">✈ ARRIVI OFF</button>
  <button class="alarm-button" id="alarmBtn" type="button" aria-pressed="false">⚠ ALLARMI OFF</button>
  <section class="alarm-panel" id="alarmPanel" hidden aria-live="polite" aria-label="Allarmi aeronautici"><div class="alarm-title">⚠ MONITORAGGIO ALLARMI</div><button id="alarmAudioBtn" type="button" style="width:100%;margin:5px 0 8px;padding:6px;border:1px solid #536579;border-radius:6px;background:#263548;color:#fff;font-size:10px;font-weight:800">🔇 AUDIO OFF</button><div id="alarmList" class="alarm-empty">Nessun allarme rilevato.</div></section>
+</div>
+</section>
 <div id="altitudeLegend" class="altitude-legend" aria-label="Legenda colori quota">
  <div class="legend-title">Quota scia</div>
  <div class="legend-row"><span class="swatch" style="background:#42d6ff"></span>Sotto 3.000 m</div>
@@ -143,6 +173,16 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+
+const rightControls=$('rightControls'),rightControlsToggle=$('rightControlsToggle'),rightControlsBody=$('rightControlsBody');
+rightControlsToggle.addEventListener('click',()=>{
+ const opening=rightControlsBody.hidden;
+ rightControlsBody.hidden=!opening;
+ rightControls.classList.toggle('open',opening);
+ rightControlsToggle.setAttribute('aria-expanded',String(opening));
+ $('rightControlsChevron').textContent=opening?'▴':'▾';
+});
+
 const map=L.map('map',{worldCopyJump:true,doubleClickZoom:true,tap:true}).setView([45.7,9.7],5);
 map.doubleClickZoom.enable();
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
