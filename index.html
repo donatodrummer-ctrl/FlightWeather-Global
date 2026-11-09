@@ -1105,7 +1105,7 @@ function airportPopup(p,type){
  const category=p.type==='small_airport'?'Piccolo aeroporto / campo di volo':p.type==='medium_airport'?'Aeroporto medio':p.type==='large_airport'?'Aeroporto principale':p.type==='heliport'?'Eliporto':p.type==='seaplane_base'?'Base per idrovolanti':escapeHtml(p.type||'N/D');
  const section=(id,title,body,color,open=false)=>'<details class="airport-section" '+(open?'open':'')+'><summary style="color:'+color+'">'+title+'</summary><div id="'+id+'" class="airport-section-body">'+body+'</div></details>';
  const weather=/^[A-Z0-9]{4}$/.test(icao)?section('airportWx-'+icao,'☁ METEO · METAR / TAF','Recupero dati meteorologici…','#8ee6ff',true):'';
- return '<div class="airport-advanced"><div class="airport-title">'+name+'</div><div class="airport-type">'+escapeHtml(type)+'</div>'+(place?'<div class="airport-meta">'+place+'</div>':'')+(codes?'<div class="airport-meta">'+escapeHtml(codes)+'</div>':'')+'<div class="airport-category">'+category+'</div>'+weather+section('airportRunways-'+(icao||'none'),'🛬 PISTE','Caricamento dati piste…','#a8e6b0')+section('airportFreq-'+(icao||'none'),'📻 FREQUENZE RADIO','Caricamento archivio…','#ffdf91')+section('airportTraffic','✈ TRAFFICO VICINO','Verifica traffico in corso…','#ffd43b')+'<div class="airport-source">Dati da OurAirports, Aviation Weather Center e archivio frequenze FlightWeather. Informazioni indicative, non sostituiscono AIP/NOTAM o comunicazioni ATC.</div></div>';
+ return '<div class="airport-advanced"><div class="airport-title">'+name+'</div><div class="airport-type">'+escapeHtml(type)+'</div>'+(place?'<div class="airport-meta">'+place+'</div>':'')+(codes?'<div class="airport-meta">'+escapeHtml(codes)+'</div>':'')+'<div class="airport-category">'+category+'</div>'+weather+section('airportFreq-'+(icao||'none'),'📻 FREQUENZE RADIO','Caricamento archivio…','#ffdf91')+'<div class="airport-source">Dati da OurAirports, Aviation Weather Center e archivio frequenze FlightWeather. Informazioni indicative, non sostituiscono AIP/NOTAM o comunicazioni ATC.</div></div>';
 }
 let frequencyArchive=null,frequencyArchivePromise=null;
 async function loadFrequencyArchive(){
@@ -1150,23 +1150,30 @@ async function loadAirportWeather(p,popup){
  el.innerHTML='☁ METAR / TAF: recupero dati…';
  const val=(v,unit='')=>v===undefined||v===null||v===''?'N/D':escapeHtml(String(v)+unit);
  const cloudNames={SKC:'cielo sereno',CLR:'nessuna nube significativa',FEW:'poche nubi',SCT:'nubi sparse',BKN:'nuvoloso',OVC:'coperto',VV:'visibilità verticale'};
+ async function getReport(kind){
+  const url='https://aviationweather.gov/api/data/'+kind+'?ids='+encodeURIComponent(icao)+'&format=json';
+  const response=await fetch(url,{cache:'no-store'});
+  if(!response.ok)throw new Error(kind+' HTTP '+response.status);
+  const raw=await response.text();
+  if(!raw.trim())return null;
+  const data=JSON.parse(raw);
+  return Array.isArray(data)?(data[0]||null):data;
+ }
  try{
-  const base='https://aviationweather.gov/api/data/';
-  const urls=[base+'metar?ids='+encodeURIComponent(icao)+'&format=json',base+'taf?ids='+encodeURIComponent(icao)+'&format=json'];
-  const responses=await Promise.all(urls.map(url=>fetch(url,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})));
-  const metar=Array.isArray(responses[0])?responses[0][0]:responses[0];
-  const taf=Array.isArray(responses[1])?responses[1][0]:responses[1];
+  const results=await Promise.allSettled([getReport('metar'),getReport('taf')]);
+  const metar=results[0].status==='fulfilled'?results[0].value:null;
+  const taf=results[1].status==='fulfilled'?results[1].value:null;
   let html='<div style="font-size:11px;line-height:1.4">';
   html+='<b style="color:#8ee6ff">METAR · OSSERVAZIONE</b>';
   if(metar){
    const windDir=metar.wdir==='VRB'?'variabile':metar.wdir!=null?metar.wdir+'°':'N/D';
-   const clouds=Array.isArray(metar.clouds)&&metar.clouds.length?metar.clouds.map(c=>(cloudNames[c.cover]||c.cover||'')+(c.base!=null?' a '+Math.round(Number(c.base)*0.3048)+' m':'' )).join(', '):'N/D';
+   const clouds=Array.isArray(metar.clouds)&&metar.clouds.length?metar.clouds.map(c=>(cloudNames[c.cover]||c.cover||'')+(c.base!=null?' a '+Math.round(Number(c.base)*0.3048)+' m':'')).join(', '):'N/D';
    html+='<div style="margin-top:4px"><b>Vento:</b> '+windDir+' · '+val(metar.wspd,' kt')+(metar.wgst!=null?' (raffiche '+val(metar.wgst,' kt')+')':'')+'</div>';
    html+='<div><b>Visibilità:</b> '+val(metar.visib,' km')+' · <b>Temp.:</b> '+val(metar.temp,' °C')+' · <b>Rugiada:</b> '+val(metar.dewp,' °C')+'</div>';
    html+='<div><b>Pressione:</b> '+(metar.altim!=null?val(Math.round(Number(metar.altim)*33.8639),' hPa'):'N/D')+' · <b>Nubi:</b> '+clouds+'</div>';
    html+='<div style="color:#9fb1c6;font-size:9px;margin-top:3px">Osservazione: '+val(metar.reportTime||metar.obsTime)+'</div>';
    if(metar.rawOb)html+='<details style="margin-top:4px"><summary>METAR originale</summary><div style="overflow-wrap:anywhere">'+escapeHtml(metar.rawOb)+'</div></details>';
-  }else html+='<div>METAR non disponibile per questo aeroporto.</div>';
+  }else html+='<div>'+(results[0].status==='rejected'?'Servizio METAR temporaneamente non raggiungibile.':'METAR non disponibile per questo aeroporto.')+'</div>';
   html+='<div style="border-top:1px solid #39728a;margin-top:7px;padding-top:6px"><b style="color:#8ee6ff">TAF · PREVISIONE</b></div>';
   if(taf){
    if(taf.validTimeFrom||taf.validTimeTo)html+='<div style="color:#9fb1c6;font-size:9px">Validità: '+val(taf.validTimeFrom)+' – '+val(taf.validTimeTo)+'</div>';
@@ -1181,7 +1188,7 @@ async function loadAirportWeather(p,popup){
     html+='</div>';
    }
    if(taf.rawTAF)html+='<details style="margin-top:4px"><summary>TAF originale</summary><div style="overflow-wrap:anywhere">'+escapeHtml(taf.rawTAF)+'</div></details>';
-  }else html+='<div>TAF non disponibile per questo aeroporto.</div>';
+  }else html+='<div>'+(results[1].status==='rejected'?'Servizio TAF temporaneamente non raggiungibile.':'TAF non disponibile per questo aeroporto.')+'</div>';
   html+='<div style="margin-top:6px;color:#9fb1c6;font-size:9px">Fonte dati: Aviation Weather Center · aggiornamento automatico all’apertura della scheda. Orari UTC.</div></div>';
   el.innerHTML=html;
  }catch(error){
@@ -1275,7 +1282,7 @@ function refreshAirportLayers(){
    if(!airfieldsEnabled||airfieldCount>=maxPoints)continue;
    const marker=L.circleMarker([lat,lon],{radius:airfieldRadius,color:'#fff0a6',weight:1,opacity:.95,fillColor:'#ffd43b',fillOpacity:.95,bubblingMouseEvents:false}).bindPopup(airportPopup(p,'Campo di volo'),{closeButton:true,autoPan:true,maxWidth:260});
    marker.on('click',function(){this.openPopup()});
-    marker.on('popupopen',event=>{loadAirportFrequencies(p,event.popup);loadAirportWeather(p,event.popup);loadAirportRunways(p,event.popup);updateAirportTraffic(p,event.popup)});
+    marker.on('popupopen',event=>{loadAirportFrequencies(p,event.popup);loadAirportWeather(p,event.popup)});
    if(p.icao_code||p.iata_code)marker.bindTooltip(escapeHtml([p.icao_code,p.iata_code].filter(Boolean).join(' - ')),{permanent:true,direction:'right',offset:[6,0],className:'airport-icao-label',opacity:1});
    marker.addTo(airfieldLayer);
    airfieldCount++;
@@ -1325,7 +1332,7 @@ function refreshMilitaryBaseLayer(){
   const p={icao_code:base.icao,name:base.name,municipality:base.place,iso_country:'IT',type:'military_airport',lat:base.lat,lon:base.lon};
   const marker=L.circleMarker([base.lat,base.lon],{radius:Math.min(10,6+(map.getZoom()-5)*0.7),color:'#ffe1a6',weight:2,opacity:1,fillColor:'#a855f7',fillOpacity:.98,bubblingMouseEvents:false});
   marker.bindPopup(airportPopup(p,'Base militare'),{closeButton:true,autoPan:true,maxWidth:260});
-  marker.on('popupopen',event=>{loadAirportFrequencies(p,event.popup);loadAirportWeather(p,event.popup);loadAirportRunways(p,event.popup);updateAirportTraffic(p,event.popup)});
+  marker.on('popupopen',event=>{loadAirportFrequencies(p,event.popup);loadAirportWeather(p,event.popup)});
   if(map.getZoom()>=7)marker.bindTooltip(base.name+' · '+base.icao,{permanent:true,direction:'right',offset:[7,0],className:'airport-icao-label',opacity:1});
   marker.addTo(militaryBaseLayer);
  }
