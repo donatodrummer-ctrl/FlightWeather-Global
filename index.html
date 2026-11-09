@@ -945,10 +945,14 @@ function showRadarFrame(index){
 function startRadarAnimation(){
  stopRadarAnimation();
  if(!$('weatherToggle').checked||!radarLayer||radarFrames.length<2)return;
- // Riproduce gli ultimi fotogrammi RainViewer in sequenza, in ciclo continuo.
- radarFrameIndex=Math.max(0,radarFrames.length-Math.min(8,radarFrames.length));
+ // Riproduce in ciclo gli ultimi 8 fotogrammi RainViewer.
+ const firstFrame=Math.max(0,radarFrames.length-Math.min(8,radarFrames.length));
+ radarFrameIndex=firstFrame;
  showRadarFrame(radarFrameIndex);
- radarAnimationTimer=setInterval(()=>showRadarFrame(radarFrameIndex+1),750);
+ radarAnimationTimer=setInterval(()=>{
+  const nextFrame=radarFrameIndex+1>=radarFrames.length?firstFrame:radarFrameIndex+1;
+  showRadarFrame(nextFrame);
+ },750);
 }
 async function loadRadar(){
  try{
@@ -961,9 +965,10 @@ async function loadRadar(){
   if(radarLayer)map.removeLayer(radarLayer);
   const frame=radarFrames[radarFrames.length-1];
   radarLayer=L.tileLayer(radarTileHost+frame.path+'/'+radarTileSize+'/{z}/{x}/{y}/2/1_1.png',{tileSize:256,opacity:.78,className:'radar-enhanced',maxNativeZoom:7,maxZoom:19,attribution:'Radar: <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>'});
-  if($('weatherToggle').checked){radarLayer.addTo(map);startRadarAnimation()}
+  if($('weatherToggle').checked)radarLayer.addTo(map);
   else stopRadarAnimation();
   showRadarFrame(radarFrames.length-1);
+  if($('weatherToggle').checked)startRadarAnimation();
  }catch(e){stopRadarAnimation();$('radarTime').textContent='N/D';setNotice('Radar meteo non disponibile: '+e.message,true)}
 }
 async function loadLightning(){
