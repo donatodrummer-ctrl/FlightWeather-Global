@@ -56,6 +56,8 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 .header-tool.tower.active{background:#51420a;border-color:#ffe477;color:#fff2b0}
 .flight-weather-panel,.tower-panel{position:absolute;z-index:1150;top:12px;left:12px;width:min(290px,calc(100vw - 24px));max-height:65dvh;overflow:auto;padding:10px;border:1px solid #58c9ff;border-radius:9px;background:#101923f5;color:#eef4fb;box-shadow:0 8px 24px #000b;backdrop-filter:blur(10px);font-size:11px}
 .flight-weather-panel[hidden],.tower-panel[hidden]{display:none!important}
+main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
+.tower-alerts{border:1px solid #ff5964;border-radius:5px;background:#4b1720;color:#ffe2e4;padding:4px 7px;font-size:9px;font-weight:850}
 .flight-weather-head,.tower-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:12px;font-weight:900}
 .flight-weather-close,.tower-close{border:1px solid #526579;border-radius:5px;background:#1b2a3a;color:#fff;padding:3px 7px;font-weight:800}
 .flight-weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
@@ -134,7 +136,7 @@ main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
  <button id="flightWeatherRadarBtn" type="button" style="width:100%;margin-top:8px;padding:7px;border:1px solid #58c9ff;border-radius:6px;background:#103b50;color:#d8f5ff;font-size:10px;font-weight:800">◉ ATTIVA RADAR PRECIPITAZIONI</button>
 </section>
 <section class="tower-panel" id="towerPanel" hidden aria-live="polite" aria-label="Modalità torre">
- <div class="tower-head"><span>▦ TORRE · TRAFFICO LIVE</span><button class="tower-close" id="towerClose" type="button">×</button></div>
+ <div class="tower-head"><span>▦ TORRE · TRAFFICO LIVE</span><div style="display:flex;gap:5px"><button class="tower-alerts" id="towerAlarms" type="button">⚠ ALLARMI</button><button class="tower-close" id="towerClose" type="button">×</button></div></div>
  <div id="towerTrafficList" class="tower-list"><div class="tower-empty">Attiva il traffico per visualizzare gli aeromobili.</div></div>
  <div class="tower-note">Seleziona un aeromobile per centrare la mappa e aprire la scheda. Dati ADS-B soggetti a copertura e ritardi di ricezione.</div>
 </section>
@@ -923,6 +925,7 @@ let towerModeEnabled=false;
 let flightWeatherLastFetch=0,flightWeatherLoading=false,flightWeatherCache=null;
 function setTowerMode(enabled){
  towerModeEnabled=enabled;
+ document.querySelector('main').classList.toggle('tower-mode',enabled);
  const panel=$('towerPanel'),button=$('towerModeBtn');
  panel.hidden=!enabled;
  button.classList.toggle('active',enabled);
@@ -947,6 +950,7 @@ function renderTowerTraffic(){
 }
 $('towerModeBtn').addEventListener('click',()=>setTowerMode(!towerModeEnabled));
 $('towerClose').addEventListener('click',()=>setTowerMode(false));
+$('towerAlarms').addEventListener('click',()=> $('alarmBtn').click());
 $('towerTrafficList').addEventListener('click',event=>{
  const row=event.target.closest('[data-tower-key]');if(!row)return;
  const key=row.getAttribute('data-tower-key');
@@ -962,7 +966,8 @@ function setFlightWeatherPanel(open){
  panel.hidden=!open;
  button.classList.toggle('active',open);
  button.setAttribute('aria-pressed',String(open));
- if(open){setTowerMode(false);loadFlightWeather();}
+ document.querySelector('main').classList.toggle('flight-weather-mode',open);
+ if(open){setTowerMode(false);$('flightWeatherRadarBtn').textContent=$('weatherToggle').checked?'◉ DISATTIVA RADAR PRECIPITAZIONI':'◉ ATTIVA RADAR PRECIPITAZIONI';loadFlightWeather();}
 }
 $('flightWeatherBtn').addEventListener('click',()=>setFlightWeatherPanel($('flightWeatherPanel').hidden));
 $('flightWeatherClose').addEventListener('click',()=>setFlightWeatherPanel(false));
