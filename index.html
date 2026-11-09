@@ -304,7 +304,7 @@ function planeIcon(a,selected=false){
  const regional=/^(E17[0-9]|E19[0-9]|E75[0-9]|E90[0-9]|CRJ[0-9]{3}|BCS[123])$/.test(type);
  let shape;
  if(heli){
-  shape='<path d="M48 8c-5 0-8 4-8 9v8c-7 5-12 13-12 23v9c0 8 6 14 14 16v7h12v-7c8-2 14-8 14-16v-9c0-10-5-18-12-23v-8c0-5-3-9-8-9z"/><path d="M40 26h16M48 78v12M20 90h56M12 45h72M48 8V3M8 3h80" fill="none" stroke-width="3.5" stroke-linecap="round"/><path d="M34 47h28M48 33v28" fill="none" stroke="#5a4700" stroke-width="2.2" stroke-linecap="round"/>';
+  shape='<path d="M48 8c-7 0-12 6-12 14v17c-7 5-11 13-11 23 0 12 8 20 19 22v5h8v-5c11-2 19-10 19-22 0-10-4-18-11-23V22c0-8-5-14-12-14z"/><path d="M48 4v88M9 48h78" fill="none" stroke-width="4.5" stroke-linecap="round"/><path d="M48 4l-5 7m5-7 5 7M48 92l-5-7m5 7 5-7M9 48l7-5m-7 5 7 5M87 48l-7-5m7 5-7 5" fill="none" stroke-width="2.5" stroke-linecap="round"/><path d="M40 31h16M40 61h16" fill="none" stroke="#5a4700" stroke-width="2" stroke-linecap="round"/><circle cx="48" cy="48" r="4" fill="#5a4700" stroke="none"/><path d="M48 85v7m-7-1h14" fill="none" stroke-width="3" stroke-linecap="round"/>';
  }else if(fighter){
   shape='<path d="M48 5l7 28 32 39-2 6-30-19v22l9 12-16-4-16 4 9-12V59L11 78l-2-6 32-39z"/>';
  }else if(four){
