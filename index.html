@@ -1141,6 +1141,52 @@ async function loadAirportFrequencies(p,popup){
   el.innerHTML=html;
  }catch(error){el.dataset.loaded='0';el.innerHTML='<b>📻 FREQUENZE RADIO</b><br>Archivio non raggiungibile. Riprova più tardi.'}
 }
+function decodeTAF(raw){
+ const tokens=String(raw||'').trim().toUpperCase().split(/\\s+/).filter(Boolean);
+ const wx={DZ:'pioviggine',RA:'pioggia',SN:'neve',SG:'neve granulosa',IC:'cristalli di ghiaccio',PL:'granuli di ghiaccio',GR:'grandine',GS:'piccola grandine',UP:'precipitazione non identificata',BR:'foschia',FG:'nebbia',FU:'fumo',VA:'cenere vulcanica',DU:'polvere',SA:'sabbia',HZ:'caligine',PY:'spruzzi',PO:'turbini di polvere',SQ:'groppo',FC:'tornado / tromba d’aria',SS:'tempesta di sabbia',DS:'tempesta di polvere',TS:'temporale',SH:'rovesci',FZ:'sopraffusione'};
+ const cloud={FEW:'poche nubi',SCT:'nubi sparse',BKN:'molto nuvoloso',OVC:'coperto',VV:'visibilità verticale'};
+ const period=tokens.findIndex(t=>/^\\d{4}\\/\\d{4}$/.test(t));
+ if(period<0)return '<div style="color:#ffcf80">Formato TAF non riconosciuto; consultare il testo originale.</div>';
+ const valid=tokens[period];
+ const datePart=v=>{const d=v.slice(0,2),h=v.slice(2,4);return 'giorno '+Number(d)+' alle '+h+':00Z'};
+ const validity='Validità: '+datePart(valid.slice(0,4))+' → '+datePart(valid.slice(5,9));
+ const starts=t=>/^(?:FM\\d{6}|BECMG|TEMPO|INTER|PROB\\d{2})$/.test(t);
+ const groups=[];let current={kind:'Situazione prevista',tokens:[]};
+ for(let i=period+1;i<tokens.length;i++){
+  const t=tokens[i];
+  if(starts(t)){
+   if(current.tokens.length||groups.length===0)groups.push(current);
+   if(/^FM/.test(t))current={kind:'Da '+datePart(t.slice(2)),tokens:[]};
+   else if(t==='BECMG'||t==='TEMPO'||t==='INTER'||/^PROB/.test(t)){
+    let kind=t==='BECMG'?'Cambiamento graduale':t==='TEMPO'?'Variazioni temporanee':t==='INTER'?'Intermittente':'Probabilità '+t.slice(4)+'%';
+    if(/^PROB/.test(t)&&tokens[i+1]==='TEMPO'){kind+=' · temporaneo';i++;}
+    current={kind,period:'',tokens:[]};
+   }
+   continue;
+  }
+  if((current.kind==='Cambiamento graduale'||current.kind==='Variazioni temporanee'||current.kind==='Intermittente'||current.kind.startsWith('Probabilità'))&&!current.period&&/^\\d{4}\\/\\d{4}$/.test(t)){current.period=t;continue;}
+  current.tokens.push(t);
+ }
+ if(current.tokens.length||!groups.length)groups.push(current);
+ const decodeGroup=g=>{
+  const a=g.tokens,parts=[];
+  const wind=a.find(t=>/^(?:\\d{3}|VRB)\\d{2,3}(?:G\\d{2,3})?KT$/.test(t));
+  if(wind){const m=wind.match(/^(\\d{3}|VRB)(\\d{2,3})(?:G(\\d{2,3}))?KT$/);parts.push('Vento '+(m[1]==='VRB'?'variabile':m[1]+'°')+' a '+m[2]+' kt'+(m[3]?' con raffiche a '+m[3]+' kt':''));}
+  const vis=a.find(t=>/^(?:CAVOK|\\d{4})$/.test(t));
+  if(vis)parts.push('Visibilità '+(vis==='CAVOK'?'10 km o più, nessun fenomeno significativo':vis==='9999'?'10 km o più':Number(vis)>=1000?(Number(vis)/1000).toLocaleString('it-IT')+' km':vis+' metri'));
+  const weather=a.filter(t=>/^[+-]?(?:VC)?(?:MI|PR|BC|DR|BL|SH|TS|FZ)?(?:DZ|RA|SN|SG|IC|PL|GR|GS|UP|BR|FG|FU|VA|DU|SA|HZ|PY|PO|SQ|FC|SS|DS)(?:\\w{0,2})$/.test(t));
+  if(weather.length){const desc=weather.map(code=>{let c=code.replace(/^[-+]/,'');const intensity=code[0]==='+'?'forte':code[0]==='-'?'debole':'';const phenomena=Object.keys(wx).sort((x,y)=>y.length-x.length).filter(k=>c.includes(k)).map(k=>wx[k]);const prefix=c.includes('TS')?'temporale con ':c.includes('SH')?'rovesci di ':c.includes('FZ')?'sopraffusi ':'';return (intensity?intensity+' ':'')+(prefix||'')+(phenomena.filter(x=>!['temporale','rovesci','sopraffusione'].includes(x)).join(' e ')||'fenomeno significativo');});parts.push(desc.join('; '));}
+  const clouds=a.filter(t=>/^(?:FEW|SCT|BKN|OVC|VV)\\d{3}(?:CB|TCU)?$/.test(t));
+  if(clouds.length)parts.push('Nubi '+clouds.map(t=>{const m=t.match(/^(FEW|SCT|BKN|OVC|VV)(\\d{3})(CB|TCU)?$/);return (cloud[m[1]]||m[1])+' a '+(Number(m[2])*30.48).toFixed(0)+' m'+(m[3]?' ('+(m[3]==='CB'?'cumulonembi':'torri di cumuli')+')':'');}).join(', '));
+  if(a.includes('NSW'))parts.push('Nessun fenomeno meteorologico significativo previsto');
+  if(a.includes('CAVOK')&&!vis)parts.push('Condizioni CAVOK');
+  if(a.includes('SKC')||a.includes('CLR')||a.includes('NSC'))parts.push('Nubi assenti o non significative');
+  return parts.length?parts.join(' · '):'Nessuna variazione significativa indicata';
+ };
+ let out='<div style="margin-top:5px;color:#9fb1c6;font-size:10px">'+validity+'</div>';
+ groups.forEach(g=>{if(!g.tokens.length)return;let label=g.kind;if(g.period)label+=' ('+datePart(g.period.slice(0,4))+' → '+datePart(g.period.slice(5,9))+')';out+='<div style="margin-top:7px;padding:6px 7px;border-left:2px solid #56b9d5;background:rgba(86,185,213,.07);border-radius:3px"><b style="color:#8ee6ff">'+escapeHtml(label)+'</b><div style="margin-top:3px">'+escapeHtml(decodeGroup(g))+'</div></div>';});
+ return out;
+}
 async function loadAirportWeather(p,popup){
  const icao=String(p.icao_code||'').toUpperCase();
  if(!/^[A-Z0-9]{4}$/.test(icao))return;
@@ -1170,7 +1216,7 @@ async function loadAirportWeather(p,popup){
    if(metar.raw)html+='<details style="margin-top:4px"><summary>METAR originale</summary><div style="overflow-wrap:anywhere">'+escapeHtml(metar.raw)+'</div></details>';
   }else html+='<div>'+(results[0].status==='rejected'?'METAR non raggiungibile al momento.':'Nessun METAR disponibile per questo aeroporto.')+'</div>';
   html+='<div style="border-top:1px solid #39728a;margin-top:7px;padding-top:6px"><b style="color:#8ee6ff">TAF · PREVISIONE</b></div>';
-  if(taf&&taf.raw)html+='<div style="margin-top:4px;overflow-wrap:anywhere">'+escapeHtml(taf.raw)+'</div><div style="color:#9fb1c6;font-size:9px">Emissione: '+esc(taf.issuedAt||'N/D')+'</div>';
+  if(taf&&taf.raw)html+=decodeTAF(taf.raw)+'<details style="margin-top:5px"><summary>TAF originale</summary><div style="overflow-wrap:anywhere">'+escapeHtml(taf.raw)+'</div></details><div style="color:#9fb1c6;font-size:9px">Emissione: '+esc(taf.issuedAt||'N/D')+'</div>';
   else html+='<div>'+(results[1].status==='rejected'?'TAF non raggiungibile al momento.':'TAF non disponibile per questo aeroporto.')+'</div>';
   html+='<div style="margin-top:6px;color:#9fb1c6;font-size:9px">Fonte: NOAA NWS tramite Datamask Aviation. Dati informativi, non per la pianificazione del volo.</div></div>';
   el.innerHTML=html;
