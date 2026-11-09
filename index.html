@@ -774,7 +774,7 @@ function aircraftPopup(a){
 let planesLoading=false;
 let trafficEnabled=false;
 async function loadPlanes(){
- if(!trafficEnabled){planeLayer.clearLayers();$('planeCount').textContent='0';return}
+ if(!trafficEnabled){planeLayer.clearLayers();aircraftCache=[];$('planeCount').textContent='0';if(towerModeEnabled)renderTowerTraffic();return}
  // Aggiornamento del traffico ogni 3 secondi, sia a mappa libera sia con un aereo selezionato.
  const minRefreshMs=3000;
  if(Date.now()<flyItalyBlockedUntil||Date.now()-lastLiveRequestAt<minRefreshMs)return;
@@ -931,7 +931,7 @@ function setTowerMode(enabled){
  button.classList.toggle('active',enabled);
  button.setAttribute('aria-pressed',String(enabled));
  button.textContent=enabled?'▦ TORRE ON':'▦ TORRE';
- if(enabled){$('flightWeatherPanel').hidden=true;renderTowerTraffic();setNotice('Modalità torre attiva: seleziona un aeromobile nell’elenco per aprire i dettagli.');}
+ if(enabled){$('flightWeatherPanel').hidden=true;$('flightWeatherBtn').classList.remove('active');$('flightWeatherBtn').setAttribute('aria-pressed','false');document.querySelector('main').classList.remove('flight-weather-mode');renderTowerTraffic();setNotice('Modalità torre attiva: seleziona un aeromobile nell’elenco per aprire i dettagli.');}
 }
 function renderTowerTraffic(){
  const panel=$('towerPanel'),list=$('towerTrafficList');
