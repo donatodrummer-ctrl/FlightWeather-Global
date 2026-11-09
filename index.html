@@ -35,7 +35,7 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 
 .traffic-button{position:absolute;right:12px;top:197px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ffd43b;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}.traffic-button.active{background:#51420a;border-color:#ffe477;color:#fff2b0}
 .ctr-button{position:absolute;right:12px;top:228px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ff6872;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:11px;font-weight:700;box-shadow:0 2px 8px #0008}.ctr-button.active{background:#4a1720;border-color:#ff9aa1;color:#ffdadd}
-.airport-button,.airfield-button{position:absolute;right:12px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:10px;font-weight:750;box-shadow:0 2px 8px #0008}
+.runway-button{position:absolute;right:12px;top:320px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #58c9ff;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:10px;font-weight:750;box-shadow:0 2px 8px #0008}.runway-button.active{background:#103b50;border-color:#8be0ff;color:#d8f5ff}\n.airport-button,.airfield-button{position:absolute;right:12px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border-radius:5px;padding:6px 9px;color:#eaf2fb;font-size:10px;font-weight:750;box-shadow:0 2px 8px #0008}
 .airport-button{top:260px;border:1px solid #ff4b55}.airport-button.active{background:#55151c;color:#ffdadd}
 .airfield-button{top:290px;border:1px solid #ffd43b}.airfield-button.active{background:#55440b;color:#fff0a6}
 .alarm-button{position:fixed;right:12px;top:auto;bottom:14px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ff5964;border-radius:5px;padding:6px 9px;color:#fff;font-size:10px;font-weight:800;box-shadow:0 2px 8px #0008}.alarm-button.active{background:#741923;border-color:#ff9aa1;box-shadow:0 0 12px #ff263a66}
@@ -86,7 +86,7 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
 .right-controls-body .altitude-button{order:2}
 .right-controls-body .traffic-button{order:3}
 .right-controls-body .ctr-button{order:5}
-.right-controls-body .airport-button{order:6}
+.right-controls-body .runway-button{order:7}\n.right-controls-body .airport-button{order:6}
 .right-controls-body .airfield-button{order:7}
 .right-controls-body .wind-button{order:8}
 .right-controls-body .descent-button{order:9}
@@ -133,7 +133,7 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
 
  <button class="ctr-button" id="ctrBtn" type="button" aria-pressed="false">CTR OFF</button>
  <button class="airport-button" id="airportBtn" type="button" aria-pressed="false">● AEROPORTI OFF</button>
- <button class="airfield-button" id="airfieldBtn" type="button" aria-pressed="false">● CAMPI OFF</button>
+ <button class="airfield-button" id="airfieldBtn" type="button" aria-pressed="false">● CAMPI OFF</button>\n <button class="runway-button" id="runwayBtn" type="button" aria-pressed="false">━ PISTE OFF</button>
 <button class="wind-button" id="windBtn" type="button" aria-pressed="false">↗ VENTO OFF</button>
   <button class="descent-button" id="descentBtn" type="button" aria-pressed="false">↘ DISCESA OFF</button>
  <button class="convergence-button" id="convergenceBtn" type="button" aria-pressed="false">◎ CONVERGENZE OFF</button>
@@ -162,7 +162,7 @@ map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.ge
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,className:'basemap-dim',attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
 map.createPane('lightningPane');map.getPane('lightningPane').style.zIndex='420';map.getPane('lightningPane').style.pointerEvents='none';
 let planeLayer=L.layerGroup().addTo(map),trailLayer=L.layerGroup().addTo(map),multiTrackLayer=L.layerGroup().addTo(map),radarLayer=null,radarFrames=[],lightningLayer=null,ctrLayer=null,ctrDataLoaded=false,ctrLoading=false;
-let airportData=null,airportLayer=L.layerGroup(),airfieldLayer=L.layerGroup(),airportsEnabled=false,airfieldsEnabled=false,airportLoadPromise=null;
+let airportData=null,airportLayer=L.layerGroup(),airfieldLayer=L.layerGroup(),airportsEnabled=false,airfieldsEnabled=false,airportLoadPromise=null;\nlet runwayData=null,runwayLayer=L.layerGroup(),runwaysEnabled=false,runwayLoadPromise=null;
 let windEnabled=false,windLayer=L.layerGroup(),windLoading=false,lastWindRefresh=0;
 let descentEnabled=false,descentLayer=L.layerGroup();
 let convergenceRadarEnabled=false,convergenceRadarLayer=L.layerGroup();
@@ -1074,6 +1074,57 @@ async function loadAirportData(){
  }
  return airportLoadPromise;
 }
+async function loadRunwayData(){
+ if(runwayData)return runwayData;
+ if(!runwayLoadPromise){
+  runwayLoadPromise=(async()=>{
+   let response,data;
+   if(typeof DecompressionStream==='function'){
+    response=await fetch('./data/runways.json.gz?'+Date.now(),{cache:'no-store'});
+    if(response.ok){const stream=response.body.pipeThrough(new DecompressionStream('gzip'));data=JSON.parse(await new Response(stream).text());}
+   }
+   if(!data){response=await fetch('./data/runways.json?'+Date.now(),{cache:'no-store'});if(!response.ok)throw new Error('Archivio piste non pronto (HTTP '+response.status+')');data=await response.json();}
+   if(!Array.isArray(data))throw new Error('Archivio piste non valido');
+   runwayData=data;return runwayData;
+  })().catch(error=>{runwayLoadPromise=null;throw error});
+ }
+ return runwayLoadPromise;
+}
+function refreshRunwayLayer(){
+ runwayLayer.clearLayers();
+ if(!runwaysEnabled||!runwayData||map.getZoom()<8)return;
+ const bounds=map.getBounds();let count=0;
+ for(const r of runwayData){
+  const a=[Number(r[0]),Number(r[1])],b=[Number(r[2]),Number(r[3])];
+  if(!Number.isFinite(a[0])||!Number.isFinite(a[1])||!Number.isFinite(b[0])||!Number.isFinite(b[1]))continue;
+  const lineBounds=L.latLngBounds(a,b);if(!lineBounds.intersects(bounds))continue;
+  const length=Number(r[7]),width=Number(r[8]);
+  const lengthText=Number.isFinite(length)&&length>0?Math.round(length*0.3048).toLocaleString('it-IT')+' m':'N/D';
+  const widthText=Number.isFinite(width)&&width>0?Math.round(width*0.3048)+' m':'N/D';
+  const ends=[r[5],r[6]].filter(Boolean).join(' / ')||'Designazione N/D';
+  const popup='<b>Pista '+escapeHtml(ends)+'</b><br>Aeroporto: '+escapeHtml(r[4]||'N/D')+'<br>Lunghezza: '+lengthText+'<br>Larghezza: '+widthText+'<br>Superficie: '+escapeHtml(r[9]||'N/D')+'<br><small>Fonte: OurAirports · dati informativi, non per uso operativo</small>';
+  L.polyline([a,b],{color:'#54d7ff',weight:Math.min(5,Math.max(2,map.getZoom()-6)),opacity:.95,lineCap:'butt',interactive:true}).bindPopup(popup,{maxWidth:220}).addTo(runwayLayer);
+  if(++count>=2500)break;
+ }
+ if(!map.hasLayer(runwayLayer))runwayLayer.addTo(map);
+}
+async function setRunwaysEnabled(enabled){
+ const button=$('runwayBtn');button.disabled=true;
+ try{
+  if(enabled)await loadRunwayData();
+  runwaysEnabled=enabled;button.classList.toggle('active',enabled);
+  button.textContent=enabled?'━ PISTE ON':'━ PISTE OFF';
+  button.setAttribute('aria-pressed',String(enabled));
+  if(enabled&&map.getZoom()<8)setNotice('Piste attivate: aumenta lo zoom a livello 8 o superiore per visualizzarle.');
+  else setNotice(enabled?'Piste aeroportuali visibili nell’area della mappa. Tocca una pista per i dettagli.':'Piste disattivate.');
+  refreshRunwayLayer();
+ }catch(error){
+  runwaysEnabled=false;button.classList.remove('active');button.textContent='━ PISTE OFF';button.setAttribute('aria-pressed','false');
+  setNotice('Piste non disponibili: '+error.message,true);
+ }finally{button.disabled=false}
+}
+$('runwayBtn').addEventListener('click',()=>setRunwaysEnabled(!runwaysEnabled));
+
 function airportPopup(p,type){
  const name=escapeHtml(p.name||'Senza nome');
  const place=[p.municipality,p.iso_country].filter(Boolean).map(escapeHtml).join(', ');
@@ -1228,7 +1279,7 @@ locateButton.addEventListener('click',event=>{
 });
 
 map.on('click',()=>{closeRightControls();pinnedAircraftKey=null;followSelectedAircraft=false;updateFollowButton();updateAircraftIcons();showSelectedAircraft(null);drawSelectedTrail();setPanelCompact(true)});
-let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes();refreshAirportLayers();if(windEnabled){lastWindRefresh=0;refreshWindLayer()}},250)});map.on('zoomend',()=>{refreshAirportLayers();updateAircraftLabels();if(windEnabled){lastWindRefresh=0;refreshWindLayer()}});
+let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes();refreshAirportLayers();refreshRunwayLayer();if(windEnabled){lastWindRefresh=0;refreshWindLayer()}},250)});map.on('zoomend',()=>{refreshAirportLayers();refreshRunwayLayer();updateAircraftLabels();if(windEnabled){lastWindRefresh=0;refreshWindLayer()}});
 loadRadar();loadPlanes();
 // Il controllo e il caricamento del traffico sono impostati ogni 3 secondi.
 setInterval(()=>{if(trafficEnabled)loadPlanes()},3000);
