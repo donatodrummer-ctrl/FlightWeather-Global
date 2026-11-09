@@ -1192,9 +1192,8 @@ async function loadAirportFrequencies(p,popup){
     html+='<div style="padding:3px 0;border-bottom:1px solid #665331"><b>'+escapeHtml(item.service||'Servizio')+'</b>: <span style="font-size:12px;font-weight:800">'+escapeHtml(item.frequency_mhz||'')+' MHz</span>'+(item.note?'<br>'+escapeHtml(item.note):'')+'</div>';
    }
    html+='</div><div style="margin-top:5px">Fonte: '+escapeHtml(record.source||'Non specificata')+(record.valid_from?' · Validità: '+escapeHtml(record.valid_from):'')+'</div>';
-  }else html+='<div style="margin-top:5px">Nessuna frequenza verificata inserita in archivio per questo sito.</div>';
-  html+='<div style="margin-top:6px"><a href="https://www.enav.it/servizi/aip" target="_blank" rel="noopener noreferrer" style="color:#9edbff">AIP Italia / ENAV</a> · <a href="https://www.enac.gov.it/" target="_blank" rel="noopener noreferrer" style="color:#9edbff">ENAC</a></div>';
-  html+='<div style="margin-top:4px;color:#d6bd8b;font-size:9px">Archivio in costruzione. Verificare sempre AIP e pubblicazioni vigenti prima di qualsiasi uso operativo.</div>';
+  }else html+='<div style="margin-top:5px">Frequenze radio non ancora caricate per questo sito.</div>';
+  html+='<div style="margin-top:4px;color:#d6bd8b;font-size:9px">Le frequenze verificate compariranno qui direttamente, con servizio, MHz, fonte e data di validità. Nessun collegamento esterno.</div>';
   el.innerHTML=html;
  }catch(error){el.dataset.loaded='0';el.innerHTML='<b>📻 FREQUENZE RADIO</b><br>Archivio non raggiungibile. Riprova più tardi.'}
 }
