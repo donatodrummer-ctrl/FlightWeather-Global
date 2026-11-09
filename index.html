@@ -42,11 +42,6 @@ main{height:calc(100dvh - 58px);position:relative}#map{height:100%;width:100%;ba
 .airfield-button{top:290px;border:1px solid #ffd43b}.airfield-button.active{background:#55440b;color:#fff0a6}
 .alarm-button{position:fixed;right:12px;top:auto;bottom:14px;z-index:1000;pointer-events:auto;touch-action:manipulation;background:#101923ed;border:1px solid #ff5964;border-radius:5px;padding:6px 9px;color:#fff;font-size:10px;font-weight:800;box-shadow:0 2px 8px #0008}.alarm-button.active{background:#741923;border-color:#ff9aa1;box-shadow:0 0 12px #ff263a66}
 .alarm-panel{position:absolute;z-index:1200;top:104px;right:12px;width:min(270px,calc(100vw - 24px));max-height:34dvh;overflow:auto;padding:10px;border:1px solid #ff5964;border-radius:8px;background:#101923f5;color:#f4f8ff;box-shadow:0 8px 24px #000b;backdrop-filter:blur(10px)}.alarm-panel[hidden]{display:none!important}.alarm-title{font-size:12px;font-weight:850;margin-bottom:7px;color:#ffb3b8}.alarm-empty{font-size:11px;color:#aebdce;padding:5px 0}.alarm-item{padding:7px 0;border-top:1px solid #51313b;font-size:11px;line-height:1.4}.alarm-item b{color:#fff}.alarm-item small{display:block;color:#aebdce;font-size:10px}
-main.night-mode #map .leaflet-tile-pane{filter:brightness(.42) saturate(.62) hue-rotate(155deg) contrast(1.12)}
-main.night-mode .aircraft-icon{filter:drop-shadow(0 0 1px #62ffe0);text-shadow:0 0 2px #62ffe0,0 1px 4px #000}
-main.night-mode .leaflet-popup-content-wrapper,main.night-mode .leaflet-popup-tip{background:#031b25!important;border-color:#35d9bd!important;box-shadow:0 0 14px #12c8a655!important}
-main.night-mode .leaflet-control-attribution{background:#031b25cc!important;color:#a5e9df!important}
-main.night-mode .leaflet-control-attribution a{color:#55ddca!important}
 
 /* METEO VOLO + MODALITÀ TORRE */
 .header-actions{display:flex;align-items:center;gap:6px}
@@ -106,7 +101,7 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
 
 </style></head>
 <body>
-<header><div class="brand">✈ <span>FlightWeather</span> Global</div><div class="header-actions"><div class="status" id="topStatus">Mappa radar in inizializzazione…</div><button class="header-tool" id="flightWeatherBtn" type="button" aria-pressed="false">☁ METEO VOLO</button><button class="header-tool tower" id="towerModeBtn" type="button" aria-pressed="false">▦ TORRE</button></div></header>
+<header><div class="brand">✈ <span>FlightWeather</span> Global</div><div class="header-actions"><div class="status" id="topStatus">Mappa radar in inizializzazione…</div></div></header>
 <main><div id="map"></div>
 <section class="panel compact" aria-label="Controlli mappa">
 <button class="panel-toggle" id="panelToggle" type="button" aria-expanded="false">⚙ Impostazioni</button>
@@ -139,7 +134,6 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
 <button class="radar-button" id="radarBtn" type="button" aria-pressed="false">◉ RADAR OFF</button>
 <button class="altitude-button" id="altitudeBtn" type="button" aria-pressed="false">◈ QUOTA OFF</button>
 <button class="traffic-button" id="trafficBtn" type="button" aria-pressed="false">✈ TRAFFICO OFF</button>
-<button class="night-button" id="nightBtn" type="button" aria-pressed="false">◐ NOTTE OFF</button>
  <button class="ctr-button" id="ctrBtn" type="button" aria-pressed="false">CTR OFF</button>
  <button class="airport-button" id="airportBtn" type="button" aria-pressed="false">● AEROPORTI OFF</button>
  <button class="airfield-button" id="airfieldBtn" type="button" aria-pressed="false">● CAMPI OFF</button>
@@ -160,16 +154,7 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
 <div class="selected-aircraft" id="selectedAircraftInfo" hidden aria-live="polite"></div>
 <div class="multi-track-panel" id="multiTrackPanel" hidden aria-live="polite"></div>
 <div class="arrivals-panel" id="arrivalsPanel" hidden aria-live="polite"></div>
-<section class="flight-weather-panel" id="flightWeatherPanel" hidden aria-live="polite" aria-label="Meteo di volo">
- <div class="flight-weather-head"><span>☁ METEO DI VOLO · MODELLO</span><button class="flight-weather-close" id="flightWeatherClose" type="button">×</button></div>
- <div id="flightWeatherContent"><div class="tower-empty">Premi METEO VOLO per caricare le condizioni atmosferiche sull'area centrale della mappa.</div></div>
- <button id="flightWeatherRadarBtn" type="button" style="width:100%;margin-top:8px;padding:7px;border:1px solid #58c9ff;border-radius:6px;background:#103b50;color:#d8f5ff;font-size:10px;font-weight:800">◉ ATTIVA RADAR PRECIPITAZIONI</button>
-</section>
-<section class="tower-panel" id="towerPanel" hidden aria-live="polite" aria-label="Modalità torre">
- <div class="tower-head"><span>▦ TORRE · TRAFFICO LIVE</span><div style="display:flex;gap:5px"><button class="tower-alerts" id="towerAlarms" type="button">⚠ ALLARMI</button><button class="tower-close" id="towerClose" type="button">×</button></div></div>
- <div id="towerTrafficList" class="tower-list"><div class="tower-empty">Attiva il traffico per visualizzare gli aeromobili.</div></div>
- <div class="tower-note">Seleziona un aeromobile per centrare la mappa e aprire la scheda. Dati ADS-B soggetti a copertura e ritardi di ricezione.</div>
-</section>
+
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -822,7 +807,7 @@ function aircraftPopup(a){
 let planesLoading=false;
 let trafficEnabled=false;
 async function loadPlanes(){
- if(!trafficEnabled){planeLayer.clearLayers();aircraftCache=[];$('planeCount').textContent='0';if(towerModeEnabled)renderTowerTraffic();return}
+ if(!trafficEnabled){planeLayer.clearLayers();aircraftCache=[];$('planeCount').textContent='0';return}
  // Aggiornamento del traffico ogni 3 secondi, sia a mappa libera sia con un aereo selezionato.
  const minRefreshMs=3000;
  if(Date.now()<flyItalyBlockedUntil||Date.now()-lastLiveRequestAt<minRefreshMs)return;
@@ -964,125 +949,8 @@ $('trafficBtn').addEventListener('click',()=>setTrafficEnabled(!trafficEnabled))
 $('weatherToggle').addEventListener('change',e=>setRadarEnabled(e.target.checked));
 $('lightningToggle').addEventListener('change',e=>setLightningEnabled(e.target.checked));
 $('altitudeBtn').addEventListener('click',()=>{altitudeColorMode=!altitudeColorMode;$('altitudeBtn').classList.toggle('active',altitudeColorMode);$('altitudeBtn').textContent=altitudeColorMode?'◈ QUOTA ON':'◈ QUOTA OFF';$('altitudeBtn').setAttribute('aria-pressed',String(altitudeColorMode));$('altitudeLegend').classList.toggle('visible',altitudeColorMode);drawSelectedTrail()});
-$('nightBtn').addEventListener('click',()=>{const enabled=!document.querySelector('main').classList.contains('night-mode');document.querySelector('main').classList.toggle('night-mode',enabled);$('nightBtn').classList.toggle('active',enabled);$('nightBtn').textContent=enabled?'◐ NOTTE ON':'◐ NOTTE OFF';$('nightBtn').setAttribute('aria-pressed',String(enabled))});
 
 
-
-let towerModeEnabled=false;
-let flightWeatherLastFetch=0,flightWeatherLoading=false,flightWeatherCache=null;
-function setTowerMode(enabled){
- towerModeEnabled=enabled;
- document.querySelector('main').classList.toggle('tower-mode',enabled);
- const panel=$('towerPanel'),button=$('towerModeBtn');
- panel.hidden=!enabled;
- button.classList.toggle('active',enabled);
- button.setAttribute('aria-pressed',String(enabled));
- button.textContent=enabled?'▦ TORRE ON':'▦ TORRE';
- if(enabled){$('flightWeatherPanel').hidden=true;$('flightWeatherBtn').classList.remove('active');$('flightWeatherBtn').setAttribute('aria-pressed','false');document.querySelector('main').classList.remove('flight-weather-mode');renderTowerTraffic();setNotice('Modalità torre attiva: seleziona un aeromobile nell’elenco per aprire i dettagli.');}
-}
-function renderTowerTraffic(){
- const panel=$('towerPanel'),list=$('towerTrafficList');
- if(!panel||panel.hidden||!list)return;
- const rows=(aircraftCache||[]).map(a=>({a,key:String(a.hex||a.flight||('pos-'+a.lat+'-'+a.lon)).trim()}))
-  .sort((x,y)=>Number(y.a.alt_baro??y.a.alt_geom??0)-Number(x.a.alt_baro??x.a.alt_geom??0));
- if(!rows.length){list.innerHTML='<div class="tower-empty">Nessun aeromobile ricevuto. Attiva TRAFFICO e attendi i dati ADS-B.</div>';return;}
- list.innerHTML=rows.slice(0,100).map(({a,key})=>{
-  const flight=String(a.flight||a.r||'Aeromobile').trim();
-  const route=a.route,from=route&&(route.from_iata||route.from_icao||route.from),to=route&&(route.to_iata||route.to_icao||route.to);
-  const routeText=from&&to?String(from).toUpperCase()+' → '+String(to).toUpperCase():'Tratta n/d';
-  const altitude=niceAlt(a.alt_baro??a.alt_geom),speed=niceSpeed(a.gs);
-  const type=a.t||a.desc||'Tipo n/d';
-  return '<button type="button" class="tower-row" data-tower-key="'+escapeHtml(key)+'"><strong>'+escapeHtml(flight)+'</strong><span>'+escapeHtml(type)+'</span><span>'+escapeHtml(routeText)+'</span><span>Vel. '+escapeHtml(speed)+'</span><span class="tower-alt">Quota '+escapeHtml(altitude)+'</span></button>';
- }).join('');
-}
-$('towerModeBtn').addEventListener('click',()=>setTowerMode(!towerModeEnabled));
-$('towerClose').addEventListener('click',()=>setTowerMode(false));
-$('towerAlarms').addEventListener('click',()=> $('alarmBtn').click());
-$('towerTrafficList').addEventListener('click',event=>{
- const row=event.target.closest('[data-tower-key]');if(!row)return;
- const key=row.getAttribute('data-tower-key');
- const a=(aircraftCache||[]).find(item=>String(item.hex||item.flight||('pos-'+item.lat+'-'+item.lon)).trim()===key);
- const marker=aircraftMarkers.get(key);
- if(marker){map.setView(marker.getLatLng(),Math.max(map.getZoom(),8),{animate:true});marker.openPopup();}
- if(a)showSelectedAircraft(a);
-});
-setInterval(()=>{if(towerModeEnabled)renderTowerTraffic()},5000);
-
-function setFlightWeatherPanel(open){
- const panel=$('flightWeatherPanel'),button=$('flightWeatherBtn');
- panel.hidden=!open;
- button.classList.toggle('active',open);
- button.setAttribute('aria-pressed',String(open));
- document.querySelector('main').classList.toggle('flight-weather-mode',open);
- if(open){setTowerMode(false);$('flightWeatherRadarBtn').textContent=$('weatherToggle').checked?'◉ DISATTIVA RADAR PRECIPITAZIONI':'◉ ATTIVA RADAR PRECIPITAZIONI';loadFlightWeather();}
-}
-$('flightWeatherBtn').addEventListener('click',()=>setFlightWeatherPanel($('flightWeatherPanel').hidden));
-$('flightWeatherClose').addEventListener('click',()=>setFlightWeatherPanel(false));
-$('flightWeatherRadarBtn').addEventListener('click',()=>{
- const enabled=!$('weatherToggle').checked;
- setRadarEnabled(enabled);
- $('flightWeatherRadarBtn').textContent=enabled?'◉ DISATTIVA RADAR PRECIPITAZIONI':'◉ ATTIVA RADAR PRECIPITAZIONI';
-});
-function flightWeatherCodeLabel(code){
- const n=Number(code);
- if([95,96,99].includes(n))return 'Temporale';
- if([71,73,75,77,85,86].includes(n))return 'Neve / precipitazioni solide';
- if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(n))return 'Precipitazioni';
- if([45,48].includes(n))return 'Nebbia';
- if(n===0)return 'Sereno';
- if([1,2,3].includes(n))return 'Nuvolosità variabile';
- return 'Condizioni variabili';
-}
-function weatherValue(v,unit,digits=0){return Number.isFinite(Number(v))?Number(v).toFixed(digits)+' '+unit:'n/d';}
-async function loadFlightWeather(){
- if(flightWeatherLoading)return;
- if(flightWeatherCache&&Date.now()-flightWeatherLastFetch<900000){renderFlightWeather(flightWeatherCache);return;}
- flightWeatherLoading=true;
- $('flightWeatherContent').innerHTML='<div class="tower-empty">Caricamento dati meteo in quota…</div>';
- try{
-  const center=map.getCenter(),lat=center.lat.toFixed(3),lon=center.lng.toFixed(3);
-  const hourly='temperature_850hPa,temperature_700hPa,temperature_500hPa,temperature_300hPa,temperature_250hPa,wind_speed_850hPa,wind_speed_700hPa,wind_speed_500hPa,wind_speed_300hPa,wind_speed_250hPa,wind_direction_850hPa,wind_direction_700hPa,wind_direction_500hPa,wind_direction_300hPa,wind_direction_250hPa,geopotential_height_850hPa,geopotential_height_700hPa,geopotential_height_500hPa,geopotential_height_300hPa,geopotential_height_250hPa';
-  const url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&current=temperature_2m,precipitation,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code&hourly='+hourly+'&forecast_hours=2&wind_speed_unit=kn&timezone=auto';
-  const response=await fetch(url);if(!response.ok)throw new Error('Open-Meteo HTTP '+response.status);
-  const data=await response.json(),h=data.hourly||{},current=data.current||{};
-  const idx=0;
-  const levels=[['850 hPa','1.5 km',850],['700 hPa','3.0 km',700],['500 hPa','5.6 km',500],['300 hPa','9.2 km',300],['250 hPa','10.4 km',250]].map(([label,approx,level])=>({
-   label,approx,level,
-   temp:h['temperature_'+level+'hPa']?.[idx],
-   wind:h['wind_speed_'+level+'hPa']?.[idx],
-   direction:h['wind_direction_'+level+'hPa']?.[idx],
-   height:h['geopotential_height_'+level+'hPa']?.[idx]
-  }));
-  flightWeatherCache={current,levels,place:lat+', '+lon,time:h.time?.[idx]||current.time||'n/d'};
-  flightWeatherLastFetch=Date.now();
-  renderFlightWeather(flightWeatherCache);
- }catch(error){
-  $('flightWeatherContent').innerHTML='<div class="tower-empty">Meteo non disponibile: '+escapeHtml(error.message)+'</div>';
- }finally{flightWeatherLoading=false;}
-}
-function renderFlightWeather(data){
- const c=data.current||{},levels=data.levels||[];
- const precip=Number(c.precipitation),wind=Number(c.wind_speed_10m),gust=Number(c.wind_gusts_10m),code=Number(c.weather_code);
- const flags=[];
- if([95,96,99].includes(code))flags.push('Codice meteo compatibile con temporali nell’area.');
- if(Number.isFinite(precip)&&precip>=2)flags.push('Precipitazioni modellate almeno 2 mm/h.');
- if(Number.isFinite(wind)&&wind>=25)flags.push('Vento al suolo modellato sostenuto (almeno 25 kt).');
- if(Number.isFinite(gust)&&gust>=35)flags.push('Raffiche modellate elevate (almeno 35 kt).');
- const selected=(aircraftCache||[]).find(a=>String(a.hex||a.flight||('pos-'+a.lat+'-'+a.lon)).trim()===pinnedAircraftKey);
- const oat=selected&&Number.isFinite(Number(selected.oat))?Number(selected.oat).toFixed(1)+' °C':'n/d (OAT ADS-B non ricevuta)';
- const rows=levels.map(l=>'<div class="flight-weather-level"><b>'+l.label+'</b><span>'+escapeHtml(weatherValue(l.temp,'°C',1))+'</span><span>'+escapeHtml(weatherValue(l.wind,'kt'))+(Number.isFinite(Number(l.direction))?' · '+Math.round(Number(l.direction))+'°':'')+'</span></div>').join('');
- $('flightWeatherContent').innerHTML=
-  '<div class="flight-weather-grid">'+
-   '<div class="flight-weather-cell"><span>Temperatura al suolo</span><b>'+escapeHtml(weatherValue(c.temperature_2m,'°C',1))+'</b></div>'+
-   '<div class="flight-weather-cell"><span>Precipitazioni</span><b>'+escapeHtml(weatherValue(precip,'mm/h',1))+'</b></div>'+
-   '<div class="flight-weather-cell"><span>Vento 10 m</span><b>'+escapeHtml(weatherValue(wind,'kt'))+' · '+(Number.isFinite(Number(c.wind_direction_10m))?Math.round(Number(c.wind_direction_10m))+'°':'n/d')+'</b></div>'+
-   '<div class="flight-weather-cell"><span>Raffiche 10 m</span><b>'+escapeHtml(weatherValue(gust,'kt'))+'</b></div>'+
-   '<div class="flight-weather-cell"><span>Condizione</span><b>'+escapeHtml(flightWeatherCodeLabel(code))+'</b></div>'+
-   '<div class="flight-weather-cell"><span>OAT aereo selezionato</span><b>'+escapeHtml(oat)+'</b></div>'+
-  '</div><div class="flight-weather-levels"><b>PROFILO IN QUOTA</b><div class="flight-weather-level" style="color:#9fb1c6"><b>Livello</b><span>Temperatura</span><span>Vento</span></div>'+rows+'</div>'+
-  (flags.length?'<div class="flight-weather-alert"><b>⚠ ATTENZIONE METEO</b><br>'+flags.map(escapeHtml).join('<br>')+'</div>':'<div class="flight-weather-note">Nessuna soglia indicativa di attenzione attivata dai dati disponibili.</div>')+
-  '<div class="flight-weather-note">Punto mappa: '+escapeHtml(data.place)+' · ora modello: '+escapeHtml(data.time)+'<br>Temperature e venti in quota sono stime modellistiche Open-Meteo ai livelli di pressione indicati; le quote sono approssimative. OAT è il dato ADS-B dell’aereo selezionato, se trasmesso. Non sostituisce METAR/TAF, SIGMET o briefing ufficiali.</div>';
-}
 
 function windArrowIcon(speed,direction){
  const bearing=(Number(direction)+180)%360;
