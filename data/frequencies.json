@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "updated_at": "2026-11-09",
-  "source_policy": "Dati di riferimento trascritti da pagine che dichiarano derivazione dall'eAIP Italia. Ogni record riporta la data di efficacia della fonte; prima di uso operativo verificare sempre l'eAIP ENAV vigente e i NOTAM. Non dedurre frequenze.",
+  "source_policy": "Frequenze ATS e locali riportano la fonte e la qualità del dato. Le frequenze 130.005 MHz inserite per aviosuperfici/campi senza frequenza dedicata sono indicate da ENAC come consuetudine di auto-informazione, non come assegnazione locale. Prima di qualsiasi uso operativo verificare eAIP ENAV vigente, NOTAM e gestore.",
   "airports": {
     "LIML": {
       "name": "Milano Linate",
@@ -636,6 +636,763 @@
           "service": "AFIS",
           "frequency_mhz": "127.055",
           "note": "Cagliari Arrival"
+        }
+      ]
+    },
+    "LIEA": {
+      "name": "Alghero Fertilia",
+      "iata": "AHO",
+      "source": "Datamask Aviation, dati community-maintained; da verificare su eAIP ENAV",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "ATIS",
+          "frequency_mhz": "125.025",
+          "note": "Dato community-maintained"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.850",
+          "note": "Dato community-maintained"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "128.550",
+          "note": "Dato community-maintained"
+        }
+      ]
+    },
+    "LIPY": {
+      "name": "Ancona Falconara – Aeroporto delle Marche",
+      "iata": "AOI",
+      "source": "EAIP Download Service, pagina consultata 2026-11-09; fonte secondaria per simulazione, non validata operativamente",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "118.15",
+          "note": "Romagna APP"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "122.85",
+          "note": "ATIS"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.8",
+          "note": "TWR"
+        }
+      ]
+    },
+    "LIBD": {
+      "name": "Bari Palese – Karol Wojtyła",
+      "iata": "BRI",
+      "source": "EAIP Download Service, pagina consultata 2026-11-09; fonte secondaria per simulazione, non validata operativamente",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "119.5",
+          "note": "APP"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.3",
+          "note": "TWR"
+        }
+      ]
+    },
+    "LIPQ": {
+      "name": "Trieste Ronchi dei Legionari",
+      "iata": "TRS",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "119.175",
+          "note": "Padova Radar"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.5",
+          "note": "Ronchi TWR"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "130.205",
+          "note": "Ronchi TWR"
+        }
+      ]
+    },
+    "LICT": {
+      "name": "Trapani Birgi – Vincenzo Florio",
+      "iata": "TPS",
+      "source": "Aeronautical Information (20-08-2025) e Datamask Aviation; dati secondari, da verificare su eAIP vigente",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.700",
+          "note": "Trapani Tower"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "119.950",
+          "note": "Trapani APP/Radar"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "122.100",
+          "note": "Trapani APP/Radar"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "120.590",
+          "note": "Trapani Aerodrome Information"
+        }
+      ]
+    },
+    "LIRZ": {
+      "name": "Perugia San Francesco d’Assisi",
+      "iata": "PEG",
+      "source": "Sito ufficiale Aeroporto dell’Umbria – Info Tecniche",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.10",
+          "note": "Frequenza riportata dal gestore aeroportuale"
+        }
+      ]
+    },
+    "LIPR": {
+      "name": "Rimini Miramare – Federico Fellini",
+      "iata": "RMI",
+      "source": "Datamask Aviation, dati community-maintained; da verificare su eAIP ENAV",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.100",
+          "note": "Dato community-maintained"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "118.150",
+          "note": "Romagna APP"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.600",
+          "note": "GCCD GND/CLNC DEL"
+        }
+      ]
+    },
+    "LIBP": {
+      "name": "Pescara – Abruzzo Airport",
+      "iata": "PSR",
+      "source": "Datamask Aviation e repertorio radio community-maintained; da verificare su eAIP ENAV",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.450",
+          "note": "Dato community-maintained"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "120.050",
+          "note": "Dato community-maintained"
+        }
+      ]
+    },
+    "LIMG": {
+      "name": "Albenga",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILB": {
+      "name": "Alzate Brianza",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDA": {
+      "name": "Asiago",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDB": {
+      "name": "Belluno",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILE": {
+      "name": "Biella Cerrione",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILC": {
+      "name": "Calcinate del Pesce",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIAU": {
+      "name": "Capua",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDU": {
+      "name": "Carpi Budrione",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILM": {
+      "name": "Casale Monferrato",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILY": {
+      "name": "Como",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILR": {
+      "name": "Cremona Migliaro",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDF": {
+      "name": "Fano",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIPF": {
+      "name": "Ferrara",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIAF": {
+      "name": "Foligno",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIPG": {
+      "name": "Gorizia",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIRG": {
+      "name": "Guidonia",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIAP": {
+      "name": "L’Aquila Preturo",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIRL": {
+      "name": "Latina",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LINL": {
+      "name": "Lecce Lepore",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDL": {
+      "name": "Legnago",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIQL": {
+      "name": "Lucca Tassignano",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDG": {
+      "name": "Lugo di Romagna",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILQ": {
+      "name": "Massa Cinquale",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIPM": {
+      "name": "Modena Marzaglia",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIMR": {
+      "name": "Novi Ligure",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIER": {
+      "name": "Oristano Fenosu",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIPU": {
+      "name": "Padova",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LICP": {
+      "name": "Palermo Bocca di Falco",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDP": {
+      "name": "Pavullo",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDV": {
+      "name": "Prati Vecchi d’Aguscello",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDR": {
+      "name": "Ravenna",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDE": {
+      "name": "Reggio Emilia",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIQN": {
+      "name": "Rieti",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIRU": {
+      "name": "Roma Urbe",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIQW": {
+      "name": "Sarzana Luni",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIQS": {
+      "name": "Siena Ampugnano",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDH": {
+      "name": "Thiene",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIMA": {
+      "name": "Torino Aeritalia",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIET": {
+      "name": "Tortolì",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIDT": {
+      "name": "Trento Mattarello",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIPD": {
+      "name": "Udine Campoformido",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILV": {
+      "name": "Valbrembo",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILN": {
+      "name": "Varese Venegono",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIPV": {
+      "name": "Venezia Lido",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILI": {
+      "name": "Vercelli",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILG": {
+      "name": "Vergiate",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIPN": {
+      "name": "Verona Boscomantico",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIRV": {
+      "name": "Viterbo",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LILH": {
+      "name": "Voghera Rivanazzano",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "AUTO-INFORMAZIONE",
+          "frequency_mhz": "130.005",
+          "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
         }
       ]
     }
