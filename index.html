@@ -322,7 +322,6 @@ function planeIcon(a,selected=false){
   if(shape.accent){let accents=Array.isArray(shape.accent)?shape.accent:[shape.accent];accents.forEach(d=>{svgBody+='<path fill="none" stroke="'+stroke+'" stroke-width="'+(.6*(shape.accentMult||1)*.7)+'" d="'+d+'"/>';});}
   svgBody+='</g></svg>';
  }
- if(shape.svg)svgBody=svgBody.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"');
  const svg='<div style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:drop-shadow(0 1px 1px #000b)">'+svgBody.replace('<svg','<svg style="width:34px;height:34px;overflow:visible"')+'</div>';
  const airline=airlineForFlight(a.flight),domain=airline&&airline[2],logo=domain?'<img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(domain)+'&sz=64" alt="" title="'+airline[1]+'" onerror="this.style.display=\'none\'" style="position:absolute;left:38px;top:9px;width:16px;height:16px;object-fit:contain;background:#fff;border:1px solid #fff;border-radius:4px;padding:1px;box-shadow:0 1px 3px #000b">':'';
  const width=logo?'56px':'38px';
