@@ -174,15 +174,6 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 
-const rightControls=$('rightControls'),rightControlsToggle=$('rightControlsToggle'),rightControlsBody=$('rightControlsBody');
-rightControlsToggle.addEventListener('click',()=>{
- const opening=rightControlsBody.hidden;
- rightControlsBody.hidden=!opening;
- rightControls.classList.toggle('open',opening);
- rightControlsToggle.setAttribute('aria-expanded',String(opening));
- $('rightControlsChevron').textContent=opening?'▴':'▾';
-});
-
 const map=L.map('map',{worldCopyJump:true,doubleClickZoom:true,tap:true}).setView([45.7,9.7],5);
 map.doubleClickZoom.enable();
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
@@ -228,6 +219,15 @@ function animateAircraft(){
 }
 requestAnimationFrame(animateAircraft);
 const $=id=>document.getElementById(id);
+const rightControls=$('rightControls'),rightControlsToggle=$('rightControlsToggle'),rightControlsBody=$('rightControlsBody');
+rightControlsToggle.addEventListener('click',()=>{
+ const opening=rightControlsBody.hidden;
+ rightControlsBody.hidden=!opening;
+ rightControls.classList.toggle('open',opening);
+ rightControlsToggle.setAttribute('aria-expanded',String(opening));
+ $('rightControlsChevron').textContent=opening?'▴':'▾';
+});
+
 const settingsPanel=document.querySelector('.panel');
 if(settingsPanel){
  settingsPanel.style.touchAction='pan-y';
