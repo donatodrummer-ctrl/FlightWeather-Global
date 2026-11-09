@@ -7,7 +7,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const style=document.createElement('style');
 style.textContent=`
 .fw-extra-button{position:static!important;width:100%;min-height:31px;margin:0;padding:7px 9px;border:1px solid #a879ff;border-radius:5px;background:#101923;color:#f4f8ff;text-align:left;font-size:10px;font-weight:800;touch-action:manipulation}
-.fw-extra-button.active{background:#39235d;border-color:#d4b7ff;color:#fff}
+.fw-extra-button.active{background:#39235d;border-color:#d4b7ff;color:#fff}\n#fwVerticalBtn{order:2.5!important}#fwApproachBtn{order:13.5!important}
 .fw-extra-button.approach{border-color:#70d99a}.fw-extra-button.approach.active{background:#16452c;border-color:#a9f2c0}
 .fw-feature-panel{position:absolute;z-index:1300;left:50%;top:12px;transform:translateX(-50%);width:min(390px,calc(100vw - 20px));max-height:44dvh;overflow:auto;padding:10px;border:1px solid #a879ff;border-radius:9px;background:#101923f5;color:#eef4fb;box-shadow:0 8px 26px #000c;backdrop-filter:blur(10px);font-size:10px}
 .fw-feature-panel[hidden]{display:none!important}
@@ -113,7 +113,7 @@ function drawApproaches(){
      const toThreshold=bearing([lat,lon],threshold);
      if(angleDiff(track,toThreshold)>32||angleDiff(track,inbound)>32)return;
      const deltaLat=(lat-threshold[0])*111320,deltaLon=(lon-threshold[1])*111320*Math.cos(threshold[0]*Math.PI/180);
-     const br=inbound*Math.PI/180,along=deltaLon*Math.sin(br)+deltaLat*Math.cos(br),cross=Math.abs(deltaLon*Math.cos(br)-deltaLat*Math.sin(br))/1000;
+     const outbound=(inbound+180)%360,br=outbound*Math.PI/180,along=deltaLon*Math.sin(br)+deltaLat*Math.cos(br),cross=Math.abs(deltaLon*Math.cos(br)-deltaLat*Math.sin(br))/1000;
      if(along<0||along>30000||cross>3.5||alt>10000)return;
      const key=String(a.hex||a.flight||'').trim();
      if(!candidates.some(c=>c.key===key&&c.runway===runwayName))candidates.push({a,key,dist,alt,runway:runwayName,icao});
