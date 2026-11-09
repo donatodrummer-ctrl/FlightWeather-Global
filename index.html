@@ -1202,16 +1202,16 @@ async function loadAirportRunways(p,popup){
  el.dataset.loaded='1';
  try{
   const rows=await loadRunwayArchive();
-  const matches=rows.filter(r=>String(r.airport_ident||r.airport_icao||'').toUpperCase()===icao&&String(r.closed??'0')!=='1'&&String(r.closed??'false').toLowerCase()!=='true');
+  const matches=rows.filter(r=>String(Array.isArray(r)?r[4]:(r.airport_ident||r.airport_icao||'')).toUpperCase()===icao);
   if(!matches.length){el.innerHTML='Nessuna pista presente nell’archivio per questo codice ICAO.';return}
   el.innerHTML=matches.map(r=>{
-   const ends=[r.le_ident,r.he_ident].filter(Boolean).join(' / ')||'Identificativi N/D';
-   const length=Number(r.length_ft),width=Number(r.width_ft);
+   const le=Array.isArray(r)?r[5]:r.le_ident,he=Array.isArray(r)?r[6]:r.he_ident;
+   const length=Number(Array.isArray(r)?r[7]:r.length_ft),width=Number(Array.isArray(r)?r[8]:r.width_ft);
+   const surface=Array.isArray(r)?r[9]:r.surface;
+   const ends=[le,he].filter(Boolean).join(' / ')||'Identificativi N/D';
    const len=Number.isFinite(length)&&length>0?Math.round(length*0.3048).toLocaleString('it-IT')+' m ('+Math.round(length).toLocaleString('it-IT')+' ft)':'Lunghezza N/D';
    const wid=Number.isFinite(width)&&width>0?Math.round(width*0.3048)+' m':'larghezza N/D';
-   const surface=escapeHtml(String(r.surface||'superficie N/D').replaceAll('_',' '));
-   const light=String(r.lighted)==='1'||r.lighted===true?' · illuminata':'';
-   return '<div class="airport-runway-row"><b>'+escapeHtml(ends)+'</b><br>'+len+' · '+wid+'<br>'+surface+light+'</div>';
+   return '<div class="airport-runway-row"><b>'+escapeHtml(ends)+'</b><br>'+len+' · '+wid+'<br>'+escapeHtml(String(surface||'superficie N/D').replaceAll('_',' '))+'</div>';
   }).join('')+'<div style="font-size:8px;color:#91a6ba;margin-top:5px">Fonte: archivio piste OurAirports. Dati da verificare su AIP aggiornato.</div>';
  }catch(error){el.dataset.loaded='0';el.textContent='Archivio piste temporaneamente non disponibile.'}
 }
