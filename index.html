@@ -1269,6 +1269,7 @@ function refreshAirportLayers(){
  if(airfieldsEnabled&&!map.hasLayer(airfieldLayer))airfieldLayer.addTo(map);
  if(!airfieldsEnabled&&map.hasLayer(airfieldLayer))map.removeLayer(airfieldLayer);
 }
+// Coordinate dei siti militari da ENAC ATM-09, Allegato F (2021); marker informativi, non per navigazione.
 const militaryBases=[
  {icao:'LIBA',name:'Amendola',lat:41.5413917,lon:15.7180833,place:'Foggia'},
  {icao:'LIPA',name:'Aviano',lat:46.0300722,lon:12.5988389,place:'Pordenone'},
@@ -1300,10 +1301,10 @@ function refreshMilitaryBaseLayer(){
  for(const base of militaryBases){
   if(!bounds.contains([base.lat,base.lon]))continue;
   const p={icao_code:base.icao,name:base.name,municipality:base.place,iso_country:'IT',type:'military_airport'};
-  const marker=L.circleMarker([base.lat,base.lon],{radius:7,color:'#ffe1a6',weight:2,opacity:1,fillColor:'#a855f7',fillOpacity:.98,bubblingMouseEvents:false});
+  const marker=L.circleMarker([base.lat,base.lon],{radius:Math.min(10,6+(map.getZoom()-5)*0.7),color:'#ffe1a6',weight:2,opacity:1,fillColor:'#a855f7',fillOpacity:.98,bubblingMouseEvents:false});
   marker.bindPopup(airportPopup(p,'Base militare'),{closeButton:true,autoPan:true,maxWidth:260});
   marker.on('popupopen',event=>loadAirportFrequencies(p,event.popup));
-  marker.bindTooltip(base.name+' · '+base.icao,{permanent:true,direction:'right',offset:[7,0],className:'airport-icao-label',opacity:1});
+  if(map.getZoom()>=7)marker.bindTooltip(base.name+' · '+base.icao,{permanent:true,direction:'right',offset:[7,0],className:'airport-icao-label',opacity:1});
   marker.addTo(militaryBaseLayer);
  }
  if(!map.hasLayer(militaryBaseLayer))militaryBaseLayer.addTo(map);
