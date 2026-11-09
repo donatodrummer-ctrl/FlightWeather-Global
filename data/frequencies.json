@@ -461,8 +461,8 @@
     "LIPX": {
       "name": "Verona Villafranca Valerio Catullo",
       "iata": "VRN",
-      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
-      "valid_from": "2026-09-03",
+      "source": "EAIP Download Service, pagina consultata il 2026-11-09 (fonte secondaria; data di efficacia non esposta)",
+      "valid_from": null,
       "services": [
         {
           "service": "APP",
@@ -489,8 +489,8 @@
     "LIRQ": {
       "name": "Firenze Peretola",
       "iata": "FLR",
-      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
-      "valid_from": "2026-09-03",
+      "source": "EAIP Download Service, pagina consultata il 2026-11-09 (fonte secondaria; data di efficacia non esposta)",
+      "valid_from": null,
       "services": [
         {
           "service": "APP",
@@ -512,8 +512,8 @@
     "LIMJ": {
       "name": "Genova Cristoforo Colombo",
       "iata": "GOA",
-      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
-      "valid_from": "2026-09-03",
+      "source": "EAIP Download Service, pagina consultata il 2026-11-09 (fonte secondaria; data di efficacia non esposta)",
+      "valid_from": null,
       "services": [
         {
           "service": "APP",
@@ -535,8 +535,8 @@
     "LIRP": {
       "name": "Pisa Galileo Galilei",
       "iata": "PSA",
-      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
-      "valid_from": "2026-09-03",
+      "source": "EAIP Download Service, pagina consultata il 2026-11-09 (fonte secondaria; data di efficacia non esposta)",
+      "valid_from": null,
       "services": [
         {
           "service": "APP",
@@ -558,8 +558,8 @@
     "LICJ": {
       "name": "Palermo Falcone e Borsellino",
       "iata": "PMO",
-      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
-      "valid_from": "2026-09-03",
+      "source": "EAIP Download Service, pagina consultata il 2026-11-09 (fonte secondaria; data di efficacia non esposta)",
+      "valid_from": null,
       "services": [
         {
           "service": "APP",
@@ -586,8 +586,8 @@
     "LICC": {
       "name": "Catania Fontanarossa",
       "iata": "CTA",
-      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
-      "valid_from": "2026-09-03",
+      "source": "EAIP Download Service, pagina consultata il 2026-11-09 (fonte secondaria; data di efficacia non esposta)",
+      "valid_from": null,
       "services": [
         {
           "service": "APP",
