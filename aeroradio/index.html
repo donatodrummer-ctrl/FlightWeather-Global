@@ -26,7 +26,7 @@ footer{color:#71869a;text-align:center;font-size:10px;padding:15px 8px 28px}a{co
 <section class="hero"><h1>Le frequenze, a portata di mano.</h1><p>Cerca un aeroporto, un servizio o una frequenza. Salva i tuoi riferimenti preferiti.</p></section>
 <div class="search"><input id="q" type="search" placeholder="Es. Orio, LIME, Torre, 125.875…" autocomplete="off"><button id="clear">Pulisci</button></div>
 <div class="filters" id="filters"><button class="filter active" data-filter="tutti">Tutti</button><button class="filter" data-filter="TWR">Torre</button><button class="filter" data-filter="GND">Ground</button><button class="filter" data-filter="APP">Approach</button><button class="filter" data-filter="ATIS">ATIS</button><button class="filter" data-filter="ALTRO">Altri servizi</button><button class="filter" data-filter="preferiti">★ Preferiti</button></div>
-<div class="stats"><div class="stat"><b id="airportCount">1</b><span>Aeroporti</span></div><div class="stat"><b id="freqCount">6</b><span>Frequenze</span></div><div class="stat"><b id="favCount">0</b><span>Preferiti</span></div></div>
+<div class="stats"><div class="stat"><b id="airportCount">1</b><span>Aeroporti</span></div><div class="stat"><b id="freqCount">8</b><span>Frequenze</span></div><div class="stat"><b id="favCount">0</b><span>Preferiti</span></div></div>
 <div class="section-head"><h2>ARCHIVIO AEROPORTI</h2><span id="resultLabel">1 aeroporto</span></div>
 <div id="results"></div>
 <div class="notice"><b>Nota importante:</b> archivio in costruzione. Le frequenze mostrate non sostituiscono l’AIP Italia, i NOTAM o le pubblicazioni ufficiali aggiornate. Prima di qualsiasi utilizzo operativo, verifica sempre la documentazione aeronautica vigente. L’app è un riferimento informativo e non abilita alla trasmissione.</div>
@@ -36,10 +36,12 @@ footer{color:#71869a;text-align:center;font-size:10px;padding:15px 8px 28px}a{co
 const airports=[{name:"Bergamo • Orio al Serio",icao:"LIME",iata:"BGY",place:"Bergamo (BG)",type:"Civile",freqs:[
 {service:"TWR",label:"Torre",name:"Orio Tower",mhz:"125.875",note:"Dato fornito dall'utente"},
 {service:"GND",label:"Ground",name:"Orio Ground",mhz:"120.505",note:"Dato fornito dall'utente"},
+{service:"APP",label:"Approach",name:"Milano Approach",mhz:"126.750",note:"Fonte pubblica aeronautica · maggio 2026"},
+{service:"ALTRO",label:"Delivery",name:"Orio Delivery",mhz:"134.105",note:"Fonte pubblica aeronautica · maggio 2026"},
+{service:"ATIS",label:"ATIS",name:"Bergamo ATIS Information",mhz:"118.540",note:"Fonte pubblica aeronautica · maggio 2026"},
 {service:"ALTRO",label:"Pushback",name:"Orio Pushback",mhz:"131.700",note:"Dato fornito dall'utente"},
 {service:"ALTRO",label:"Operativo",name:"Orio Operativo",mhz:"441.500",note:"Dato fornito dall'utente"},
-{service:"ALTRO",label:"Emergenza / Airside",name:"Orio Emergenza e Airside",mhz:"445.775",note:"Dato fornito dall'utente"},
-{service:"ATIS",label:"ATIS",name:"Orio Terminal Information",mhz:"—",note:"Frequenza da inserire dopo verifica AIP"}
+{service:"ALTRO",label:"Emergenza / Airside",name:"Orio Emergenza e Airside",mhz:"445.775",note:"Dato fornito dall'utente"}
 ]}];
 const $=s=>document.querySelector(s);let active="tutti";let favorites=JSON.parse(localStorage.getItem("ar-favs")||"[]");
 function render(){const q=$("#q").value.trim().toLowerCase();let total=0,shownAirports=0;let html="";
