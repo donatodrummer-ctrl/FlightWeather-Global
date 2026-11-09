@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#091522"><meta name="description" content="AeroRadio Italia: archivio e ricerca delle frequenze aeronautiche italiane.">
+<title>AeroRadio Italia</title>
+<style>
+:root{color-scheme:dark;--bg:#07111d;--panel:#101f2e;--panel2:#15283a;--line:#263b4e;--muted:#91a5b8;--text:#edf5fb;--cyan:#54c8e8;--gold:#f3c64e;--green:#66d6a4}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% -10%,#17344a 0,transparent 45%),var(--bg);color:var(--text);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+header{padding:calc(18px + env(safe-area-inset-top)) 18px 16px;border-bottom:1px solid var(--line);background:#091522eF;position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}
+.top{display:flex;align-items:center;gap:12px}.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#20445a,#0d2537);display:grid;place-items:center;border:1px solid #356078;color:var(--cyan);font-size:22px}.eyebrow{color:var(--cyan);font-size:10px;font-weight:800;letter-spacing:2px}.brand{font-size:22px;font-weight:850;letter-spacing:-.5px}.sub{font-size:12px;color:var(--muted)}
+main{max-width:760px;margin:auto;padding:18px 14px 42px}.hero{padding:18px 4px 16px}.hero h1{font-size:26px;line-height:1.12;margin:0 0 8px;letter-spacing:-.7px}.hero p{color:var(--muted);margin:0;font-size:13px}
+.search{display:flex;gap:8px;margin:10px 0 13px}.search input{min-width:0;flex:1;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px;color:var(--text);font-size:15px;outline:none}.search input:focus{border-color:var(--cyan)}button{font:inherit;cursor:pointer}.search button,.filter,.copy,.fav{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:11px 13px}.search button{color:var(--cyan);font-weight:700}
+.filters{display:flex;gap:7px;overflow:auto;padding:2px 0 12px;scrollbar-width:none}.filter{white-space:nowrap;font-size:12px;padding:8px 12px;color:var(--muted)}.filter.active{background:#17374a;border-color:#34718b;color:#d9f6ff}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 18px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:11px}.stat b{font-size:20px;display:block}.stat span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 9px}.section-head h2{font-size:14px;margin:0;letter-spacing:.5px}.section-head span{font-size:11px;color:var(--muted)}
+.airport{background:linear-gradient(145deg,#122536,#0d1b29);border:1px solid var(--line);border-radius:17px;margin:10px 0;overflow:hidden}.airport-head{padding:15px;display:flex;justify-content:space-between;gap:12px;align-items:center}.airport-name{font-weight:800;font-size:16px}.airport-meta{font-size:11px;color:var(--muted);margin-top:3px}.icao{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--gold);background:#4a3a16;padding:6px 8px;border-radius:7px;white-space:nowrap}
+.freq{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px 14px;border-top:1px solid #203548}.freq-main{min-width:0}.freq-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.1px}.freq-name{font-size:13px;font-weight:650;margin-top:2px}.mhz{font-size:20px;font-weight:850;letter-spacing:.2px;color:var(--cyan);font-variant-numeric:tabular-nums}.freq-actions{display:flex;align-items:center;gap:5px}.copy,.fav{padding:7px 9px;font-size:11px}.fav{color:var(--gold)}.tag{display:inline-block;font-size:9px;border-radius:5px;padding:3px 6px;background:#1b3548;color:#b7d9e8;margin-top:5px}
+.notice{border:1px solid #66552a;background:#2c2618;color:#f2dfaa;border-radius:12px;padding:12px 13px;font-size:11px;margin:18px 0}.empty{padding:28px 14px;text-align:center;color:var(--muted);background:var(--panel);border:1px dashed var(--line);border-radius:14px}.empty b{display:block;color:var(--text);margin-bottom:4px}
+footer{color:#71869a;text-align:center;font-size:10px;padding:15px 8px 28px}a{color:var(--cyan)}
+@media(min-width:600px){main{padding:22px 22px 50px}.hero h1{font-size:32px}.freq{padding:13px 17px}.airport-head{padding:17px}}
+</style></head>
+<body>
+<header><div class="top"><div class="logo">⌁</div><div><div class="eyebrow">RADIO • AVIAZIONE • ITALIA</div><div class="brand">AeroRadio Italia</div><div class="sub">Archivio frequenze aeronautiche</div></div></div></header>
+<main>
+<section class="hero"><h1>Le frequenze, a portata di mano.</h1><p>Cerca un aeroporto, un servizio o una frequenza. Salva i tuoi riferimenti preferiti.</p></section>
+<div class="search"><input id="q" type="search" placeholder="Es. Orio, LIME, Torre, 125.875…" autocomplete="off"><button id="clear">Pulisci</button></div>
+<div class="filters" id="filters"><button class="filter active" data-filter="tutti">Tutti</button><button class="filter" data-filter="TWR">Torre</button><button class="filter" data-filter="GND">Ground</button><button class="filter" data-filter="APP">Approach</button><button class="filter" data-filter="ATIS">ATIS</button><button class="filter" data-filter="ALTRO">Altri servizi</button><button class="filter" data-filter="preferiti">★ Preferiti</button></div>
+<div class="stats"><div class="stat"><b id="airportCount">1</b><span>Aeroporti</span></div><div class="stat"><b id="freqCount">6</b><span>Frequenze</span></div><div class="stat"><b id="favCount">0</b><span>Preferiti</span></div></div>
+<div class="section-head"><h2>ARCHIVIO AEROPORTI</h2><span id="resultLabel">1 aeroporto</span></div>
+<div id="results"></div>
+<div class="notice"><b>Nota importante:</b> archivio in costruzione. Le frequenze mostrate non sostituiscono l’AIP Italia, i NOTAM o le pubblicazioni ufficiali aggiornate. Prima di qualsiasi utilizzo operativo, verifica sempre la documentazione aeronautica vigente. L’app è un riferimento informativo e non abilita alla trasmissione.</div>
+<footer>AeroRadio Italia · Versione iniziale · Dati da verificare prima dell'uso</footer>
+</main>
+<script>
+const airports=[{name:"Bergamo • Orio al Serio",icao:"LIME",iata:"BGY",place:"Bergamo (BG)",type:"Civile",freqs:[
+{service:"TWR",label:"Torre",name:"Orio Tower",mhz:"125.875",note:"Dato fornito dall'utente"},
+{service:"GND",label:"Ground",name:"Orio Ground",mhz:"120.505",note:"Dato fornito dall'utente"},
+{service:"ALTRO",label:"Pushback",name:"Orio Pushback",mhz:"131.700",note:"Dato fornito dall'utente"},
+{service:"ALTRO",label:"Operativo",name:"Orio Operativo",mhz:"441.500",note:"Dato fornito dall'utente"},
+{service:"ALTRO",label:"Emergenza / Airside",name:"Orio Emergenza e Airside",mhz:"445.775",note:"Dato fornito dall'utente"},
+{service:"ATIS",label:"ATIS",name:"Orio Terminal Information",mhz:"—",note:"Frequenza da inserire dopo verifica AIP"}
+]}];
+const $=s=>document.querySelector(s);let active="tutti";let favorites=JSON.parse(localStorage.getItem("ar-favs")||"[]");
+function render(){const q=$("#q").value.trim().toLowerCase();let total=0,shownAirports=0;let html="";
+airports.forEach(a=>{const fs=a.freqs.filter(f=>{const hay=[a.name,a.icao,a.iata,a.place,f.label,f.name,f.mhz,f.service].join(" ").toLowerCase();return (active==="tutti"||(active==="preferiti"?favorites.includes(a.icao+"|"+f.mhz):active==="ALTRO"?f.service==="ALTRO":f.service===active))&&(!q||hay.includes(q))});if(!fs.length)return;shownAirports++;total+=fs.length;html+=`<article class="airport"><div class="airport-head"><div><div class="airport-name">${a.name}</div><div class="airport-meta">${a.place} · ${a.type} · ${a.iata}</div></div><div class="icao">${a.icao}</div></div>`;fs.forEach(f=>{const key=a.icao+"|"+f.mhz;const fav=favorites.includes(key);html+=`<div class="freq"><div class="freq-main"><div class="freq-label">${f.label}</div><div class="freq-name">${f.name}</div><div class="tag">${f.note}</div></div><div class="freq-actions"><div class="mhz">${f.mhz}</div><button class="copy" data-copy="${f.mhz}" aria-label="Copia frequenza">Copia</button><button class="fav" data-fav="${key}" aria-label="Salva preferito">${fav?"★":"☆"}</button></div></div>`});html+="</article>"});$("#results").innerHTML=html||'<div class="empty"><b>Nessun risultato</b>Prova con un altro aeroporto, servizio o frequenza.</div>';$("#airportCount").textContent=shownAirports;$("#freqCount").textContent=total;$("#favCount").textContent=favorites.length;$("#resultLabel").textContent=shownAirports+" aeroporti · "+total+" frequenze";
+document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{const v=b.dataset.copy;if(v!=="—"){navigator.clipboard?.writeText(v);b.textContent="Copiata";setTimeout(()=>b.textContent="Copia",1100)}});document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{const k=b.dataset.fav;favorites=favorites.includes(k)?favorites.filter(x=>x!==k):[...favorites,k];localStorage.setItem("ar-favs",JSON.stringify(favorites));render()})}
+$("#q").addEventListener("input",render);$("#clear").onclick=()=>{$("#q").value="";render()};document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{active=b.dataset.filter;document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));render()});render();
+</script></body></html>
