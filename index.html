@@ -162,6 +162,17 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
 <script>
 
 const map=L.map('map',{worldCopyJump:true,doubleClickZoom:true,tap:true}).setView([45.7,9.7],5);
+/* Difesa aggiuntiva: impedisce che eventuali link SkyVector compaiano nei popup aeroportuali,
+   anche se arrivano da contenuti memorizzati o da markup esterno. */
+map.on('popupopen',event=>{
+ const root=event.popup&&event.popup.getElement?event.popup.getElement():null;
+ if(!root)return;
+ root.querySelectorAll('a').forEach(link=>{
+  const signature=((link.href||'')+' '+(link.textContent||'')).toLowerCase();
+  if(signature.includes('skyvector'))link.remove();
+ });
+});
+
 map.doubleClickZoom.enable();
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,className:'basemap-dim',attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
