@@ -1148,104 +1148,37 @@ async function loadAirportWeather(p,popup){
  if(!el||el.dataset.loaded==='1')return;
  el.dataset.loaded='1';
  el.innerHTML='☁ METAR / TAF: recupero dati…';
- const val=(v,unit='')=>v===undefined||v===null||v===''?'N/D':escapeHtml(String(v)+unit);
- const cloudNames={SKC:'cielo sereno',CLR:'nessuna nube significativa',FEW:'poche nubi',SCT:'nubi sparse',BKN:'nuvoloso',OVC:'coperto',VV:'visibilità verticale'};
- async function getReport(kind){
-  const url='https://aviationweather.gov/api/data/'+kind+'?ids='+encodeURIComponent(icao)+'&format=json';
-  const response=await fetch(url,{cache:'no-store'});
-  if(!response.ok)throw new Error(kind+' HTTP '+response.status);
-  const raw=await response.text();
-  if(!raw.trim())return null;
-  const data=JSON.parse(raw);
-  return Array.isArray(data)?(data[0]||null):data;
- }
+ const esc=v=>v===undefined||v===null||v===''?'N/D':escapeHtml(String(v));
+ const km=m=>m==null?'N/D':(Number(m)>=9999?'10+':(Number(m)/1000).toFixed(1).replace('.',','))+' km';
+ const cloudNames={SKC:'cielo sereno',CLR:'cielo sereno',FEW:'poche nubi',SCT:'nubi sparse',BKN:'nuvoloso',OVC:'coperto',VV:'visibilità verticale'};
  try{
-  const results=await Promise.allSettled([getReport('metar'),getReport('taf')]);
+  const results=await Promise.allSettled([
+   fetch('https://datamask.org/api/v1/metar/'+encodeURIComponent(icao),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('METAR HTTP '+r.status);return r.json()}),
+   fetch('https://datamask.org/api/v1/taf/'+encodeURIComponent(icao),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('TAF HTTP '+r.status);return r.json()})
+  ]);
   const metar=results[0].status==='fulfilled'?results[0].value:null;
   const taf=results[1].status==='fulfilled'?results[1].value:null;
-  let html='<div style="font-size:11px;line-height:1.4">';
-  html+='<b style="color:#8ee6ff">METAR · OSSERVAZIONE</b>';
+  const d=metar?.decoded||{},w=d.wind||{},vis=d.visibility||{},temp=d.temperature||{},qnh=d.qnh||{};
+  let html='<div style="font-size:11px;line-height:1.4"><b style="color:#8ee6ff">METAR · OSSERVAZIONE</b>';
   if(metar){
-   const windDir=metar.wdir==='VRB'?'variabile':metar.wdir!=null?metar.wdir+'°':'N/D';
-   const clouds=Array.isArray(metar.clouds)&&metar.clouds.length?metar.clouds.map(c=>(cloudNames[c.cover]||c.cover||'')+(c.base!=null?' a '+Math.round(Number(c.base)*0.3048)+' m':'')).join(', '):'N/D';
-   html+='<div style="margin-top:4px"><b>Vento:</b> '+windDir+' · '+val(metar.wspd,' kt')+(metar.wgst!=null?' (raffiche '+val(metar.wgst,' kt')+')':'')+'</div>';
-   html+='<div><b>Visibilità:</b> '+val(metar.visib,' km')+' · <b>Temp.:</b> '+val(metar.temp,' °C')+' · <b>Rugiada:</b> '+val(metar.dewp,' °C')+'</div>';
-   html+='<div><b>Pressione:</b> '+(metar.altim!=null?val(Math.round(Number(metar.altim)*33.8639),' hPa'):'N/D')+' · <b>Nubi:</b> '+clouds+'</div>';
-   html+='<div style="color:#9fb1c6;font-size:9px;margin-top:3px">Osservazione: '+val(metar.reportTime||metar.obsTime)+'</div>';
-   if(metar.rawOb)html+='<details style="margin-top:4px"><summary>METAR originale</summary><div style="overflow-wrap:anywhere">'+escapeHtml(metar.rawOb)+'</div></details>';
-  }else html+='<div>'+(results[0].status==='rejected'?'Servizio METAR temporaneamente non raggiungibile.':'METAR non disponibile per questo aeroporto.')+'</div>';
+   const clouds=Array.isArray(d.clouds)&&d.clouds.length?d.clouds.map(c=>(cloudNames[c.quantity]||c.quantity||'')+(c.heightFt!=null?' a '+Math.round(Number(c.heightFt)*0.3048)+' m':'')).join(', '):'N/D';
+   html+='<div style="margin-top:4px"><b>Vento:</b> '+(w.direction==null?'variabile':esc(w.direction)+'°')+' · '+esc(w.speedKt)+' kt'+(w.gustKt!=null?' (raffiche '+esc(w.gustKt)+' kt)':'')+'</div>';
+   html+='<div><b>Visibilità:</b> '+(vis.cavok?'CAVOK':km(vis.meters))+' · <b>Temp.:</b> '+esc(temp.temp)+' °C · <b>Rugiada:</b> '+esc(temp.dewpoint)+' °C</div>';
+   html+='<div><b>QNH:</b> '+esc(qnh.hpa)+' hPa · <b>Nubi:</b> '+clouds+'</div>';
+   html+='<div><b>Categoria:</b> '+esc(d.flightCategory)+'</div>';
+   html+='<div style="color:#9fb1c6;font-size:9px;margin-top:3px">Osservazione: '+esc(metar.observedAt||'orario N/D')+'</div>';
+   if(metar.raw)html+='<details style="margin-top:4px"><summary>METAR originale</summary><div style="overflow-wrap:anywhere">'+escapeHtml(metar.raw)+'</div></details>';
+  }else html+='<div>'+(results[0].status==='rejected'?'METAR non raggiungibile al momento.':'Nessun METAR disponibile per questo aeroporto.')+'</div>';
   html+='<div style="border-top:1px solid #39728a;margin-top:7px;padding-top:6px"><b style="color:#8ee6ff">TAF · PREVISIONE</b></div>';
-  if(taf){
-   if(taf.validTimeFrom||taf.validTimeTo)html+='<div style="color:#9fb1c6;font-size:9px">Validità: '+val(taf.validTimeFrom)+' – '+val(taf.validTimeTo)+'</div>';
-   if(Array.isArray(taf.fcsts)&&taf.fcsts.length){
-    html+='<div style="margin-top:3px">';
-    taf.fcsts.slice(0,5).forEach((fcst,index)=>{
-     const from=fcst.timeFrom?new Date(Number(fcst.timeFrom)*1000).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+'Z':'';
-     const dir=fcst.wdir==='VRB'?'variabile':fcst.wdir!=null?fcst.wdir+'°':'';
-     const sky=Array.isArray(fcst.clouds)?fcst.clouds.map(c=>(cloudNames[c.cover]||c.cover||'')+(c.base!=null?' '+Math.round(Number(c.base)*0.3048)+' m':'')).join(', '):'';
-     html+='<div style="padding:3px 0;border-bottom:1px solid #24485a"><b>'+escapeHtml(from||('Periodo '+(index+1)))+'</b> · vento '+escapeHtml(dir||'N/D')+' '+val(fcst.wspd,' kt')+' · visibilità '+val(fcst.visib,' km')+(sky?' · '+escapeHtml(sky):'')+'</div>';
-    });
-    html+='</div>';
-   }
-   if(taf.rawTAF)html+='<details style="margin-top:4px"><summary>TAF originale</summary><div style="overflow-wrap:anywhere">'+escapeHtml(taf.rawTAF)+'</div></details>';
-  }else html+='<div>'+(results[1].status==='rejected'?'Servizio TAF temporaneamente non raggiungibile.':'TAF non disponibile per questo aeroporto.')+'</div>';
-  html+='<div style="margin-top:6px;color:#9fb1c6;font-size:9px">Fonte dati: Aviation Weather Center · aggiornamento automatico all’apertura della scheda. Orari UTC.</div></div>';
+  if(taf&&taf.raw)html+='<div style="margin-top:4px;overflow-wrap:anywhere">'+escapeHtml(taf.raw)+'</div><div style="color:#9fb1c6;font-size:9px">Emissione: '+esc(taf.issuedAt||'N/D')+'</div>';
+  else html+='<div>'+(results[1].status==='rejected'?'TAF non raggiungibile al momento.':'TAF non disponibile per questo aeroporto.')+'</div>';
+  html+='<div style="margin-top:6px;color:#9fb1c6;font-size:9px">Fonte: NOAA NWS tramite Datamask Aviation. Dati informativi, non per la pianificazione del volo.</div></div>';
   el.innerHTML=html;
  }catch(error){
   el.dataset.loaded='0';
   el.innerHTML='<b>METAR / TAF</b><br>Dati temporaneamente non raggiungibili. Riapri la scheda per riprovare.';
  }
 }
-
-let runwayArchive=null,runwayArchivePromise=null,activeAirportTraffic=null;
-async function loadRunwayArchive(){
- if(runwayArchive)return runwayArchive;
- if(!runwayArchivePromise)runwayArchivePromise=fetch('./data/runways.json',{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(data=>{const rows=Array.isArray(data)?data:(Array.isArray(data.runways)?data.runways:[]);if(!rows.length)throw new Error('Archivio piste non valido');runwayArchive=rows;return rows}).catch(error=>{runwayArchivePromise=null;throw error});
- return runwayArchivePromise;
-}
-async function loadAirportRunways(p,popup){
- const icao=String(p.icao_code||'').toUpperCase(),el=popup.getElement()?.querySelector('#airportRunways-'+(icao||'none'));
- if(!el||el.dataset.loaded==='1')return;
- el.dataset.loaded='1';
- try{
-  const rows=await loadRunwayArchive();
-  const matches=rows.filter(r=>String(Array.isArray(r)?r[4]:(r.airport_ident||r.airport_icao||'')).toUpperCase()===icao);
-  if(!matches.length){el.innerHTML='Nessuna pista presente nell’archivio per questo codice ICAO.';return}
-  el.innerHTML=matches.map(r=>{
-   const le=Array.isArray(r)?r[5]:r.le_ident,he=Array.isArray(r)?r[6]:r.he_ident;
-   const length=Number(Array.isArray(r)?r[7]:r.length_ft),width=Number(Array.isArray(r)?r[8]:r.width_ft);
-   const surface=Array.isArray(r)?r[9]:r.surface;
-   const ends=[le,he].filter(Boolean).join(' / ')||'Identificativi N/D';
-   const len=Number.isFinite(length)&&length>0?Math.round(length*0.3048).toLocaleString('it-IT')+' m ('+Math.round(length).toLocaleString('it-IT')+' ft)':'Lunghezza N/D';
-   const wid=Number.isFinite(width)&&width>0?Math.round(width*0.3048)+' m':'larghezza N/D';
-   return '<div class="airport-runway-row"><b>'+escapeHtml(ends)+'</b><br>'+len+' · '+wid+'<br>'+escapeHtml(String(surface||'superficie N/D').replaceAll('_',' '))+'</div>';
-  }).join('')+'<div style="font-size:8px;color:#91a6ba;margin-top:5px">Fonte: archivio piste OurAirports. Dati da verificare su AIP aggiornato.</div>';
- }catch(error){el.dataset.loaded='0';el.textContent='Archivio piste temporaneamente non disponibile.'}
-}
-function airportTrafficMarkup(p){
- if(!trafficEnabled)return 'Attiva il livello TRAFFICO per visualizzare gli aeromobili rilevati vicino a questo aeroporto.';
- if(!Array.isArray(aircraftCache)||!aircraftCache.length)return 'Nessun dato ADS-B disponibile al momento. Riprova dopo il prossimo aggiornamento.';
- const lat=Number(p.lat),lon=Number(p.lon);
- if(!Number.isFinite(lat)||!Number.isFinite(lon))return 'Coordinate aeroporto non disponibili.';
- const rad=x=>x*Math.PI/180;
- const distance=a=>{const dLat=rad(Number(a.lat)-lat),dLon=rad(Number(a.lon)-lon),v=Math.sin(dLat/2)**2+Math.cos(rad(lat))*Math.cos(rad(Number(a.lat)))*Math.sin(dLon/2)**2;return 6371*2*Math.atan2(Math.sqrt(v),Math.sqrt(1-v))};
- const codes=[p.icao_code,p.iata_code].filter(Boolean).map(x=>String(x).toUpperCase());
- const nearby=aircraftCache.map(a=>({a,km:distance(a)})).filter(x=>Number.isFinite(x.km)&&x.km<=35).sort((x,y)=>x.km-y.km).slice(0,12);
- if(!nearby.length)return 'Nessun aeromobile rilevato entro 35 km nell’ultimo aggiornamento.';
- return '<div style="color:#9fb1c6;font-size:8px;margin:2px 0 4px">'+nearby.length+' aeromobili entro 35 km · dati ADS-B in tempo reale</div>'+nearby.map(({a,km})=>{
-  const route=a.route||{},from=String(route.from_iata||route.from_icao||route.from||'').toUpperCase(),to=String(route.to_iata||route.to_icao||route.to||'').toUpperCase();
-  const state=codes.includes(to)?'ARRIVO':codes.includes(from)?'PARTENZA':'IN ZONA';
-  const flight=String(a.flight||a.hex||'Aeromobile').trim(),routeText=from&&to?from+' → '+to:'Tratta non disponibile';
-  return '<div class="airport-traffic-row"><b>'+escapeHtml(flight)+'</b> <span class="airport-tag">'+state+'</span><br>'+escapeHtml(routeText)+' · '+km.toFixed(1).replace('.',',')+' km · quota '+escapeHtml(niceAlt(a.alt_baro??a.alt_geom))+'</div>';
- }).join('');
-}
-function updateAirportTraffic(p,popup){
- activeAirportTraffic={p,popup};
- const el=popup.getElement()?.querySelector('#airportTraffic');
- if(el)el.innerHTML=airportTrafficMarkup(p);
-}
-window.addEventListener('flightweather:traffic',()=>{if(activeAirportTraffic&&activeAirportTraffic.popup&&activeAirportTraffic.popup.isOpen())updateAirportTraffic(activeAirportTraffic.p,activeAirportTraffic.popup)});
-
 function bindAirportLabelInfo(marker,p,type){
  const label=[p.icao_code,p.iata_code].filter(Boolean).join(' - ');
  if(!label)return;
