@@ -1192,7 +1192,10 @@ async function loadAirportFrequencies(p,popup){
     html+='<div style="padding:3px 0;border-bottom:1px solid #665331"><b>'+escapeHtml(item.service||'Servizio')+'</b>: <span style="font-size:12px;font-weight:800">'+escapeHtml(item.frequency_mhz||'')+' MHz</span>'+(item.note?'<br>'+escapeHtml(item.note):'')+'</div>';
    }
    html+='</div><div style="margin-top:5px">Fonte: '+escapeHtml(record.source||'Non specificata')+(record.valid_from?' · Validità: '+escapeHtml(record.valid_from):'')+'</div>';
-  }else html+='<div style="margin-top:5px">Frequenze radio non ancora caricate per questo sito.</div>';
+  }else {
+   html+='<div style="margin-top:5px">Frequenze radio specifiche non ancora caricate per questo sito.</div>';
+   if(p.type==='small_airport')html+='<div style="margin-top:6px;padding:5px;border-top:1px solid #665331"><b>Riferimento generale ENAC:</b> 130.005 MHz per auto-informazione, quando l’aviosuperficie non dispone di frequenza dedicata. Non è una frequenza assegnata a questo sito: verificare sempre con il gestore e le procedure locali.</div>';
+  }
   html+='<div style="margin-top:4px;color:#d6bd8b;font-size:9px">Le frequenze verificate compariranno qui direttamente, con servizio, MHz, fonte e data di validità. Nessun collegamento esterno.</div>';
   el.innerHTML=html;
  }catch(error){el.dataset.loaded='0';el.innerHTML='<b>📻 FREQUENZE RADIO</b><br>Archivio non raggiungibile. Riprova più tardi.'}
