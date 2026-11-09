@@ -128,6 +128,7 @@ main.flight-weather-mode .panel,main.tower-mode .panel{display:none!important}
 <div class="stats"><div><b id="planeCount">—</b>Aerei visibili</div><div><b id="radarTime">—</b>Ultimo radar</div></div>
 <div class="notice" id="notice">Apri la mappa su una zona e attiva il traffico aereo. Gli aerei vengono caricati nell'area attorno al centro della vista.</div>
 <div style="font-size:10px;color:#8fa4bb;margin-top:7px">Dati traffico ADS-B: <a href="https://flyitalyadsb.com/dati/api/" target="_blank" rel="noopener noreferrer" style="color:#ffd43b">FlyItalyADSB</a></div>
+<div style="font-size:9px;color:#7f91a6;margin-top:5px">Sagome aeromobili: <a href="https://github.com/plane-watch/pw-silhouettes" target="_blank" rel="noopener noreferrer" style="color:#aebed0">Plane Watch contributors</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer" style="color:#aebed0">CC BY-NC-SA 4.0</a> · adattate</div>
 </section>
 <button class="locate" id="locateBtn" title="Mostra la mia posizione GPS" aria-label="Mostra la mia posizione GPS">◎ GPS</button>
 <section class="right-controls" id="rightControls" aria-label="Controlli rapidi mappa">
@@ -321,7 +322,9 @@ function planeIcon(a,selected=false){
  }
  const fill=selected?'#ff3b30':'#ffd21f';
  const svg='<svg viewBox="0 0 96 96" width="32" height="32" style="display:block;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:drop-shadow(0 1px 1px #0009)"><g fill="'+fill+'" stroke="#5a4700" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">'+shape+'</g></svg>';
- return L.divIcon({className:'aircraft-icon',html:'<div style="width:34px;height:34px;display:flex;align-items:center;justify-content:center">'+svg+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
+ const source=type?'https://raw.githubusercontent.com/plane-watch/pw-silhouettes/main/silhouettes/'+type+'.svg':'';
+ const exact=source?'<img src="'+source+'" alt="" draggable="false" onload="this.previousElementSibling.style.display=\'none\'" onerror="this.style.display=\'none\'" style="position:absolute;width:32px;height:32px;object-fit:contain;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:'+(selected?'brightness(0) saturate(100%) invert(30%) sepia(94%) saturate(4665%) hue-rotate(339deg) brightness(101%) contrast(101%)':'brightness(0) saturate(100%) invert(82%) sepia(99%) saturate(1572%) hue-rotate(2deg) brightness(104%) contrast(105%)')+' drop-shadow(0 1px 1px #0009)">' : '';
+ return L.divIcon({className:'aircraft-icon',html:'<div style="position:relative;width:34px;height:34px;display:flex;align-items:center;justify-content:center">'+svg+exact+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
 }
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
 function playAlarmTone(kind='proximity'){
