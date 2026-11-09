@@ -457,6 +457,187 @@
           "note": "Napoli Terminal Information"
         }
       ]
+    },
+    "LIPX": {
+      "name": "Verona Villafranca Valerio Catullo",
+      "iata": "VRN",
+      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "124.45",
+          "note": "Garda APP"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.75",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "INFO",
+          "frequency_mhz": "123.25",
+          "note": "Padova INFO"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.65",
+          "note": "Nominativo non specificato nella fonte consultata"
+        }
+      ]
+    },
+    "LIRQ": {
+      "name": "Firenze Peretola",
+      "iata": "FLR",
+      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "126.075",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "129.35",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.3",
+          "note": "Firenze TWR"
+        }
+      ]
+    },
+    "LIMJ": {
+      "name": "Genova Cristoforo Colombo",
+      "iata": "GOA",
+      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "119.6",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "122.825",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.6",
+          "note": "Nominativo non specificato nella fonte consultata"
+        }
+      ]
+    },
+    "LIRP": {
+      "name": "Pisa Galileo Galilei",
+      "iata": "PSA",
+      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "122.1",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.6",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.1",
+          "note": "Nominativo non specificato nella fonte consultata"
+        }
+      ]
+    },
+    "LICJ": {
+      "name": "Palermo Falcone e Borsellino",
+      "iata": "PMO",
+      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "120.2",
+          "note": "Palermo APP"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "123.875",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.625",
+          "note": "Raisi GND"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.05",
+          "note": "Raisi TWR"
+        }
+      ]
+    },
+    "LICC": {
+      "name": "Catania Fontanarossa",
+      "iata": "CTA",
+      "source": "Dati di riferimento da pagina eAIP secondaria consultata il 2026-11-09; verificare sempre eAIP ENAV vigente e NOTAM",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "119.25",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "DIR",
+          "frequency_mhz": "120.8",
+          "note": "Director"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "129.725",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.7",
+          "note": "Nominativo non specificato nella fonte consultata"
+        }
+      ]
+    },
+    "LIEE": {
+      "name": "Cagliari Elmas",
+      "iata": "CAG",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "119.275",
+          "note": "Cagliari APP"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "122.95",
+          "note": "Cagliari APP"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "125.43",
+          "note": "Elmas GND"
+        },
+        {
+          "service": "AFIS",
+          "frequency_mhz": "127.055",
+          "note": "Cagliari Arrival"
+        }
+      ]
     }
   }
 }
