@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "updated_at": "2026-11-09",
-  "source_policy": "Frequenze ATS e locali riportano la fonte e la qualità del dato. Le frequenze 130.005 MHz inserite per aviosuperfici/campi senza frequenza dedicata sono indicate da ENAC come consuetudine di auto-informazione, non come assegnazione locale. Prima di qualsiasi uso operativo verificare eAIP ENAV vigente, NOTAM e gestore.",
+  "source_policy": "Frequenze ATS e locali riportano la fonte e la qualità del dato. Le frequenze 130.005 MHz inserite per aviosuperfici/campi senza frequenza dedicata sono indicate da ENAC come consuetudine di auto-informazione, non come assegnazione locale. Prima di qualsiasi uso operativo verificare eAIP ENAV vigente, NOTAM e gestore. Le frequenze degli aeroporti militari inserite nell'archivio sono solo quelle reperite in fonti pubbliche secondarie; non sostituiscono MIL-AIP/AIP, NOTAM o istruzioni ATS vigenti.",
   "airports": {
     "LIML": {
       "name": "Milano Linate",
@@ -1393,6 +1393,80 @@
           "service": "AUTO-INFORMAZIONE",
           "frequency_mhz": "130.005",
           "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        }
+      ]
+    },
+    "LIBA": {
+      "name": "Amendola (aeroporto militare)",
+      "type": "military",
+      "source": "Aeronautical Information, Control Zone di Amendola; dati riportati come aggiornati ad AIRAC A4/26 (16-04-2026) e NOTAM E0526/26; fonte secondaria, verificare MIL-AIP/AIP e NOTAM vigenti",
+      "valid_from": "2026-04-16",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.205",
+          "note": "Amendola Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "118.855",
+          "note": "Amendola Approach / Radar"
+        }
+      ]
+    },
+    "LIPA": {
+      "name": "Aviano (aeroporto militare)",
+      "type": "military",
+      "source": "Aeronautical Information, Control Zone di Aviano; dati AIRAC A11/24 (31-10-2024), riscontro community OurAirports del 29-03-2026; fonte secondaria, verificare pubblicazioni aeronautiche e NOTAM vigenti",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "134.100",
+          "note": "Aviano Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "120.130",
+          "note": "Aviano Approach"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "120.965",
+          "note": "Aviano Approach"
+        }
+      ]
+    },
+    "LIMN": {
+      "name": "Cameri (aeroporto militare)",
+      "type": "military",
+      "source": "MetarCentral, dati operativi dichiarati derivati dall'AIP ufficiale; fonte secondaria, consultata il 09-11-2026, data di efficacia non esposta",
+      "valid_from": null,
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Cameri Tower"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.700",
+          "note": "Cameri Ground"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "125.620",
+          "note": "Cameri Approach"
         }
       ]
     }
