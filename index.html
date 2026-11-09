@@ -328,6 +328,31 @@ function planeIcon(a,selected=false){
   fill='#ffd43b';stroke='#594300';
   shape='<path d="M16 2 L18 12 L28 18 L28 21 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L4 21 L4 18 L14 12 Z"/>';
  }
+ // Sagome specifiche per famiglia/modello ICAO (campo ADS-B "t").
+ // Vista dall'alto: fusoliera, ali, impennaggi e motori riconoscibili.
+ const modelShapes=[
+  [/^A3[12][89]$/, '<path d="M16 1 L18 11 L30 19 L30 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L2 22 L2 19 L14 11 Z"/><path d="M10 15 Q12 13 14 15 M18 15 Q20 13 22 15" fill="none"/>'],
+  [/^A32[0-9]$/, '<path d="M16 1 L18 11 L30 19 L30 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L2 22 L2 19 L14 11 Z"/><ellipse cx="9" cy="19" rx="2" ry="3"/><ellipse cx="23" cy="19" rx="2" ry="3"/>'],
+  [/^A33[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 10 Z"/><ellipse cx="8" cy="20" rx="2.4" ry="3.5"/><ellipse cx="24" cy="20" rx="2.4" ry="3.5"/>'],
+  [/^A34[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 10 Z"/><ellipse cx="7" cy="20" rx="2" ry="3"/><ellipse cx="11" cy="21" rx="1.7" ry="2.5"/><ellipse cx="21" cy="21" rx="1.7" ry="2.5"/><ellipse cx="25" cy="20" rx="2" ry="3"/>'],
+  [/^A35[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 22 L1 19 L14 10 Z"/><ellipse cx="8" cy="20" rx="2.2" ry="3"/><ellipse cx="24" cy="20" rx="2.2" ry="3"/>'],
+  [/^A38[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 10 Z"/><ellipse cx="6" cy="20" rx="1.8" ry="3"/><ellipse cx="11" cy="21" rx="1.8" ry="3"/><ellipse cx="21" cy="21" rx="1.8" ry="3"/><ellipse cx="26" cy="20" rx="1.8" ry="3"/>'],
+  [/^B73[0-9]$/, '<path d="M16 1 L18 11 L30 19 L30 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L2 22 L2 19 L14 11 Z"/><ellipse cx="9" cy="19" rx="2.1" ry="3"/><ellipse cx="23" cy="19" rx="2.1" ry="3"/><path d="M4 21 L2 24 M28 21 L30 24" fill="none"/>'],
+  [/^B74[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 10 Z"/><path d="M13 5 L13 9 L19 9 L19 5 Z"/><ellipse cx="5" cy="20" rx="1.7" ry="2.8"/><ellipse cx="10" cy="21" rx="1.7" ry="2.8"/><ellipse cx="22" cy="21" rx="1.7" ry="2.8"/><ellipse cx="27" cy="20" rx="1.7" ry="2.8"/>'],
+  [/^B75[0-9]$/, '<path d="M16 1 L18 11 L30 19 L30 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L2 22 L2 19 L14 11 Z"/><ellipse cx="9" cy="19" rx="2" ry="3"/><ellipse cx="23" cy="19" rx="2" ry="3"/>'],
+  [/^B76[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 10 Z"/><ellipse cx="8" cy="20" rx="2.3" ry="3"/><ellipse cx="24" cy="20" rx="2.3" ry="3"/>'],
+  [/^B77[0-9]$/, '<path d="M16 1 L18 9 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 9 Z"/><ellipse cx="7" cy="20" rx="2.6" ry="3.8"/><ellipse cx="25" cy="20" rx="2.6" ry="3.8"/>'],
+  [/^B78[0-9]$/, '<path d="M16 1 L18 9 L31 19 L31 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 22 L1 19 L14 9 Z"/><path d="M2 20 L0 23 M30 20 L32 23" fill="none"/><ellipse cx="8" cy="20" rx="2.2" ry="3"/><ellipse cx="24" cy="20" rx="2.2" ry="3"/>'],
+  [/^(E17[0-9]|E19[0-9]|E75[0-9]|E90[0-9])$/, '<path d="M16 2 L18 12 L28 18 L28 21 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L4 21 L4 18 L14 12 Z"/><ellipse cx="10" cy="19" rx="1.5" ry="2.5"/><ellipse cx="22" cy="19" rx="1.5" ry="2.5"/>'],
+  [/^(CRJ[0-9]{3}|CL[0-9]{2})$/, '<path d="M16 2 L18 13 L27 18 L27 21 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L5 21 L5 18 L14 13 Z"/><ellipse cx="10" cy="18" rx="1.4" ry="2"/><ellipse cx="22" cy="18" rx="1.4" ry="2"/>'],
+  [/^(AT[4-7][0-9]{2}|DH8[0-9])$/, '<path d="M16 2 L18 12 L30 18 L30 21 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L2 21 L2 18 L14 12 Z"/><circle cx="8" cy="17" r="3" fill="none"/><circle cx="24" cy="17" r="3" fill="none"/>'],
+  [/^(C172|C152|C182|C206|C208|PA[0-9]{2,3}|DA[0-9]{2}|SR2[02])$/, '<path d="M16 3 L18 13 L29 16 L29 19 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L3 19 L3 16 L14 13 Z"/><path d="M5 12 H27 M16 8 V14" fill="none"/>'],
+  [/^(PC12|TBM[0-9]{2,3}|BE[0-9]{2})$/, '<path d="M16 2 L18 12 L29 17 L29 20 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L3 20 L3 17 L14 12 Z"/><path d="M7 15 L25 15 M16 5 V12" fill="none"/>'],
+  [/^(C130|C30J|C17|A400|A4M)$/, '<path d="M16 1 L19 10 L30 18 L30 22 L19 18 L19 28 L23 32 L16 30 L9 32 L13 28 L13 18 L2 22 L2 18 L13 10 Z"/><path d="M7 13 H25 M7 17 H25" fill="none"/>'],
+  [/^(F16|F18|F22|F35|EF2000|TYPH|RAFA|MIR2|TORN|AMX)$/, '<path d="M16 1 L19 12 L30 28 L28 29 L17 22 L17 31 L22 34 L16 32 L10 34 L15 31 L15 22 L4 29 L2 28 L13 12 Z"/>']
+ ];
+ const specific=modelShapes.find(([pattern])=>pattern.test(type));
+ if(specific){shape=specific[1];fill='#ffd43b';stroke='#594300';}
  if(selected){fill='#39ff14';stroke='#126b20';}
  const svg='<svg viewBox="0 0 32 34" width="29" height="31" style="display:block;flex:0 0 32px;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:drop-shadow(0 1px 2px #001)"><g fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.15" stroke-linejoin="round">'+shape+'</g></svg>';
  const airline=airlineForFlight(a.flight);
