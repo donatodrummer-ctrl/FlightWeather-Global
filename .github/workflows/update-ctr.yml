@@ -59,14 +59,42 @@ jobs:
               f.write(raw)
           print(f"Punti: {len(points)}; JSON: {len(raw)} byte; GZIP: {os.path.getsize('data/airports.json.gz')} byte")
           PY
+      - name: Scarica e comprime piste aeroportuali globali
+        run: |
+          curl --fail --location --silent --show-error \
+            'https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/runways.csv' \
+            -o /tmp/runways.csv
+          python - <<'PY'
+          import csv, json, gzip, os
+          rows = []
+          with open('/tmp/runways.csv', newline='', encoding='utf-8') as f:
+              for r in csv.DictReader(f):
+                  if str(r.get('closed','0')).strip() == '1':
+                      continue
+                  try:
+                      lat1, lon1 = float(r['le_latitude_deg']), float(r['le_longitude_deg'])
+                      lat2, lon2 = float(r['he_latitude_deg']), float(r['he_longitude_deg'])
+                  except (ValueError, TypeError, KeyError):
+                      continue
+                  if not (-90 <= lat1 <= 90 and -180 <= lon1 <= 180 and -90 <= lat2 <= 90 and -180 <= lon2 <= 180):
+                      continue
+                  rows.append([lat1, lon1, lat2, lon2, r.get('airport_ident',''), r.get('le_ident',''), r.get('he_ident',''), r.get('length_ft',''), r.get('width_ft',''), r.get('surface','')])
+          assert rows, 'Nessuna pista valida nel dataset OurAirports'
+          raw = json.dumps(rows, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
+          with open('data/runways.json', 'wb') as f:
+              f.write(raw)
+          with gzip.open('data/runways.json.gz', 'wb', compresslevel=9) as f:
+              f.write(raw)
+          print(f"Piste: {len(rows)}; JSON: {len(raw)} byte; GZIP: {os.path.getsize('data/runways.json.gz')} byte")
+          PY
       - name: Pubblica archivi aggiornati
         run: |
-          if [ -z "$(git status --porcelain -- data/ctr-it.geojson data/airports.json data/airports.json.gz)" ]; then
+          if [ -z "$(git status --porcelain -- data/ctr-it.geojson data/airports.json data/airports.json.gz data/runways.json data/runways.json.gz)" ]; then
             echo "Dati già aggiornati"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ctr-it.geojson data/airports.json data/airports.json.gz
+          git add data/ctr-it.geojson data/airports.json data/airports.json.gz data/runways.json data/runways.json.gz
           git commit -m "Aggiorna CTR e dati aeroportuali compressi"
           git push
