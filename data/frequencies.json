@@ -118,6 +118,325 @@
           "note": "Malpensa Departure"
         }
       ]
+    },
+    "LIME": {
+      "name": "Bergamo Orio al Serio",
+      "iata": "BGY",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "126.3",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "126.75",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "134.105",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "118.54",
+          "note": "Nominativo non specificato nella fonte consultata"
+        }
+      ]
+    },
+    "LIMF": {
+      "name": "Torino Caselle",
+      "iata": "TRN",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "125.275",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "129.275",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.705",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "120.48",
+          "note": "Nominativo non specificato nella fonte consultata"
+        }
+      ]
+    },
+    "LIPZ": {
+      "name": "Venezia Marco Polo",
+      "iata": "VCE",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "118.9",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "120.725",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.255",
+          "note": "Venezia TWR"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "131.48",
+          "note": "Nominativo non specificato nella fonte consultata"
+        }
+      ]
+    },
+    "LIRF": {
+      "name": "Roma Fiumicino",
+      "iata": "FCO",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "131.25",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "125.5",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "119.2",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "127.95",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "DEP",
+          "frequency_mhz": "130.9",
+          "note": "Roma Departure"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "131.1",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "DEL",
+          "frequency_mhz": "121.8",
+          "note": "Fiume Delivery"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.9",
+          "note": "Fiume GND"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "122.125",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.675",
+          "note": "Fiume GND"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "127.625",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.7",
+          "note": "Fiume TWR"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "123.725",
+          "note": "Fiume TWR"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "126.125",
+          "note": "Fiume Arrival"
+        }
+      ]
+    },
+    "LIRA": {
+      "name": "Roma Ciampino",
+      "iata": "CIA",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "131.25",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "125.5",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "127.95",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "130.9",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "134.2",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "131.1",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.755",
+          "note": "Ciampino GND"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.405",
+          "note": "Ciampino TWR"
+        }
+      ]
+    },
+    "LIEO": {
+      "name": "Olbia Costa Smeralda",
+      "iata": "OLB",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "125.95",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "127.125",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.95",
+          "note": "Olbia GND"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.975",
+          "note": "SEP TWR"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "113.9",
+          "note": "Nominativo non specificato nella fonte consultata"
+        }
+      ]
+    },
+    "LIPE": {
+      "name": "Bologna Guglielmo Marconi",
+      "iata": "BLQ",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "118.15",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "120.1",
+          "note": "Bologna APP"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "133.775",
+          "note": "Bologna APP"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.925",
+          "note": "Bologna Ground"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "120.8",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "134.875",
+          "note": "Bologna Arrival"
+        }
+      ]
+    },
+    "LIRN": {
+      "name": "Napoli Capodichino",
+      "iata": "NAP",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "124.35",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "134.2",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.9",
+          "note": "Napoli GND"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.5",
+          "note": "Napoli TWR"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "120.95",
+          "note": "Napoli TWR"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "135.975",
+          "note": "Napoli Terminal Information"
+        }
+      ]
     }
   }
 }
