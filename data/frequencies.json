@@ -1,6 +1,123 @@
 {
   "schema_version": 1,
-  "updated_at": null,
-  "source_policy": "Inserire solo frequenze verificate su AIP ENAV vigente o pubblicazione ufficiale del gestore. Non dedurre frequenze.",
-  "airports": {}
+  "updated_at": "2026-11-09",
+  "source_policy": "Dati di riferimento trascritti da pagine che dichiarano derivazione dall'eAIP Italia. Ogni record riporta la data di efficacia della fonte; prima di uso operativo verificare sempre l'eAIP ENAV vigente e i NOTAM. Non dedurre frequenze.",
+  "airports": {
+    "LIML": {
+      "name": "Milano Linate",
+      "iata": "LIN",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "126.3",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "126.75",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "133.18",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "DEL",
+          "frequency_mhz": "119.25",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.8",
+          "note": "Linate GND"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.1",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.4",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "136.375",
+          "note": "Linate Terminal Information"
+        }
+      ]
+    },
+    "LIMC": {
+      "name": "Milano Malpensa",
+      "iata": "MXP",
+      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "valid_from": "2026-09-03",
+      "services": [
+        {
+          "service": "APP",
+          "frequency_mhz": "125.63",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "134.175",
+          "note": "Milano Radar"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "118.805",
+          "note": "Milano Radar"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "132.705",
+          "note": "Milano Radar"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.825",
+          "note": "Malpensa Ground"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.9",
+          "note": "Malpensa Ground"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "123.6",
+          "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "121.75",
+          "note": "Malpensa TWR"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "128.35",
+          "note": "Malpensa TWR"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "120.9",
+          "note": "Malpensa TWR"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "120.025",
+          "note": "Malpensa Arrival"
+        },
+        {
+          "service": "ATIS",
+          "frequency_mhz": "121.625",
+          "note": "Malpensa Departure"
+        }
+      ]
+    }
+  }
 }
