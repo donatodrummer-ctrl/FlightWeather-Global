@@ -294,71 +294,37 @@ function planeIcon(a,selected=false){
  const angle=Number.isFinite(Number(a.track))?Number(a.track):0;
  const type=String(a.t||a.type||a.icaoType||a.type_designator||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
  const info=[a.t,a.desc,a.category,a.type,a.model,a.icaoType,a.type_designator,a.manufacturer].filter(Boolean).join(' ').toLowerCase();
- const military= a.mil===true||a.military===true||a.isMilitary===true ||
-  /military|militare|fighter|caccia|combat|air force|navy|army|eurofighter|typhoon|rafale|tornado|harrier|hawk|falcon|eagle|viper/.test(info) ||
-  /^(F16|F18|F22|F35|F4|F5|EF2000|TYPH|RFL|RAFA|TORN|AMX|M346|M345|HAWK|T38|T6|C130|C17|A400|E3CF|E2C|CN35|GLEXM|MIR2)$/.test(type);
- const helicopter=/helicopter|elicottero|rotor|\bheli\b/.test(info) ||
-  /^(H[0-9A-Z]{2,4}|R22|R44|R66|AS50|AS55|AS65|EC35|EC45|EC55|EC75|B06|B06T|S76|S92|A109|A119|A139|A169|A189|NH90|EH10|H60|H64|UH1|UH60|CH47|CH53)$/.test(type);
- const smallProp=/turboprop|propeller|cessna|piper|beech|cirrus|diamond|tecnam|robin|ultralight|general aviation|single.?engine|light aircraft/.test(info) ||
-  /^(C1[0-9A-Z]{2}|C2[0-9A-Z]{2}|C3[0-9A-Z]{2}|C4[0-9A-Z]{2}|PA[0-9A-Z]{2,3}|DA[0-9A-Z]{2}|SR2[02]|BE[0-9A-Z]{2}|P28[0-9A-Z]|P20[0-9A-Z]{2}|R200|R300|TBM[0-9A-Z]{2}|PC1[0-9A-Z]{2}|AT[0-9A-Z]{2}|DH8[0-9A-Z])$/.test(type);
- let shape='<path d="M16 1 L19 12 L30 20 L30 23 L18 19 L18 29 L23 32 L23 34 L16 31 L9 34 L9 32 L14 29 L14 19 L2 23 L2 20 L13 12 Z"/>';
- let fill='#ffd43b',stroke='#594300';
+ const helicopter=/helicopter|elicottero|rotor|\\bheli\\b/.test(info)||/^(H[0-9A-Z]{2,4}|R22|R44|R66|AS50|AS55|AS65|EC35|EC45|EC55|EC75|B06|B06T|S76|S92|A109|A119|A139|A169|A189|NH90|EH10|H60|H64|UH1|UH60|CH47|CH53)$/.test(type);
+ const fighter=/military|militare|fighter|caccia|combat|eurofighter|typhoon|rafale|tornado|harrier/.test(info)||/^(F16|F18|F22|F35|F4|F5|EF2000|TYPH|RAFA|MIR2|TORN|AMX|M346|M345|HAWK|T38)$/.test(type);
+ const glider=/glider|sailplane|aliante/.test(info)||/^G[0-9A-Z]{3}$/.test(type);
+ const drone=/drone|uav|unmanned/.test(info)||/^U[0-9A-Z]{3}$/.test(type);
+ const light=/cessna|piper|beech|cirrus|diamond|tecnam|robin|ultralight|single.?engine|light aircraft/.test(info)||/^(C1[0-9]{2}|C2[0-9]{2}|C3[0-9]{2}|C4[0-9]{2}|PA[0-9]{2,3}|DA[0-9]{2}|SR2[02]|P28[0-9]|P20[0-9]{2})$/.test(type);
+ const turboprop=/turboprop|propeller/.test(info)||/^(AT[4-7][0-9]{2}|DH8[0-9]|BE20|BE30|PC12|TBM[0-9]{2,3}|C208|C212|C130|C30J|A400|AN12|AN26)$/.test(type);
+ const wide=/^(A33[0-9]|A34[0-9]|A35[0-9]|A38[0-9]|B74[0-9]|B76[0-9]|B77[0-9]|B78[0-9]|MD11|DC10)$/.test(type);
+ const regional=/^(E17[0-9]|E19[0-9]|E75[0-9]|E90[0-9]|CRJ[0-9]{3}|CL[0-9]{2})$/.test(type);
+ let shape;
  if(helicopter){
-  fill='#a879ff';stroke='#4a2487';
-  shape='<path d="M3 5 H29 M16 5 V11 M10 13 Q16 9 22 13 L24 18 H9 Q7 17 8 15 Z M22 15 L29 20 L28 22 L21 18 M11 18 L8 25 H10 L14 19 M16 5 V2 M2 27 H14"/>';
- }else if(military){
-  fill='#ff6868';stroke='#641c27';
-  shape='<path d="M16 1 L19 13 L30 23 L29 26 L18 21 L17 31 L22 34 L16 32 L10 34 L15 31 L14 21 L3 26 L2 23 L13 13 Z"/>';
- }else if(smallProp){
-  fill='#70baff';stroke='#173f70';
-  shape='<path d="M16 3 L18 13 L29 18 L29 20 L18 18 L18 27 L22 30 L16 29 L10 30 L14 27 L14 18 L3 20 L3 18 L14 13 Z M13 13 L16 10 L19 13 M6 8 H26 M16 5 V11"/>';
- }else if(/glider|sailplane|aliante/.test(info)||/^G[0-9A-Z]{3}$/.test(type)){
-  fill='#b69aff';stroke='#38256f';
-  shape='<path d="M16 2 L18 15 L31 18 L31 20 L18 19 L18 29 L21 32 L16 31 L11 32 L14 29 L14 19 L1 20 L1 18 L14 15 Z"/>';
- }else if(/drone|uav|unmanned/.test(info)||/^U[0-9A-Z]{3}$/.test(type)){
-  fill='#f472b6';stroke='#6b214c';
-  shape='<path d="M7 7 L12 12 M25 7 L20 12 M7 25 L12 20 M25 25 L20 20 M12 12 L20 20 M20 12 L12 20 M4 4 L10 4 L10 10 L4 10 Z M22 4 L28 4 L28 10 L22 10 Z M4 22 L10 22 L10 28 L4 28 Z M22 22 L28 22 L28 28 L22 28 Z M13 13 H19 V19 H13 Z"/>';
- }else if(/cargo|freighter/.test(info)||/[0-9]{2,3}F$/.test(type)){
-  fill='#ffad42';stroke='#71400b';
-  shape='<path d="M16 1 L19 12 L30 20 L30 23 L18 19 L18 29 L23 32 L23 34 L16 31 L9 34 L9 32 L14 29 L14 19 L2 23 L2 20 L13 12 Z M11 15 H21 V23 H11 Z"/>';
- }else if(/A330|A340|A350|A380|B747|B767|B777|B787|MD11/.test(type)){
-  fill='#ffd43b';stroke='#594300';
-  shape='<path d="M16 1 L19 11 L31 20 L31 23 L18 19 L18 29 L23 32 L23 34 L16 31 L9 34 L9 32 L14 29 L14 19 L1 23 L1 20 L13 11 Z M10 16 L22 16 L24 20 L8 20 Z"/>';
- }else if(/E170|E175|E190|E195|CRJ|RJ[0-9]|ATR/.test(type)){
-  fill='#ffd43b';stroke='#594300';
-  shape='<path d="M16 2 L18 12 L28 18 L28 21 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L4 21 L4 18 L14 12 Z"/>';
+  shape='<path d="M19 9 C23 9 26 12 26 16 C26 19 23 21 19 21 L17 27 L20 31 L13 31 L15 27 L14 21 C10 20 8 18 8 15 C8 12 11 10 14 9 L14 5 L19 5 Z"/><path d="M3 4 H29 M16 4 V1 M16 21 L16 29 M10 17 L3 23 M22 17 L29 23" fill="none" stroke-width="2.2"/>';
+ }else if(fighter){
+  shape='<path d="M16 1 L18 10 L22 15 L31 27 L29 29 L18 22 L18 30 L22 34 L16 32 L10 34 L14 30 L14 22 L3 29 L1 27 L10 15 L14 10 Z"/>';
+ }else if(drone){
+  shape='<path d="M13 13 L19 13 L19 19 L13 19 Z M16 13 L16 5 M16 19 L16 27 M13 16 L5 16 M19 16 L27 16" fill="none" stroke-width="2.4"/><circle cx="5" cy="5" r="3.5"/><circle cx="27" cy="5" r="3.5"/><circle cx="5" cy="27" r="3.5"/><circle cx="27" cy="27" r="3.5"/>';
+ }else if(glider){
+  shape='<path d="M16 1 L17.5 14 L31 17 L31 19 L17.5 18 L18 30 L21 33 L16 32 L11 33 L14 30 L14.5 18 L1 19 L1 17 L14.5 14 Z"/>';
+ }else if(light){
+  shape='<path d="M16 3 L18 13 L29 16 L29 19 L18 18 L18 28 L21 32 L16 31 L11 32 L14 28 L14 18 L3 19 L3 16 L14 13 Z"/><path d="M5 14 L27 14 M16 8 L16 13" fill="none" stroke-width="1.6"/>';
+ }else if(turboprop){
+  shape='<path d="M16 2 L18 12 L30 17 L30 20 L18 18 L18 28 L21 32 L16 31 L11 32 L14 28 L14 18 L2 20 L2 17 L14 12 Z"/><path d="M7 13 L7 21 M5 17 H9 M25 13 L25 21 M23 17 H27" fill="none" stroke-width="1.8"/>';
+ }else if(wide){
+  shape='<path d="M16 1 L18 10 L32 19 L32 22 L18 18 L18 29 L22 33 L16 31 L10 33 L14 29 L14 18 L0 22 L0 19 L14 10 Z"/><ellipse cx="6.5" cy="20" rx="1.8" ry="3.1"/><ellipse cx="11" cy="21" rx="1.8" ry="3.1"/><ellipse cx="21" cy="21" rx="1.8" ry="3.1"/><ellipse cx="25.5" cy="20" rx="1.8" ry="3.1"/>';
+ }else if(regional){
+  shape='<path d="M16 2 L18 12 L29 18 L29 21 L18 18 L18 28 L21 32 L16 31 L11 32 L14 28 L14 18 L3 21 L3 18 L14 12 Z"/><ellipse cx="9" cy="18" rx="1.5" ry="2.5"/><ellipse cx="23" cy="18" rx="1.5" ry="2.5"/>';
+ }else{
+  shape='<path d="M16 1 L18 11 L30 19 L30 22 L18 18 L18 29 L22 33 L16 31 L10 33 L14 29 L14 18 L2 22 L2 19 L14 11 Z"/><ellipse cx="9" cy="19" rx="2" ry="3"/><ellipse cx="23" cy="19" rx="2" ry="3"/>';
  }
- // Sagome specifiche per famiglia/modello ICAO (campo ADS-B "t").
- // Vista dall'alto: fusoliera, ali, impennaggi e motori riconoscibili.
- const modelShapes=[
-  [/^A3[12][89]$/, '<path d="M16 1 L18 11 L30 19 L30 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L2 22 L2 19 L14 11 Z"/><path d="M10 15 Q12 13 14 15 M18 15 Q20 13 22 15" fill="none"/>'],
-  [/^A32[0-9]$/, '<path d="M16 1 L18 11 L30 19 L30 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L2 22 L2 19 L14 11 Z"/><ellipse cx="9" cy="19" rx="2" ry="3"/><ellipse cx="23" cy="19" rx="2" ry="3"/>'],
-  [/^A33[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 10 Z"/><ellipse cx="8" cy="20" rx="2.4" ry="3.5"/><ellipse cx="24" cy="20" rx="2.4" ry="3.5"/>'],
-  [/^A34[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 10 Z"/><ellipse cx="7" cy="20" rx="2" ry="3"/><ellipse cx="11" cy="21" rx="1.7" ry="2.5"/><ellipse cx="21" cy="21" rx="1.7" ry="2.5"/><ellipse cx="25" cy="20" rx="2" ry="3"/>'],
-  [/^A35[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 22 L1 19 L14 10 Z"/><ellipse cx="8" cy="20" rx="2.2" ry="3"/><ellipse cx="24" cy="20" rx="2.2" ry="3"/>'],
-  [/^A38[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 10 Z"/><ellipse cx="6" cy="20" rx="1.8" ry="3"/><ellipse cx="11" cy="21" rx="1.8" ry="3"/><ellipse cx="21" cy="21" rx="1.8" ry="3"/><ellipse cx="26" cy="20" rx="1.8" ry="3"/>'],
-  [/^B73[0-9]$/, '<path d="M16 1 L18 11 L30 19 L30 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L2 22 L2 19 L14 11 Z"/><ellipse cx="9" cy="19" rx="2.1" ry="3"/><ellipse cx="23" cy="19" rx="2.1" ry="3"/><path d="M4 21 L2 24 M28 21 L30 24" fill="none"/>'],
-  [/^B74[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 10 Z"/><path d="M13 5 L13 9 L19 9 L19 5 Z"/><ellipse cx="5" cy="20" rx="1.7" ry="2.8"/><ellipse cx="10" cy="21" rx="1.7" ry="2.8"/><ellipse cx="22" cy="21" rx="1.7" ry="2.8"/><ellipse cx="27" cy="20" rx="1.7" ry="2.8"/>'],
-  [/^B75[0-9]$/, '<path d="M16 1 L18 11 L30 19 L30 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L2 22 L2 19 L14 11 Z"/><ellipse cx="9" cy="19" rx="2" ry="3"/><ellipse cx="23" cy="19" rx="2" ry="3"/>'],
-  [/^B76[0-9]$/, '<path d="M16 1 L18 10 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 10 Z"/><ellipse cx="8" cy="20" rx="2.3" ry="3"/><ellipse cx="24" cy="20" rx="2.3" ry="3"/>'],
-  [/^B77[0-9]$/, '<path d="M16 1 L18 9 L31 19 L31 23 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 23 L1 19 L14 9 Z"/><ellipse cx="7" cy="20" rx="2.6" ry="3.8"/><ellipse cx="25" cy="20" rx="2.6" ry="3.8"/>'],
-  [/^B78[0-9]$/, '<path d="M16 1 L18 9 L31 19 L31 22 L18 18 L18 28 L22 32 L16 30 L10 32 L14 28 L14 18 L1 22 L1 19 L14 9 Z"/><path d="M2 20 L0 23 M30 20 L32 23" fill="none"/><ellipse cx="8" cy="20" rx="2.2" ry="3"/><ellipse cx="24" cy="20" rx="2.2" ry="3"/>'],
-  [/^(E17[0-9]|E19[0-9]|E75[0-9]|E90[0-9])$/, '<path d="M16 2 L18 12 L28 18 L28 21 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L4 21 L4 18 L14 12 Z"/><ellipse cx="10" cy="19" rx="1.5" ry="2.5"/><ellipse cx="22" cy="19" rx="1.5" ry="2.5"/>'],
-  [/^(CRJ[0-9]{3}|CL[0-9]{2})$/, '<path d="M16 2 L18 13 L27 18 L27 21 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L5 21 L5 18 L14 13 Z"/><ellipse cx="10" cy="18" rx="1.4" ry="2"/><ellipse cx="22" cy="18" rx="1.4" ry="2"/>'],
-  [/^(AT[4-7][0-9]{2}|DH8[0-9])$/, '<path d="M16 2 L18 12 L30 18 L30 21 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L2 21 L2 18 L14 12 Z"/><circle cx="8" cy="17" r="3" fill="none"/><circle cx="24" cy="17" r="3" fill="none"/>'],
-  [/^(C172|C152|C182|C206|C208|PA[0-9]{2,3}|DA[0-9]{2}|SR2[02])$/, '<path d="M16 3 L18 13 L29 16 L29 19 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L3 19 L3 16 L14 13 Z"/><path d="M5 12 H27 M16 8 V14" fill="none"/>'],
-  [/^(PC12|TBM[0-9]{2,3}|BE[0-9]{2})$/, '<path d="M16 2 L18 12 L29 17 L29 20 L18 18 L18 28 L21 31 L16 30 L11 31 L14 28 L14 18 L3 20 L3 17 L14 12 Z"/><path d="M7 15 L25 15 M16 5 V12" fill="none"/>'],
-  [/^(C130|C30J|C17|A400|A4M)$/, '<path d="M16 1 L19 10 L30 18 L30 22 L19 18 L19 28 L23 32 L16 30 L9 32 L13 28 L13 18 L2 22 L2 18 L13 10 Z"/><path d="M7 13 H25 M7 17 H25" fill="none"/>'],
-  [/^(F16|F18|F22|F35|EF2000|TYPH|RAFA|MIR2|TORN|AMX)$/, '<path d="M16 1 L19 12 L30 28 L28 29 L17 22 L17 31 L22 34 L16 32 L10 34 L15 31 L15 22 L4 29 L2 28 L13 12 Z"/>']
- ];
- const specific=modelShapes.find(([pattern])=>pattern.test(type));
- if(specific){shape=specific[1];fill='#ffd43b';stroke='#594300';}
- if(selected){fill='#39ff14';stroke='#126b20';}
- const svg='<svg viewBox="0 0 32 34" width="29" height="31" style="display:block;flex:0 0 32px;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:drop-shadow(0 1px 2px #001)"><g fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.15" stroke-linejoin="round">'+shape+'</g></svg>';
- const airline=airlineForFlight(a.flight);
- const logo=airline?'<img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(airline[2])+'&sz=64" alt="" title="'+escapeHtml(airline[1])+'" style="width:18px;height:18px;object-fit:contain;border:1px solid #fff9;border-radius:5px;background:#fff;padding:2px;box-shadow:0 1px 4px #000b" onerror="this.style.display=\'none\'">':'';
- const html='<div style="width:54px;height:34px;display:flex;align-items:center;gap:2px;overflow:visible">'+svg+logo+'</div>';
- return L.divIcon({className:'aircraft-icon',html,iconSize:[54,34],iconAnchor:[16,17]})
+ const fill=selected?'#fff176':'#ffd43b';
+ const svg='<svg viewBox="0 0 32 35" width="38" height="40" style="display:block;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:drop-shadow(0 1px 2px #000b)"><g fill="'+fill+'" stroke="#6b5100" stroke-width=".85" stroke-linejoin="round" stroke-linecap="round">'+shape+'</g></svg>';
+ return L.divIcon({className:'aircraft-icon',html:'<div style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;overflow:visible">'+svg+'</div>',iconSize:[40,40],iconAnchor:[20,20]});
 }
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
 function playAlarmTone(kind='proximity'){
