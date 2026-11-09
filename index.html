@@ -304,7 +304,7 @@ function planeIcon(a,selected=false){
  const regional=/^(E17[0-9]|E19[0-9]|E75[0-9]|E90[0-9]|CRJ[0-9]{3}|BCS[123])$/.test(type);
  let shape;
  if(heli){
-  shape='<path d="M48 28c-8 0-13 5-13 13v15c0 9 6 15 13 15s13-6 13-15V41c0-8-5-13-13-13z M45 68h6v13h-6z"/><path d="M9 25h78M48 25V8M48 68v19M35 47L9 66m52-19 26 19" fill="none" stroke-width="5" stroke-linecap="round"/>';
+  shape='<path d="M48 8c-5 0-8 4-8 9v8c-7 5-12 13-12 23v9c0 8 6 14 14 16v7h12v-7c8-2 14-8 14-16v-9c0-10-5-18-12-23v-8c0-5-3-9-8-9z"/><path d="M40 26h16M48 78v12M20 90h56M12 45h72M48 8V3M8 3h80" fill="none" stroke-width="3.5" stroke-linecap="round"/><path d="M34 47h28M48 33v28" fill="none" stroke="#5a4700" stroke-width="2.2" stroke-linecap="round"/>';
  }else if(fighter){
   shape='<path d="M48 5l7 28 32 39-2 6-30-19v22l9 12-16-4-16 4 9-12V59L11 78l-2-6 32-39z"/>';
  }else if(four){
@@ -324,7 +324,9 @@ function planeIcon(a,selected=false){
  const svg='<svg viewBox="0 0 96 96" width="32" height="32" style="display:block;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:drop-shadow(0 1px 1px #0009)"><g fill="'+fill+'" stroke="#5a4700" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">'+shape+'</g></svg>';
  const source=type?'https://raw.githubusercontent.com/plane-watch/pw-silhouettes/main/silhouettes/'+type+'.svg':'';
  const exact=source?'<img src="'+source+'" alt="" draggable="false" onload="this.previousElementSibling.style.display=\'none\'" onerror="this.style.display=\'none\'" style="position:absolute;width:32px;height:32px;object-fit:contain;transform:rotate('+angle+'deg);transform-origin:50% 50%;filter:'+(selected?'brightness(0) saturate(100%) invert(30%) sepia(94%) saturate(4665%) hue-rotate(339deg) brightness(101%) contrast(101%)':'brightness(0) saturate(100%) invert(82%) sepia(99%) saturate(1572%) hue-rotate(2deg) brightness(104%) contrast(105%)')+' drop-shadow(0 1px 1px #0009)">' : '';
- return L.divIcon({className:'aircraft-icon',html:'<div style="position:relative;width:34px;height:34px;display:flex;align-items:center;justify-content:center">'+svg+exact+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
+ const airline=airlineForFlight(a.flight),domain=airline&&airline[2],logo=domain?'<img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(domain)+'&sz=64" alt="" title="'+airline[1]+'" onerror="this.style.display=\'none\'" style="position:absolute;left:37px;top:9px;width:16px;height:16px;object-fit:contain;background:#fff;border:1px solid #fff;border-radius:4px;padding:1px;box-shadow:0 1px 3px #000b">':'';
+ const width=logo?'55px':'34px';
+ return L.divIcon({className:'aircraft-icon',html:'<div style="position:relative;width:'+width+';height:34px;display:flex;align-items:center;justify-content:center">'+svg+exact+logo+'</div>',iconSize:[logo?55:34,34],iconAnchor:[17,17]});
 }
 function setNotice(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error)}
 function playAlarmTone(kind='proximity'){
