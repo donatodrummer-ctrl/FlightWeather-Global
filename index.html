@@ -177,7 +177,6 @@ map.on('popupopen',event=>{
   if(signature.includes('skyvector'))link.remove();
  });
 });
-
 map.doubleClickZoom.enable();
 map.createPane('trailsPane');map.getPane('trailsPane').style.zIndex='550';map.getPane('trailsPane').style.pointerEvents='none';
 let baseTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,className:'basemap-dim',attribution:'Tiles © Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors'}).addTo(map);
@@ -357,8 +356,7 @@ function updateAircraftIcons(){
  updateAircraftLabels();
 }
 function trailStats(key){
- const history=(flightHistory.get(key)||[]).filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon))&&Number.isFinite(Number(p.time)));
- if(history.length<2)return null;
+ const history=(flightHistory.get(key)||[]).filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon))&&Number.isFinite(Number(p.time))); if(history.length<2)return null;
  let km=0;
  const rad=v=>v*Math.PI/180;
  for(let i=1;i<history.length;i++){
@@ -537,8 +535,7 @@ async function loadHistoricalTrail(a,key){
    const last=unique[unique.length-1];
    if(!last||Math.abs(last.lat-p.lat)+Math.abs(last.lon-p.lon)>0.00001)unique.push(p);
   }
-  flightHistory.set(key,unique.slice(-12000));
-  if(pinnedAircraftKey===key){
+  flightHistory.set(key,unique.slice(-12000));  if(pinnedAircraftKey===key){
    drawSelectedTrail();
    if(descentEnabled)drawDescentPaths();
    const selected=aircraftCache.find(item=>String(item.hex||item.flight||'').trim()===key);
@@ -717,8 +714,7 @@ function showSelectedAircraft(a){
  const box=$('selectedAircraftInfo');
  if(!a){box.hidden=true;box.innerHTML='';return}
  const flight=String(a.flight||'').trim()||'Aeromobile';
- const airline=airlineForFlight(a.flight);
- const value=v=>escapeHtml(v??'n/d');
+ const airline=airlineForFlight(a.flight); const value=v=>escapeHtml(v??'n/d');
  const route=a.route;
  const from=route&&(route.from_iata||route.from_icao||route.from);
  const to=route&&(route.to_iata||route.to_icao||route.to);
@@ -835,7 +831,7 @@ async function loadPlanes(){
   const aircraft=(data.ac||[]).map(a=>({...a,seen:a.seen??a.seen_pos})).filter(a=>Number.isFinite(Number(a.lat))&&Number.isFinite(Number(a.lon)));
   const source='FlyItalyADSB';
   if(!aircraft.length)throw new Error('Nessun aeromobile rilevato in quest’area.');
-  aircraftCache=aircraft;
+  aircraftCache=aircraft;window.dispatchEvent(new Event('flightweather:traffic'));
   if(alarmsEnabled)scanAircraftAlarms(aircraft);
   const now=Date.now();
   const activeKeys=new Set();
@@ -897,8 +893,7 @@ async function loadPlanes(){
  finally{planesLoading=false;}
 }
 async function searchMap(){
- const q=$('searchInput').value.trim(),box=$('searchResults');
- if(!q)return;
+ const q=$('searchInput').value.trim(),box=$('searchResults'); if(!q)return;
  box.style.display='block';box.innerHTML='<div class="searchhint">Ricerca in corso…</div>';
  const matches=aircraftCache.filter(a=>[a.flight,a.hex,a.r,a.t].some(v=>String(v||'').toLowerCase().includes(q.toLowerCase())));
  if(matches.length){
@@ -1077,8 +1072,7 @@ async function loadRunwayData(){
   runwayLoadPromise=(async()=>{
    const url='https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/runways.csv';
    const response=await fetch(url,{cache:'force-cache'});
-   if(!response.ok)throw new Error('Archivio piste non raggiungibile (HTTP '+response.status+')');
-   const csv=await response.text();
+   if(!response.ok)throw new Error('Archivio piste non raggiungibile (HTTP '+response.status+')');   const csv=await response.text();
    const rows=csv.split(/\r?\n/);if(rows.length<2)throw new Error('Archivio piste vuoto');
    function parseCSVLine(line){
     const out=[];let value='',quoted=false;
@@ -1257,8 +1251,7 @@ function refreshAirportLayers(){
    airportCount++;
   }
  }
- if(airportsEnabled&&!map.hasLayer(airportLayer))airportLayer.addTo(map);
- if(!airportsEnabled&&map.hasLayer(airportLayer))map.removeLayer(airportLayer);
+ if(airportsEnabled&&!map.hasLayer(airportLayer))airportLayer.addTo(map); if(!airportsEnabled&&map.hasLayer(airportLayer))map.removeLayer(airportLayer);
  if(airfieldsEnabled&&!map.hasLayer(airfieldLayer))airfieldLayer.addTo(map);
  if(!airfieldsEnabled&&map.hasLayer(airfieldLayer))map.removeLayer(airfieldLayer);
 }
@@ -1397,4 +1390,4 @@ setInterval(()=>{if(trafficEnabled)loadPlanes()},3000);
 setInterval(()=>{if($('weatherToggle').checked)loadRadar()},600000);
 setInterval(()=>{if($('lightningToggle').checked)loadLightning()},15000);
 setInterval(()=>{if(windEnabled){lastWindRefresh=0;refreshWindLayer()}},900000);
-</script></body></html>
+</script><script src="data/flightweather-extra-features.js"></script></body></html>
