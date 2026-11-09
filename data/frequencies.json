@@ -122,7 +122,7 @@
     "LIME": {
       "name": "Bergamo Orio al Serio",
       "iata": "BGY",
-      "source": "Italy eAIP, riportato da Choppy (pagina aggiornata 2026-09-30)",
+      "source": "Frequenze APP e ATIS da fonte secondaria che dichiara derivazione eAIP; TWR, GND, Pushback, Operativo ed Emergenza/Airside forniti dall'utente",
       "valid_from": "2026-09-03",
       "services": [
         {
@@ -136,14 +136,34 @@
           "note": "Nominativo non specificato nella fonte consultata"
         },
         {
-          "service": "TWR",
-          "frequency_mhz": "134.105",
-          "note": "Nominativo non specificato nella fonte consultata"
-        },
-        {
           "service": "ATIS",
           "frequency_mhz": "118.54",
           "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "125.875",
+          "note": "Torre Orio al Serio — dato fornito dall'utente"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "120.505",
+          "note": "Ground Orio al Serio — dato fornito dall'utente"
+        },
+        {
+          "service": "PUSHBACK",
+          "frequency_mhz": "131.700",
+          "note": "Pushback — dato fornito dall'utente"
+        },
+        {
+          "service": "OPS",
+          "frequency_mhz": "441.500",
+          "note": "Orio operativo — dato fornito dall'utente"
+        },
+        {
+          "service": "EMERGENZA / AIRSIDE",
+          "frequency_mhz": "445.775",
+          "note": "Emergenza e Airside — dato fornito dall'utente"
         }
       ]
     },
