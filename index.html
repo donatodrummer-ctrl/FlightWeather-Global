@@ -220,12 +220,20 @@ function animateAircraft(){
 requestAnimationFrame(animateAircraft);
 const $=id=>document.getElementById(id);
 const rightControls=$('rightControls'),rightControlsToggle=$('rightControlsToggle'),rightControlsBody=$('rightControlsBody');
+function closeRightControls(){
+ rightControlsBody.hidden=true;
+ rightControls.classList.remove('open');
+ rightControlsToggle.setAttribute('aria-expanded','false');
+ $('rightControlsChevron').textContent='▾';
+}
 rightControlsToggle.addEventListener('click',()=>{
  const opening=rightControlsBody.hidden;
- rightControlsBody.hidden=!opening;
- rightControls.classList.toggle('open',opening);
- rightControlsToggle.setAttribute('aria-expanded',String(opening));
- $('rightControlsChevron').textContent=opening?'▴':'▾';
+ if(opening){
+  rightControlsBody.hidden=false;
+  rightControls.classList.add('open');
+  rightControlsToggle.setAttribute('aria-expanded','true');
+  $('rightControlsChevron').textContent='▴';
+ }else closeRightControls();
 });
 
 const settingsPanel=document.querySelector('.panel');
@@ -1353,7 +1361,7 @@ locateButton.addEventListener('click',event=>{
  },{enableHighAccuracy:true,timeout:20000,maximumAge:10000});
 });
 
-map.on('click',()=>{pinnedAircraftKey=null;followSelectedAircraft=false;updateFollowButton();updateAircraftIcons();showSelectedAircraft(null);drawSelectedTrail();setPanelCompact(true)});
+map.on('click',()=>{closeRightControls();pinnedAircraftKey=null;followSelectedAircraft=false;updateFollowButton();updateAircraftIcons();showSelectedAircraft(null);drawSelectedTrail();setPanelCompact(true)});
 let moveTimer;map.on('moveend',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(()=>{loadPlanes();refreshAirportLayers();if(windEnabled){lastWindRefresh=0;refreshWindLayer()}},250)});map.on('zoomend',()=>{refreshAirportLayers();updateAircraftLabels();if(windEnabled){lastWindRefresh=0;refreshWindLayer()}});
 loadRadar();loadPlanes();
 // Il controllo e il caricamento del traffico sono impostati ogni 3 secondi.
