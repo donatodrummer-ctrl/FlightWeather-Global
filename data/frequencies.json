@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "updated_at": "2026-11-09",
-  "source_policy": "Frequenze ATS e locali riportano la fonte e la qualità del dato. Le frequenze 130.005 MHz inserite per aviosuperfici/campi senza frequenza dedicata sono indicate da ENAC come consuetudine di auto-informazione, non come assegnazione locale. Prima di qualsiasi uso operativo verificare eAIP ENAV vigente, NOTAM e gestore. Le frequenze degli aeroporti militari inserite nell'archivio sono solo quelle reperite in fonti pubbliche secondarie; non sostituiscono MIL-AIP/AIP, NOTAM o istruzioni ATS vigenti.",
+  "source_policy": "Frequenze ATS e locali riportano la fonte e la qualità del dato. Le frequenze 130.005 MHz inserite per aviosuperfici/campi senza frequenza dedicata sono indicate da ENAC come consuetudine di auto-informazione, non come assegnazione locale. Prima di qualsiasi uso operativo verificare eAIP ENAV vigente, NOTAM e gestore. Le frequenze degli aeroporti militari inserite nell'archivio sono solo quelle reperite in fonti pubbliche secondarie; non sostituiscono MIL-AIP/AIP, NOTAM o istruzioni ATS vigenti. Le frequenze militari sono riportate da fonti pubbliche secondarie e possono avere orari o attivazione condizionati da NOTAM; verificare sempre MIL-AIP/AIP e NOTAM vigenti.",
   "airports": {
     "LIML": {
       "name": "Milano Linate",
@@ -533,9 +533,9 @@
       ]
     },
     "LIRP": {
-      "name": "Pisa Galileo Galilei",
+      "name": "Pisa San Giusto (aeroporto militare / uso misto)",
       "iata": "PSA",
-      "source": "EAIP Download Service, pagina consultata il 2026-11-09 (fonte secondaria; data di efficacia non esposta)",
+      "source": "EAIP Download Service, pagina consultata il 2026-11-09 (fonte secondaria; data di efficacia non esposta); Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
       "valid_from": null,
       "services": [
         {
@@ -552,6 +552,31 @@
           "service": "TWR",
           "frequency_mhz": "119.1",
           "note": "Nominativo non specificato nella fonte consultata"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.105",
+          "note": "Pisa Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "120.080",
+          "note": "Pisa Ground"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "126.080",
+          "note": "Pisa Approach"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "124.280",
+          "note": "Pisa Approach"
         }
       ]
     },
@@ -989,14 +1014,29 @@
       ]
     },
     "LIRG": {
-      "name": "Guidonia",
-      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "name": "Guidonia (aeroporto militare)",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore; Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
       "valid_from": null,
       "services": [
         {
           "service": "AUTO-INFORMAZIONE",
           "frequency_mhz": "130.005",
           "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.200",
+          "note": "Guidonia Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "142.350",
+          "note": "Guidonia Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
         }
       ]
     },
@@ -1013,14 +1053,34 @@
       ]
     },
     "LIRL": {
-      "name": "Latina",
-      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "name": "Latina (aeroporto militare)",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore; Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
       "valid_from": null,
       "services": [
         {
           "service": "AUTO-INFORMAZIONE",
           "frequency_mhz": "130.005",
           "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.150",
+          "note": "Latina Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "126.550",
+          "note": "Latina Approach"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
         }
       ]
     },
@@ -1217,14 +1277,24 @@
       ]
     },
     "LIQW": {
-      "name": "Sarzana Luni",
-      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "name": "Sarzana Luni (aeroporto militare)",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore; Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
       "valid_from": null,
       "services": [
         {
           "service": "AUTO-INFORMAZIONE",
           "frequency_mhz": "130.005",
           "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.650",
+          "note": "Sarzana Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
         }
       ]
     },
@@ -1373,14 +1443,24 @@
       ]
     },
     "LIRV": {
-      "name": "Viterbo",
-      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore",
+      "name": "Viterbo (aeroporto militare)",
+      "source": "ENAC SPL-20 Rev.1 (2026): frequenza comune di auto-informazione indicata per aviosuperfici prive di frequenza dedicata; confermare sempre con il gestore; Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
       "valid_from": null,
       "services": [
         {
           "service": "AUTO-INFORMAZIONE",
           "frequency_mhz": "130.005",
           "note": "Frequenza comune di auto-informazione; NON è una frequenza dedicata o assegnata a questo campo. Verificare procedure e frequenza locale con il gestore."
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "127.150",
+          "note": "Viterbo Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
         }
       ]
     },
@@ -1469,6 +1549,287 @@
           "note": "Cameri Approach"
         }
       ]
+    },
+    "LIPC": {
+      "name": "Cervia (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "124.900",
+          "note": "Cervia Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LIED": {
+      "name": "Decimomannu (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "140.400",
+          "note": "Decimo Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LIRH": {
+      "name": "Frosinone (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.350",
+          "note": "Frosinone Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "122.600",
+          "note": "Frosinone Approach"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LIPL": {
+      "name": "Ghedi (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Ghedi Tower"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LIBV": {
+      "name": "Gioia del Colle (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.455",
+          "note": "Gioia Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "130.655",
+          "note": "Gioia Approach / Radar"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LIRM": {
+      "name": "Grazzanise (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.025",
+          "note": "Grazzanise Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "135.255",
+          "note": "Grazzanise Approach"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LIRS": {
+      "name": "Grosseto (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "124.525",
+          "note": "Grosseto Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "128.105",
+          "note": "Grosseto Tower"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "124.525",
+          "note": "Grosseto Approach / Radar"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LIPS": {
+      "name": "Istrana (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "124.355",
+          "note": "Istrana Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LIBN": {
+      "name": "Lecce Galatina (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "119.555",
+          "note": "Lecce Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "142.000",
+          "note": "Lecce Ground"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "118.955",
+          "note": "Lecce Approach"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LIMS": {
+      "name": "Piacenza San Damiano (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "123.925",
+          "note": "Piacenza Tower; servizio normalmente disattivato, riattivabile con NOTAM"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte; verificare NOTAM"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "121.250",
+          "note": "Piacenza Approach; attivabile con NOTAM"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LIRE": {
+      "name": "Pratica di Mare (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.050",
+          "note": "Pratica Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        },
+        {
+          "service": "GND",
+          "frequency_mhz": "121.600",
+          "note": "Pratica Ground; orari limitati indicati dalla fonte"
+        },
+        {
+          "service": "APP",
+          "frequency_mhz": "118.050",
+          "note": "Pratica Approach"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LIPI": {
+      "name": "Udine Rivolto (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "126.850",
+          "note": "Rivolto Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "139.250",
+          "note": "Rivolto Tower"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
+    },
+    "LICZ": {
+      "name": "Sigonella (aeroporto militare)",
+      "services": [
+        {
+          "service": "TWR",
+          "frequency_mhz": "118.055",
+          "note": "Sigonella Tower"
+        },
+        {
+          "service": "TWR",
+          "frequency_mhz": "122.100",
+          "note": "Frequenza alternativa riportata dalla fonte"
+        }
+      ],
+      "source": "Aeronautical Information, Servizi del traffico aereo AM; dati riportati con riferimenti AIRAC 2022–2026 (non tutti aggiornati alla stessa data). Fonte secondaria: verificare MIL-AIP/AIP e NOTAM vigenti.",
+      "valid_from": null
     }
   }
 }
