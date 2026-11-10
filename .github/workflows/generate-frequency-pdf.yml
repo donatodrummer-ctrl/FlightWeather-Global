@@ -1,0 +1,183 @@
+name: Genera PDF frequenze aeronautiche
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "data/frequencies.json"
+      - ".github/workflows/generate-frequency-pdf.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica repository
+        uses: actions/checkout@v4
+
+      - name: Configura Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installa ReportLab
+        run: pip install reportlab
+
+      - name: Genera PDF dal database
+        run: |
+          mkdir -p output
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from datetime import datetime
+          from reportlab.lib import colors
+          from reportlab.lib.enums import TA_CENTER, TA_LEFT
+          from reportlab.lib.pagesizes import A4, landscape
+          from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+          from reportlab.lib.units import mm
+          from reportlab.platypus import (
+              SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+              PageBreak, KeepTogether
+          )
+          from xml.sax.saxutils import escape
+
+          source = Path("data/frequencies.json")
+          data = json.loads(source.read_text(encoding="utf-8"))
+          airports = data.get("airports", {})
+          updated = data.get("updated_at", "non indicata")
+          country = data.get("countries", {}).get("IT", {})
+          total_freq = sum(len(a.get("services", [])) for a in airports.values())
+
+          styles = getSampleStyleSheet()
+          styles.add(ParagraphStyle(
+              name="CoverTitle", parent=styles["Title"], fontName="Helvetica-Bold",
+              fontSize=22, leading=27, alignment=TA_CENTER, textColor=colors.HexColor("#15324B"),
+              spaceAfter=8
+          ))
+          styles.add(ParagraphStyle(
+              name="Airport", parent=styles["Heading2"], fontName="Helvetica-Bold",
+              fontSize=12, leading=15, textColor=colors.HexColor("#15324B"),
+              spaceBefore=10, spaceAfter=4, keepWithNext=True
+          ))
+          styles.add(ParagraphStyle(
+              name="Small", parent=styles["BodyText"], fontSize=7.5, leading=9
+          ))
+          styles.add(ParagraphStyle(
+              name="Tiny", parent=styles["BodyText"], fontSize=6.5, leading=8
+          ))
+          styles.add(ParagraphStyle(
+              name="Note", parent=styles["BodyText"], fontSize=8, leading=11,
+              textColor=colors.HexColor("#444444")
+          ))
+
+          out = Path("output/frequenze_aeronautiche_italia.pdf")
+          doc = SimpleDocTemplate(
+              str(out), pagesize=landscape(A4),
+              rightMargin=12*mm, leftMargin=12*mm,
+              topMargin=15*mm, bottomMargin=15*mm,
+              title="Database frequenze aeronautiche - Italia",
+              author="FlightWeather-Global"
+          )
+
+          def footer(canvas, doc):
+              canvas.saveState()
+              w, h = landscape(A4)
+              canvas.setStrokeColor(colors.HexColor("#CBD5DF"))
+              canvas.line(12*mm, 11*mm, w-12*mm, 11*mm)
+              canvas.setFont("Helvetica", 7)
+              canvas.setFillColor(colors.HexColor("#52606D"))
+              canvas.drawString(12*mm, 7*mm, "FlightWeather-Global | Database informativo - verificare sempre le pubblicazioni ufficiali")
+              canvas.drawRightString(w-12*mm, 7*mm, f"Pagina {doc.page}")
+              canvas.restoreState()
+
+          story = [
+              Spacer(1, 22*mm),
+              Paragraph("FREQUENZE AERONAUTICHE", styles["CoverTitle"]),
+              Paragraph("ITALIA", styles["CoverTitle"]),
+              Spacer(1, 5*mm),
+              Paragraph(f"Database aggiornato: <b>{escape(str(updated))}</b>", styles["Heading2"]),
+              Spacer(1, 4*mm),
+              Paragraph(
+                  f"<b>{len(airports)} siti</b> e <b>{total_freq} registrazioni di frequenza</b> "
+                  "presenti nel file JSON del repository al momento della generazione.",
+                  styles["BodyText"]
+              ),
+              Spacer(1, 8*mm),
+              Paragraph("Avvertenza importante", styles["Heading2"]),
+              Paragraph(
+                  "Questo documento riproduce i dati presenti nel database FlightWeather-Global: "
+                  "non costituisce una pubblicazione aeronautica ufficiale e non garantisce copertura "
+                  "completa o validità operativa. Le fonti secondarie, le frequenze fornite dagli utenti "
+                  "e i dati militari possono essere provvisori o soggetti a variazioni. Prima di qualsiasi "
+                  "uso operativo consultare eAIP ENAV, MIL-AIP, NOTAM e le istruzioni del gestore/ATS vigenti.",
+                  styles["Note"]
+              ),
+              Spacer(1, 4*mm),
+              Paragraph(
+                  "La frequenza comune 130.005 MHz riportata per alcuni campi è indicata come "
+                  "auto-informazione consuetudinaria e NON come assegnazione dedicata al singolo sito.",
+                  styles["Note"]
+              ),
+              PageBreak()
+          ]
+
+          for icao, airport in sorted(airports.items(), key=lambda x: (
+              (x[1].get("name") or "").casefold(), x[0]
+          )):
+              name = airport.get("name", "Sito senza nome")
+              iata = airport.get("iata")
+              title = f"{name} ({icao})" + (f" / {iata}" if iata else "")
+              site_type = airport.get("type", "")
+              if site_type:
+                  title += f" - {site_type}"
+              story.append(Paragraph(escape(title), styles["Airport"]))
+
+              source_text = airport.get("source", "Fonte non specificata")
+              valid = airport.get("valid_from") or "non indicata"
+              meta = f"<b>Validità dichiarata:</b> {escape(str(valid))} &nbsp;&nbsp; <b>Fonte:</b> {escape(str(source_text))}"
+              story.append(Paragraph(meta, styles["Tiny"]))
+              story.append(Spacer(1, 3))
+
+              rows = [[
+                  Paragraph("<b>Servizio</b>", styles["Small"]),
+                  Paragraph("<b>Frequenza (MHz)</b>", styles["Small"]),
+                  Paragraph("<b>Note / nominativo</b>", styles["Small"])
+              ]]
+              for item in airport.get("services", []):
+                  rows.append([
+                      Paragraph(escape(str(item.get("service", "—"))), styles["Small"]),
+                      Paragraph(escape(str(item.get("frequency_mhz", "—"))), styles["Small"]),
+                      Paragraph(escape(str(item.get("note", ""))), styles["Small"])
+                  ])
+
+              if len(rows) == 1:
+                  rows.append([Paragraph("Nessuna frequenza registrata", styles["Small"]), "", ""])
+
+              table = Table(rows, colWidths=[48*mm, 42*mm, 170*mm], repeatRows=1, hAlign="LEFT")
+              table.setStyle(TableStyle([
+                  ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#E7EEF4")),
+                  ("TEXTCOLOR", (0,0), (-1,0), colors.HexColor("#15324B")),
+                  ("GRID", (0,0), (-1,-1), 0.35, colors.HexColor("#C7D0D9")),
+                  ("VALIGN", (0,0), (-1,-1), "TOP"),
+                  ("LEFTPADDING", (0,0), (-1,-1), 5),
+                  ("RIGHTPADDING", (0,0), (-1,-1), 5),
+                  ("TOPPADDING", (0,0), (-1,-1), 4),
+                  ("BOTTOMPADDING", (0,0), (-1,-1), 4),
+                  ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.white, colors.HexColor("#F7F9FB")]),
+              ]))
+              story.append(table)
+              story.append(Spacer(1, 5))
+
+          doc.build(story, onFirstPage=footer, onLaterPages=footer)
+          print(f"Creato {out}: {len(airports)} siti, {total_freq} frequenze")
+          PY
+
+      - name: Pubblica PDF come artifact scaricabile
+        uses: actions/upload-artifact@v4
+        with:
+          name: PDF-frequenze-aeronautiche-Italia
+          path: output/frequenze_aeronautiche_italia.pdf
+          if-no-files-found: error
+          retention-days: 90
